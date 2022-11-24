@@ -17,6 +17,8 @@
   "author": "Henry Ge",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2"
+    "aws-sdk": "^2.1261.0",
+    "express": "^4.18.2",
+    "pug": "^3.0.2"
   }
 }

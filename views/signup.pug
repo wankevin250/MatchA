@@ -1,0 +1,35 @@
+extends layouts/standard.pug
+
+block head
+  title Sign up to Pennbook
+  script(src='js/ajaxsignup.js')
+
+block content
+  h1 Sign up
+  div(class="signup-form")
+    div(class="error-statusresponse")
+    div(class="")
+        label(for="signup-username") Username
+        input(type="text", class="", id="signup-username" name="signup-username")
+    div(class="")
+        label(for="signup-password") Password
+        input(type="text", class="", id="signup-password" name="signup-password")
+    div(class="")
+        label(for="signup-firstname") First Name
+        input(type="text", class="", id="signup-firstname" name="signup-firstname")
+    div(class="")
+        label(for="signup-lastname") Last Name
+        input(type="text", class="", id="signup-lastname" name="signup-lastname")
+    div(class="")
+        label(for="signup-email") Email
+        input(type="text", class="", id="signup-email" name="signup-email")
+    div(class="")
+        label(for="signup-dob") Date of Birth
+        input(type="date", class="", id="signup-dob" name="signup-dob")
+    button(id='signup-submit', class="btn btn-primary")
+        span Create your account
+
+
+    
+    
+    

@@ -25,6 +25,10 @@ app.use(session({
  * json = URL that will respond with JSON data
  */
 app.get('/', routes.getSplash);
+app.get('/signup', routes.getSignUp);
 app.get('/login', routes.getLogin);
+
+//AJAX Post
+app.post('/ajaxpostsignup', routes.postCreateUser);
 
 app.listen(PORT, () => console.log(`Example app is listening on port ${PORT}`));

@@ -38,7 +38,6 @@ const queryUser = (username, password, callback) => {
  */
 const createUser = (user, callback) => {
   if (usr.checkUser(user)) {
-
     let item = {};
     Object.entries(user).forEach((key, val) => {
       item[key] = {S: val};
@@ -55,11 +54,11 @@ const createUser = (user, callback) => {
         console.log("Error", err);
         callback(500, err, null);
       } else {
-        callback(200, err, data);
+        callback(201, err, data);
       }
     });
   } else {
-    callback(400, null, null);
+    callback(401, null, null);
   }
 }
 

@@ -27,8 +27,17 @@ app.use(session({
 app.get('/', routes.getSplash);
 app.get('/signup', routes.getSignUp);
 app.get('/login', routes.getLogin);
+// app.get('/wall', null);
+// app.get('/profile', null);
+// app.get('/settings', null);
+// app.get('/friends', null);
+// app.get('/visualizer', null);
+// app.get('/chat', null);
+// app.get('/news', null);
 
 //AJAX Post
 app.post('/ajaxpostsignup', routes.postCreateUser);
+// app.post('/ajaxpostlogin', null);
+// app.post('/ajaxgetwall', null);
 
 app.listen(PORT, () => console.log(`Example app is listening on port ${PORT}`));

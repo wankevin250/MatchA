@@ -8,8 +8,10 @@ block head
 block content
   h1(class='text-center') Sign Up
   div(class="signup-form")
-    div(class="error-statusresponse")
-    div.form-group(class="w-25")
+    div(class="signup-error")
+        div(id="signup-clienterror")
+        div(id="signup-servererror")
+    div.form-group(class="")
         label(for="signup-username") Username
         input.form-control(type="text", class="", id="signup-username" name="signup-username")
     div.form-group(class="w-25")
@@ -27,11 +29,6 @@ block content
     div.form-group(class="w-25")
         label(for="signup-dob") Date of Birth
         input.form-control(type="date", class="", id="signup-dob" name="signup-dob")
-    |
-    button(id='signup-submit', class="btn btn-primary")
+    button(id='signup-submit', class="btn btn-primary", onclick="createUser()")
         span Create your account
-
-
-    
-    
     

@@ -22,34 +22,64 @@ function createUser() {
         firstname: $('#signup-firstname').val(),
         lastname: $('#signup-lastname').val(),
         email: $('#signup-email').val(),
-        dob: $('signup-dob').val(),
-        timestamp: Date.parse().toString()
+        dob: $('#signup-dob').val(),
+        timestamp: (new Date()).toString()
     };
 
-    let userErr = '';
+    console.log(user.dob);
+
+    let userErr = document.createElement('ul');
     if (!user.username.match(/^\w{1,25}$/)) {
-
+        userErr.innerHTML += "<li>Username unsupported. Limit 1 to 25 characters.</li>";
     }
+    if (!user.password.match(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,40}$/)) {
+        userErr.innerHTML += "<li>Password unsupported. Limit 8 to 40 characters. Must have 1 letter, 1 number, 1 special character.</li>";
+    }
+    if (!user.email.match(/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/)) {
+        userErr.innerHTML += "<li>Email error. Please enter in valid email.</li>";
+    }
+    if (!user.firstname.match(/^[A-Za-z-\s']{1,25}$/)) {
+        userErr.innerHTML += "<li>First Name error. Please enter in legal first name</li>"
+    }
+    if (!user.lastname.match(/^[A-Za-z-\s']{1,25}$/)) {
+        userErr.innerHTML += "<li>Last Name error. Please enter in legal last name</li>"
+    }
+    let dobDate = new Date(user.dob);
+    let today = new Date();
+    if (!isNaN(dobDate) && dobDate < new Date("01-01-1900") 
+        && dobDate > (today).setFullYear(today.getFullYear() - 13)) {
+            userErr.innerHTML += "<li>Date of birth error. Must be 13 years or older.</li>"
+    }
+    $('#signup-clienterror').append(userErr);
+    
+    console.log(userErr.innerHTML.length);
 
-    $.ajax({
-        url: '/ajaxpostsignup',
-        type: 'POST',
-        async: true,
-        datatype: 'json',
-        data: {
-            user: user
-        },
-        success: (response) => {
-            console.log(response);
-        },
-        error: (status) => {
-            let errmsg = '';
-            if (status == 401) {
-                errmsg = '401: User not accepted. Please check your information.'
-            } else if (status == 500) {
-                errmsg = '500: Internal Server Error.'
+    if (userErr.innerHTML.length == 0) {
+        $.ajax({
+            url: '/ajaxpostsignup',
+            type: 'POST',
+            async: true,
+            datatype: 'json',
+            data: {
+                user: user
+            },
+            success: (response) => {
+                console.log(response);
+                window.location.href = "/wall";
+            },
+            error: (error) => {
+                let status = error.status;
+                console.log(error);
+                let serverErr = '';
+                if (status == 401) {
+                    serverErr = 'User not accepted. Please check your information.'
+                } else if (status == 403) {
+                    serverErr = 'Username or email already exists. Please use different username or email'
+                } else if (status == 500) {
+                    serverErr = '500: Internal Server Error.'
+                } 
+                $("#signup-servererror").html(`<p>${serverErr}</p>`);
             }
-            $(".error-statusresponse").val(errmsg);
-        }
-    }); 
+        }); 
+    }
 }

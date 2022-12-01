@@ -17,12 +17,13 @@ block head
 
 
 block content
-  h1 Login Below:
-  form(role='form', action='', method='POST')
-    div.form-group
-      label(for='username') Username: 
-      input#username.form-control(type='text', name='username', placeholder='Enter username here.')
-    div.form-group
-      label(for='password') Password:
-      input#password.form-control(type='password', name='password', placeholder='Enter password here.')
-    button.btn.btn-primary(type='submit', name='loginButton') Login
+  h1(class='text-center') Login Below:
+  div(align='center')
+    form(role='form', action='', method='POST')
+      div.form-group(class='w-25')
+        label(for='username') Username: 
+        input#username.form-control(type='text', name='username', placeholder='Enter username here.')
+      div.form-group(class='w-25')
+        label(for='password') Password:
+        input#password.form-control(type='password', name='password', placeholder='Enter password here.')
+      button.btn.btn-primary(type='submit', name='loginButton') Login

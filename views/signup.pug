@@ -7,7 +7,9 @@ block head
 block content
   h1 Sign up
   div(class="signup-form")
-    div(class="error-statusresponse")
+    div(class="signup-error")
+        div(id="signup-clienterror")
+        div(id="signup-servererror")
     div(class="")
         label(for="signup-username") Username
         input(type="text", class="", id="signup-username" name="signup-username")
@@ -26,10 +28,6 @@ block content
     div(class="")
         label(for="signup-dob") Date of Birth
         input(type="date", class="", id="signup-dob" name="signup-dob")
-    button(id='signup-submit', class="btn btn-primary", onclick="createUser")
+    button(id='signup-submit', class="btn btn-primary", onclick="createUser()")
         span Create your account
-
-
-    
-    
     

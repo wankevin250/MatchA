@@ -1,5 +1,6 @@
 const { sendStatus } = require('express/lib/response');
-var db = require('../models/database');
+const usr = require('../models/user');
+const db = require('../models/database');
 
 /**
  * Checks if HTTP Status code is successful (between 200-299)
@@ -33,12 +34,16 @@ const getLogin = (req, res) => {
 const postCreateUser = (req, res) => {
   let user = req.body.user;
 
-  if (user && user.checkUser(user)) {
+  if (user && usr.checkUser(user)) {
     db.createUser(user, (status, err, data) => {
-      res.sendStatus(status);
+      if (status < 300 && status >= 200) {
+        res.sendStatus(201);
+      } else {
+        res.status(status).send(new Error(err));
+      }
     });
   } else {
-    res.sendStatus(401);
+    res.status(401).send(new Error('Invalid user input'));
   }
 }
 

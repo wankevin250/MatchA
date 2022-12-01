@@ -39,22 +39,56 @@ const queryUser = (username, password, callback) => {
 const createUser = (user, callback) => {
   if (usr.checkUser(user)) {
     let item = {};
-    Object.entries(user).forEach((key, val) => {
+    Object.entries(user).forEach(entry => {
+      let [key, val] = entry;
       item[key] = {S: val};
     });
 
-    const params = {
-      Item: item,
+    db.query({
+      ExpressionAttributeValues: {
+        ':username': {S: user.username},
+      },
+      KeyConditionExpression: 'username = :username',
       TableName: 'users',
-    };
-    
-    // put to database. respond with no data if server error.
-    db.putItem(params, (err, data) => {
+    }, (err, data) => {
       if (err) {
-        console.log("Error", err);
+        console.log(err);
         callback(500, err, null);
       } else {
-        callback(201, err, data);
+        if (data.Items.length > 0) {
+          callback(403, "username", null);
+        } else {
+          db.query({
+            ExpressionAttributeValues: {
+              ':email': {S: user.email},
+            },
+            KeyConditionExpression: 'email = :email',
+            TableName: 'users',
+            IndexName: 'email'
+          }, (err, data) => {
+            if (err) {
+              console.log(err);
+              callback(500, err, null);
+            } else {
+              if (data.Items.length > 0) {
+                callback(403, 'email', null);
+              } else {          
+                // put to database. respond with no data if server error.
+                db.putItem({
+                  Item: item,
+                  TableName: 'users',
+                }, (err, data) => {
+                  if (err) {
+                    console.log("Error", err);
+                    callback(500, err, null);
+                  } else {
+                    callback(201, err, data);
+                  }
+                });
+              }
+            }
+          });
+        }
       }
     });
   } else {

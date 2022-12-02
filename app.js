@@ -34,17 +34,26 @@ app.get('/login', routes.getLogin);
 // app.get('/visualizer', null);
 
 // ace: routes call
+
 /** moves to chat page: should have a list of user's chats, and a new chat room button. REFRESH every 3 seconds */
 app.get('/chat', routes.getChat);
 /** adds new chat to list, opens up chatroom, button to add friend, text input box + button to send text */
 app.get('/createroom', routes.addChat);
 /** opens up chatroom chosen from list */
 app.get('/openroom', routes.openChat);
-// open CHATBOX should REFRESH every 1 second
+// open CHATBOX should REFRESH every 1 second. Chatbox should leave button
 /** in chatroom box, button that allows adding a friend */
 app.get('/addfriend', routes.addFriend);
+app.get('/leaveroom', routes.leaveChat);
 /** send msg to database, refreshes page */
 app.get('/sendmessage', routes.sendMessage);
+/** if request is sent by chat admin, remove user from chat */
+app.get('/removeuser', routes.removeUser);
+/** button to view list of particpants */
+app.get('/viewchatdetails', routes.viewUsers);
+
+// end of ace
+
 // app.get('/news', null);
 
 //AJAX Post

@@ -47,7 +47,7 @@ const postCreateUser = (req, res) => {
   }
 }
 
-// ace: To Commit
+// ace: routes
 /**
   input: req, res
   function: calls on database method to create new chatroom with a friend
@@ -58,8 +58,8 @@ const getChat = (req, res) => {
 
 /**
   input: req, res
-  function: calls on method to open up chatroom
-  if error: 
+  function: adds new chat to database, opens up in chatbox
+  if error: send error message to session, console error
  */
 const addChat = (req, res) => {
 	
@@ -67,8 +67,8 @@ const addChat = (req, res) => {
 
 /**
   input: req, res
-  function: calls on method to open up chatroom
-  if error: 
+  function: sends chat invite to friend
+  if error: send error message to session, console error
  */
 const addFriend = (req, res) => {
 	
@@ -85,12 +85,36 @@ const openChat = (req, res) => {
 
 /**
   input: req, res
-  function: calls on method to open up chatroom
+  function: sends message to current chatroom
   if error: 
  */
 const sendMsg = (req, res) => {
 	
 }
+
+/**
+  input: req, res
+  function: removes current user from chatroom
+  if error: send error message to session, console error
+ */
+const leaveChat = (req, res) => {
+	
+}
+
+/**
+  input: req, res
+  function: SHOULD ONLY BE POSSIBLE IF CREATOR, removes specific user from chatroom
+  if error: send error message to session, console error
+ */
+const removeUser = (req, res) => {
+	
+}
+
+const viewUsers = (req, res) => {
+	
+}
+
+// end of Ace
 
 const routes = {
   getSplash: getSplash,
@@ -103,6 +127,9 @@ const routes = {
   addFriend: addFriend,
   openChat: openChat,
   sendMessage: sendMsg,
+  leaveChat: leaveChat,
+  removeUser: removeUser,
+  viewUsers: viewUsers,
   // end of ace's routes
 
   postCreateUser: postCreateUser

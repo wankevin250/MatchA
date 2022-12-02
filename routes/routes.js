@@ -59,6 +59,8 @@ const getChat = (req, res) => {
 		// call db method to query
 	} else {
 		// not logged in, return to homepage & log reason on console
+		console.log("Not logged in, returned to homepage.");
+		res.render('splash');
 	}
 }
 

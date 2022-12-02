@@ -1,10 +1,15 @@
 extends layouts/standard.pug
 
 block head
-  title PennBook Main Page
+  title Chats
 
 block content
   h1(class="text-center italics bold") PennBook
-  div(class="")
-    h2(class="bold") Your Friends' Timeline
-    
+  div(class="right" id="chatbox")
+    div()
+      ul#messages
+    form#message-form
+    div(id="form-message")
+      input(id = 'message', class = 'form-control' autocomplete='off', placeholder='Type a message...')
+      button#send-message.btn.btn-light(type='button', onclick='return sendMessage();')  Send
+  

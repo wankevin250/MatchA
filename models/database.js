@@ -96,9 +96,42 @@ const createUser = (user, callback) => {
   }
 }
 
+// ACE HOUR
+const findChats = (user, callback) => {
+	// using username, query user data from table: users, get stringified list of chatrooms, return in array form to routes.js
+	
+}
+
+const addChatToTable = (user, callback) => {
+	// using username, query user data from table: users, get stringified list of chatrooms, return in array form to routes.js
+	
+	// callback: (chatinfo, err, data)
+}
+
+const displayFriends = (user, callback) => {
+	// display list of friends, called when click on invite friend button
+}
+
+const addFriendToChat = (friend, callback) => {
+	// add given friend 
+}
+
+const viewOneChat = (chatid, callback) => {
+	// return chat info & messages
+}
+
+// end of ACE HOUR
+
 const database = {
   queryUser: queryUser,
   createUser: createUser,
+  
+  findChats: findChats,
+  newChat: addChatToTable,
+  viewFriends: displayFriends,
+  addFriendToChat: addFriendToChat,
+  viewChat: viewOneChat, 
+  
 }
 
 module.exports = database;

@@ -1,0 +1,22 @@
+extends layouts/standard.pug
+
+block head
+  title Chats
+
+block content
+  h1(class="text-center italics bold") PennBook
+  
+  // proto button to enter first chatroom. TODO: make buttons for every chat in user's joined list  
+  // TODO: js code for AJAX roomBtn.onclick -> call /openroom (opens this room)
+  div(class="left" id="prototype-button-wrapper")
+    h2#roomBtn Enter Chatroom
+  
+  // need to show chatbox iff req.session.currentroom != null
+  div(class="right" id="chatbox")
+    div()
+      ul#messages
+    form#message-form
+    div(id="form-message")
+      input(id = 'message', class = 'form-control', autocomplete='off', placeholder='Type a message...')
+      button#send-message.btn.btn-light(type='button', onclick='return sendMessage();')  Send
+  

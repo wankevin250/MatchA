@@ -2,32 +2,33 @@ extends layouts/standard.pug
 
 block head
   title Sign up to Pennbook
+  link(rel='stylesheet', href='https://stackpath.bootstrapcdn.com/bootstrap/5.2.3/css/bootstrap.min.css')
   script(src='js/ajaxsignup.js')
 
 block content
-  h1 Sign up
-  div(class="signup-form")
+  h1(class='text-center') Sign Up
+  div(class="signup-form", align='center')
     div(class="signup-error")
         div(id="signup-clienterror")
         div(id="signup-servererror")
-    div(class="")
+    div.form-group(class="w-25")
         label(for="signup-username") Username
-        input(type="text", class="", id="signup-username" name="signup-username")
-    div(class="")
+        input.form-control(type="text", class="", id="signup-username" name="signup-username")
+    div.form-group(class="w-25")
         label(for="signup-password") Password
-        input(type="text", class="", id="signup-password" name="signup-password")
-    div(class="")
+        input.form-control(type="text", class="", id="signup-password" name="signup-password")
+    div.form-group(class="w-25")
         label(for="signup-firstname") First Name
-        input(type="text", class="", id="signup-firstname" name="signup-firstname")
-    div(class="")
+        input.form-control(type="text", class="", id="signup-firstname" name="signup-firstname")
+    div.form-group(class="w-25")
         label(for="signup-lastname") Last Name
-        input(type="text", class="", id="signup-lastname" name="signup-lastname")
-    div(class="")
+        input.form-control(type="text", class="", id="signup-lastname" name="signup-lastname")
+    div.form-group(class="w-25")
         label(for="signup-email") Email
-        input(type="text", class="", id="signup-email" name="signup-email")
-    div(class="")
+        input.form-control(type="text", class="", id="signup-email" name="signup-email")
+    div.form-group(class="w-25")
         label(for="signup-dob") Date of Birth
-        input(type="date", class="", id="signup-dob" name="signup-dob")
+        input.form-control(type="date", class="", id="signup-dob" name="signup-dob")
     button(id='signup-submit', class="btn btn-primary", onclick="createUser()")
         span Create your account
     

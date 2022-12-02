@@ -65,7 +65,7 @@ const getChat = (req, res) => {
 				req.session.chats = data;
 			}
 		});
-		// render chats page
+		// render chats page: if req.session.chats == null or empty list, show a specific message on the page (FRONTEND)
 		res.render('chats');
 	} else {
 		// not logged in, return to homepage & log reason on console
@@ -85,6 +85,16 @@ const addChat = (req, res) => {
 	// also send data to frontend
 	if (req.session.user != null) {
 		let user = req.session.user;
+		// call newChat function
+		db.newChat(user, (chatinfo, err, data) => {
+			// return chatinfo = {room-uuid: value, chatname: chat name}
+			if (err) {
+				console.log(err);
+			} else {
+				// set req.session.currentroom = { id: room-uuid, name: chatname, creator: req.session.user }
+			}
+		});
+		// KEVIN: on frontend we need to call reloadData on the chatlist div after addChat 
 		
 	} else {
 		// not logged in, return to homepage & log reason on console
@@ -126,7 +136,7 @@ const addFriend = (req, res) => {
  */
 const openChat = (req, res) => {
 	// upon clicking one of chats in list, open chatbox in side of screen
-	// set req.session.currentroom
+	// set req.session.currentroom = { id: room-uuid, name: chatname, creator: creator}
 	
 	// KEVIN: on frontend, check session.currentroom to display chatbox, 
 	// also we need functionality so that on click of a chatroom listed it sends openChat request with req.body.chattoopen variable plz 
@@ -190,6 +200,9 @@ const routes = {
   leaveChat: leaveChat,
   removeUser: removeUser,
   viewUsers: viewUsers,
+  
+  reloadRoom: reloadMsgs,
+  reloadChats: reloadChats,
   // end of ace's routes
 
   postCreateUser: postCreateUser

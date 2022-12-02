@@ -105,6 +105,7 @@ const findChats = (user, callback) => {
 const addChatToTable = (user, callback) => {
 	// using username, query user data from table: users, get stringified list of chatrooms, return in array form to routes.js
 	
+	// callback: (chatinfo, err, data)
 }
 
 const displayFriends = (user, callback) => {
@@ -113,6 +114,10 @@ const displayFriends = (user, callback) => {
 
 const addFriendToChat = (friend, callback) => {
 	// add given friend 
+}
+
+const viewOneChat = (chatid, callback) => {
+	// return chat info & messages
 }
 
 // end of ACE HOUR
@@ -125,6 +130,7 @@ const database = {
   newChat: addChatToTable,
   viewFriends: displayFriends,
   addFriendToChat: addFriendToChat,
+  viewChat: viewOneChat, 
   
 }
 

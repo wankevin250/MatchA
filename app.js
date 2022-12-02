@@ -49,10 +49,12 @@ app.get('/addfriend', routes.addFriend);
 app.get('/leaveroom', routes.leaveChat);
 /** send msg to database, refreshes page */
 app.get('/sendmessage', routes.sendMessage);
+
 /** reload list of chats */
-app.get('/reloadchats', null);
+app.get('/reloadchats', routes.reloadChats);
 /** reload chat, by which I mean res.JSON list of messages to Frontend (look at my app.js /output for HW4)*/
-app.get('/reloadroom', );
+app.get('/reloadroom', routes.reloadRoom);
+
 /** if request is sent by chat admin, remove user from chat */
 app.get('/removeuser', routes.removeUser);
 /** button to view list of particpants in chat */

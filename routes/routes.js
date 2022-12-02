@@ -53,7 +53,13 @@ const postCreateUser = (req, res) => {
   function: calls on database method to create new chatroom with a friend
  */
 const getChat = (req, res) => {
-	
+	// call user from req.session.user
+	if (req.session.user != null) {
+		let user = req.session.user;
+		// call db method to query
+	} else {
+		// not logged in, return to homepage & log reason on console
+	}
 }
 
 /**

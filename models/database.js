@@ -96,9 +96,15 @@ const createUser = (user, callback) => {
   }
 }
 
+const findChats = (user, callback) => {
+	
+}
+
 const database = {
   queryUser: queryUser,
   createUser: createUser,
+  findChats: findChats,
+  
 }
 
 module.exports = database;

@@ -42,14 +42,20 @@ app.get('/createroom', routes.addChat);
 /** opens up chatroom chosen from list */
 app.get('/openroom', routes.openChat);
 // open CHATBOX should REFRESH every 1 second. Chatbox should leave button
+/** popup list of friends user can add to chat */
+app.get('/friendstoadd', routes.popupFriends);
 /** in chatroom box, button that allows adding a friend */
 app.get('/addfriend', routes.addFriend);
 app.get('/leaveroom', routes.leaveChat);
 /** send msg to database, refreshes page */
 app.get('/sendmessage', routes.sendMessage);
+/** reload list of chats */
+app.get('/reloadchats', null);
+/** reload chat, by which I mean res.JSON list of messages to Frontend (look at my app.js /output for HW4)*/
+app.get('/reloadroom', );
 /** if request is sent by chat admin, remove user from chat */
 app.get('/removeuser', routes.removeUser);
-/** button to view list of particpants */
+/** button to view list of particpants in chat */
 app.get('/viewchatdetails', routes.viewUsers);
 
 // end of ace

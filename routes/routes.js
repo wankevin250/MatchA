@@ -80,9 +80,23 @@ const getChat = (req, res) => {
   if error: send error message to session, console error
  */
 const addChat = (req, res) => {
-	
+	// if user is logged in, continue
+	// generate a new chatroom item (using db), save to req.session.currentroom
+	// also send data to frontend
+	if (req.session.user != null) {
+		let user = req.session.user;
+		
+	} else {
+		// not logged in, return to homepage & log reason on console
+		console.log("Not logged in, returned to homepage.");
+		res.render('splash');
+	}
 }
 
+/**
+	function: pops up list of friends that (on frontend) you can click on to add a user's friend to the chat
+	if error: console error
+ */
 const viewFriends = (req, res) => {
 	// if user exists
 	
@@ -128,6 +142,15 @@ const sendMsg = (req, res) => {
 	
 }
 
+const reloadMsgs = (req, res) => {
+	// res.json list of messages every 10 seconds
+}
+
+const reloadChats = (req, res) => {
+	// res.json list of user's active chats
+	// reload chats when we add a chat OR when accept chat invite
+}
+
 /**
   input: req, res
   function: removes current user from chatroom
@@ -160,6 +183,7 @@ const routes = {
   // ace: To Commit
   getChat: getChat,
   addChat: addChat,
+  popupFriends: viewFriends,
   addFriend: addFriend,
   openChat: openChat,
   sendMessage: sendMsg,

@@ -197,6 +197,7 @@ const routes = {
   getSplash: getSplash,
   getLogin: getLogin,
   getSignUp: getSignUp,
+  getWall: getWall,
   
   // ace: To Commit
   getChat: getChat,

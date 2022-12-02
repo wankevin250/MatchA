@@ -27,7 +27,7 @@ app.use(session({
 app.get('/', routes.getSplash);
 app.get('/signup', routes.getSignUp);
 app.get('/login', routes.getLogin);
-// app.get('/wall', null);
+app.get('/wall', routes.getWall);
 // app.get('/profile', null);
 // app.get('/settings', null);
 // app.get('/friends', null);

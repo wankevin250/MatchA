@@ -31,12 +31,20 @@ const getLogin = (req, res) => {
   }
 }
 
+const getWall = (req, res) => {
+  if (req.session && req.session.user) {
+    res.render('wall');
+  } else {
+    res.redirect('/login');
+  }
+}
+
 const postCreateUser = (req, res) => {
   let user = req.body.user;
 
   if (user && usr.checkUser(user)) {
     db.createUser(user, (status, err, data) => {
-      if (status < 300 && status >= 200) {
+      if (isSuccessfulStatus(status)) {
         res.sendStatus(201);
       } else {
         res.status(status).send(new Error(err));
@@ -50,7 +58,8 @@ const postCreateUser = (req, res) => {
 const routes = {
   getSplash: getSplash,
   getLogin: getLogin,
-  getSignUp, getSignUp,
+  getSignUp: getSignUp,
+  getWall: getWall,
 
   postCreateUser: postCreateUser
 }

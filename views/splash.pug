@@ -5,12 +5,15 @@ block head
 
 block content
   h1(class="text-center") Welcome to PennBook!
-  div(class="row")
-    form(method="get", action="/signup")
-      button(id='splash-signup', class="btn btn-primary btn-rounded margin-left")
-        span Create your account
+  div(class="row", align='center')
+    div(class='col')
+      h3 Don't Have An Account? Create an Account Here!
+      form(method="get", action="/signup")
+        button(id='splash-signup', class="btn btn-primary btn-rounded margin-left")
+          span Create your account
     br
-
-    form(method="get", action="/login")
-      button(id='splash-login', class="btn btn-primary btn-rounded margin-right")
-        span Login here
+    div(class='col')
+      h3 Already have an account? Login Here!
+      form(method="get", action="/login")
+        button(id='splash-login', class="btn btn-primary btn-rounded margin-right")
+          span Login

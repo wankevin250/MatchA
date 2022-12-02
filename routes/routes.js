@@ -47,10 +47,26 @@ const postCreateUser = (req, res) => {
   }
 }
 
+// ace: To Commit
+/**
+  input: req, res
+ */
+const getChat = (req, res) => {
+	
+}
+
+const sendMsg = (req, res) => {
+	
+}
+
 const routes = {
   getSplash: getSplash,
   getLogin: getLogin,
-  getSignUp, getSignUp,
+  getSignUp: getSignUp,
+  
+  // ace: To Commit
+  getChat: getChat,
+  sendMessage: sendMsg,
 
   postCreateUser: postCreateUser
 }

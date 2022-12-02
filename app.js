@@ -32,7 +32,8 @@ app.get('/login', routes.getLogin);
 // app.get('/settings', null);
 // app.get('/friends', null);
 // app.get('/visualizer', null);
-// app.get('/chat', null);
+app.get('/chat', routes.getChat);
+app.get('/sendmessage', routes.sendMessage);
 // app.get('/news', null);
 
 //AJAX Post

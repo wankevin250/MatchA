@@ -50,11 +50,44 @@ const postCreateUser = (req, res) => {
 // ace: To Commit
 /**
   input: req, res
+  function: calls on database method to create new chatroom with a friend
  */
 const getChat = (req, res) => {
 	
 }
 
+/**
+  input: req, res
+  function: calls on method to open up chatroom
+  if error: 
+ */
+const addChat = (req, res) => {
+	
+}
+
+/**
+  input: req, res
+  function: calls on method to open up chatroom
+  if error: 
+ */
+const addFriend = (req, res) => {
+	
+}
+
+/**
+  input: req, res
+  function: calls on method to open up chatroom
+  if error: 
+ */
+const openChat = (req, res) => {
+	
+}
+
+/**
+  input: req, res
+  function: calls on method to open up chatroom
+  if error: 
+ */
 const sendMsg = (req, res) => {
 	
 }
@@ -66,7 +99,11 @@ const routes = {
   
   // ace: To Commit
   getChat: getChat,
+  addChat: addChat,
+  addFriend: addFriend,
+  openChat: openChat,
   sendMessage: sendMsg,
+  // end of ace's routes
 
   postCreateUser: postCreateUser
 }

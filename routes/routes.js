@@ -57,6 +57,16 @@ const getChat = (req, res) => {
 	if (req.session.user != null) {
 		let user = req.session.user;
 		// call db method to query
+		db.findChats(user, (err, data) => {
+			// create js array using data, save array to session: req.session.chats
+			if (err) {
+				console.log(err);
+			} else {
+				req.session.chats = data;
+			}
+		});
+		// render chats page
+		res.render('chats');
 	} else {
 		// not logged in, return to homepage & log reason on console
 		console.log("Not logged in, returned to homepage.");
@@ -73,12 +83,25 @@ const addChat = (req, res) => {
 	
 }
 
+const viewFriends = (req, res) => {
+	// if user exists
+	
+	// display list of friends: req.session.friendslist
+	// to KEVIN: on frontend, if req.session.friendslist != null then display a popup / container
+}
+
 /**
   input: req, res
   function: sends chat invite to friend
   if error: send error message to session, console error
  */
 const addFriend = (req, res) => {
+	// if user exists
+	
+	// on click, send request to add friend to db using addFriendToChat
+	
+	// set req.session.friendslist == null
+	// to KEVIN: on frontend, is there a way to close the friendslist popup?
 	
 }
 
@@ -88,7 +111,12 @@ const addFriend = (req, res) => {
   if error: 
  */
 const openChat = (req, res) => {
+	// upon clicking one of chats in list, open chatbox in side of screen
+	// set req.session.currentroom
 	
+	// KEVIN: on frontend, check session.currentroom to display chatbox, 
+	// also we need functionality so that on click of a chatroom listed it sends openChat request with req.body.chattoopen variable plz 
+	// PS: we need to refresh chatbox every 1 second
 }
 
 /**

@@ -3,3 +3,4 @@ storage/DynamoConnector$LocalServer.class
 storage/DynamoConnector.class
 storage/SparkConnector.class
 storage/News.class
+finalproject/TokenizeNews.class

@@ -121,14 +121,6 @@ public class LoadNews {
 							.add("short_description", "string") 
 							.add("date", "string");
 
-							/*
-							row[0] = line.category; //get("category");
-								row[1] = line.headline; // get("headline");
-								row[2] = line.authors; //get("authors");
-								row[3] = line.link; //get("link");
-								row[4] = line.short_description; //get("short_description");
-								row[5] = line.date; //get("date");*/
-
 			List<Row> rowOfNews = lines.parallelStream()
 							.map(line -> {
 								Object[] row = new Object[6]; // assign appropriate values for each Schema
@@ -138,7 +130,7 @@ public class LoadNews {
 								row[3] = line.get("link").toString();
 								row[4] = line.get("short_description").toString();
 								row[5] = line.get("date").toString();
-								System.out.println(row);
+								//System.out.println(row);
 								return new GenericRowWithSchema(row, schema);// Make Row with Schema
 							})
 							.collect(Collectors.toList());
@@ -229,12 +221,12 @@ public class LoadNews {
 				Row news = iter.next();
 				// Create Item
 				Item newsItem = new Item()
-						.withPrimaryKey("headline", (String) news.getAs(1))
+						.withPrimaryKey("headline", (String) news.getAs(1), "date", (String) news.getAs(5))
 						.withString("category", (String) news.getAs(0))
 						.withString("authors", (String) news.getAs(2))
 						.withString("link", (String) news.getAs(3))
-						.withString("short_description", (String) news.getAs(4))
-						.withString("date", (String) news.getAs(5));
+						.withString("short_description", (String) news.getAs(4));
+						//.withString("date", (String) news.getAs(5));
 				rows.add(newsItem);
 				
 				if (rows.size() == 25 || !iter.hasNext()) {
@@ -248,19 +240,29 @@ public class LoadNews {
 				}	
 			}
 		});
-
-
-		JavaPairRDD <String, String> newsPair = newsData
-				.mapToPair(x -> new Tuple2<String, String>(x.getAs(0), x.getAs(1)));
-		
-		// JavaPairRDD <String, String> interests = getInterests("");
-
-
-
-		
-		
 		
 	}
+
+	/*public void computeRanks() {
+		JavaRDD<Row> newsData = this.getNews("NewsCategoryData.txt");
+
+		JavaPairRDD <String, String> CtoA = newsData
+				.mapToPair(x -> new Tuple2<String, String>((String) x.getAs(0), (String) x.getAs(1)));
+
+		JavaPairRDD <String, String> newsPair = CtoA
+				.union(CtoA.mapToPair(x -> new Tuple2<String, String>(x._2, x._1)))
+				.distinct();
+
+		JavaPairRDD<String, Double> categoryNodeWeight = CtoA
+				.mapToPair(x -> new Tuple2<String, Integer>(x._1, 1)) // c->a adjacent node weight should sum up to 1
+				.reduceByKey((x, y) -> x + y) // find the degree of the node
+				.mapToPair(x -> new Tuple2<String, Double>(x._1, (1.0 /x._2)));
+
+		JavaPairRDD<String, Tuple2<String, Double>> catArtEdgeTransfer = CtoA
+				.join(categoryNodeWeight);
+
+		// JavaPairRDD <String, String> interests = getInterests("");
+	}*/
 	
 
 	public void shutdown() {

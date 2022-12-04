@@ -100,13 +100,15 @@ public class LoadNews {
 			public String authors;
 			public String link;
 			public String short_description;
+			public String data;
 
-			public Person(String c, String h, String a, String l, String sd) {
+			public Person(String c, String h, String a, String l, String sd, String d) {
 				this.category = c;
 				this.headline = h;
 				this.authors = a;
 				this.link = l;
 				this.short_description = sd;
+				this.date = d;
 			}
 		}
 
@@ -127,6 +129,7 @@ public class LoadNews {
 							.add("authors", "string")  
 							.add("link", "string") 
 							.add("short_description", "string") 
+							.add("date", "string")
 
 			List<Row> rowOfNews = lines.parallelStream()
 							.map(line -> {
@@ -136,6 +139,7 @@ public class LoadNews {
 								row[2] = line.authors;
 								row[3] = line.link;
 								row[4] = line.short_description;
+								row[5] = line.date;
 								return new GenericRowWithSchema(row, schema);// Make Row with Schema
 							})
 							.collect(Collectors.toList());
@@ -248,7 +252,7 @@ public class LoadNews {
 		JavaPairRDD <String, String> newsPair = newsData
 				.mapToPair(x -> new Tuple2<String, String>(x.getAs(0), x.getAs(1)));
 		
-		JavaPairRDD <String, String> interests = getInterests("");
+		// JavaPairRDD <String, String> interests = getInterests("");
 
 
 

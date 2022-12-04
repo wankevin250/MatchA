@@ -1,4 +1,4 @@
-package edu.nets2120.finalproject;
+package finalproject;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -46,13 +46,17 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.amazonaws.services.dynamodbv2.model.WriteRequest;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.*;
+import storage.DynamoConnector;
+import storage.SparkConnector;
+import scala.Tuple2;
+import storage.News;
 
 public class LoadNews {
     	/**
 	 * The basic logger
 	 */
-	static Logger logger = LogManager.getLogger(LoadNetwork.class);
+	static Logger logger = LogManager.getLogger(LoadNews.class);
     /**
 	 * Connection to DynamoDB
 	 */
@@ -63,7 +67,6 @@ public class LoadNews {
 	 * Connection to Apache Spark
 	 */
 	SparkSession spark;
-	
 	JavaSparkContext context;
 
     /**
@@ -91,35 +94,22 @@ public class LoadNews {
 	 * @throws IOException
 	 */
 	JavaRDD<Row> getNews(String filePath) throws IOException {
-		Reader reader = null;
-		ObjectMapper mapper = new ObjectMapper();
+		BufferedReader reader = null;
+		JsonParser mapper = new JsonParser();
 
-		private class News {
-			public String category;
-			public String headline;
-			public String authors;
-			public String link;
-			public String short_description;
-			public String data;
-
-			public Person(String c, String h, String a, String l, String sd, String d) {
-				this.category = c;
-				this.headline = h;
-				this.authors = a;
-				this.link = l;
-				this.short_description = sd;
-				this.date = d;
-			}
-		}
-
-		try {
+		//try {
 			reader = new BufferedReader(new FileReader(new File(filePath)));
 
 			String nextLine;
-			List<News> lines = new ArrayList<>();
+			List<JsonObject> lines = new ArrayList<>();
+			//List<News> lines = new ArrayList<>();
+			//List<News> lines = mapper.readValue(filePath, News.class);
 
-			while((nextLine = reader.readNext()) != null) {
-				News news = mapper.readValue(nextLine, News.class);
+			while((nextLine = reader.readLine()) != null) {
+				
+				//JsonElement n = ;
+				JsonObject news = mapper.parseString(nextLine).getAsJsonObject();
+				//News news = mapper.convertValue(n, News.class);
 				lines.add(news);
 			}
 
@@ -129,28 +119,37 @@ public class LoadNews {
 							.add("authors", "string")  
 							.add("link", "string") 
 							.add("short_description", "string") 
-							.add("date", "string")
+							.add("date", "string");
+
+							/*
+							row[0] = line.category; //get("category");
+								row[1] = line.headline; // get("headline");
+								row[2] = line.authors; //get("authors");
+								row[3] = line.link; //get("link");
+								row[4] = line.short_description; //get("short_description");
+								row[5] = line.date; //get("date");*/
 
 			List<Row> rowOfNews = lines.parallelStream()
 							.map(line -> {
-								Object[] row = new Object[5]; // assign appropriate values for each Schema
-								row[0] = line.category;
-								row[1] = line.headline;
-								row[2] = line.authors;
-								row[3] = line.link;
-								row[4] = line.short_description;
-								row[5] = line.date;
+								Object[] row = new Object[6]; // assign appropriate values for each Schema
+								row[0] = line.get("category").toString();
+								row[1] = line.get("headline").toString();
+								row[2] = line.get("authors").toString();
+								row[3] = line.get("link").toString();
+								row[4] = line.get("short_description").toString();
+								row[5] = line.get("date").toString();
+								System.out.println(row);
 								return new GenericRowWithSchema(row, schema);// Make Row with Schema
 							})
 							.collect(Collectors.toList());
 			JavaRDD<Row> newsRDD = context.parallelize(rowOfNews);
 
 			return newsRDD;
-		} finally {
+		/*} finally {
 			if (reader != null)
 				reader.close();
 		}
-    return null;
+    	return null;*/
 	}
 
 	/**
@@ -161,7 +160,7 @@ public class LoadNews {
 	 */
 	JavaPairRDD<String, String> getInterests(String filePath) {
 		// Read into RDD with lines as strings
-		JavaRDD<String[]> file = context.textFile(filePath, Config.PARTITIONS)
+		JavaRDD<String[]> file = context.textFile(filePath)
 				.map(line -> line.toString().split(" "));
 		
 		// Convert to JavaPairRDD from JavaRDD
@@ -179,7 +178,7 @@ public class LoadNews {
 	 */
 	JavaPairRDD<String, String> getFriends(String filePath) {
 		// Read into RDD with lines as strings
-		JavaRDD<String[]> file = context.textFile(filePath, Config.PARTITIONS)
+		JavaRDD<String[]> file = context.textFile(filePath)
 				.map(line -> line.toString().split(" "));
 		
 		// Convert to JavaPairRDD from JavaRDD
@@ -197,7 +196,7 @@ public class LoadNews {
 	 */
 	JavaPairRDD<String, String> getLikes(String filePath) {
 		// Read into RDD with lines as strings
-		JavaRDD<String[]> file = context.textFile(filePath, Config.PARTITIONS)
+		JavaRDD<String[]> file = context.textFile(filePath)
 				.map(line -> line.toString().split(" "));
 		
 		// Convert to JavaPairRDD from JavaRDD
@@ -215,6 +214,7 @@ public class LoadNews {
 	 * @throws InterruptedException User presses Ctrl-C
 	 */
 	public void run() throws IOException, DynamoDbException, InterruptedException {
+		//initialize();
 		logger.info("Running");
 
 		// Load + store the news data
@@ -229,11 +229,12 @@ public class LoadNews {
 				Row news = iter.next();
 				// Create Item
 				Item newsItem = new Item()
-						.withPrimaryKey("category", news.getAs(0))
-						.withString("headline", (String) news.getAs(1))
-						.withString("authors", (String) talk.getAs(2))
-						.withString("link", (String) talk.getAs(3))
-						.withString("short_description", (String) talk.getAs(4));
+						.withPrimaryKey("headline", (String) news.getAs(1))
+						.withString("category", (String) news.getAs(0))
+						.withString("authors", (String) news.getAs(2))
+						.withString("link", (String) news.getAs(3))
+						.withString("short_description", (String) news.getAs(4))
+						.withString("date", (String) news.getAs(5));
 				rows.add(newsItem);
 				
 				if (rows.size() == 25 || !iter.hasNext()) {

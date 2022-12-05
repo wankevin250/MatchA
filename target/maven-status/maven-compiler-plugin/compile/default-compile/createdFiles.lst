@@ -1,6 +1,7 @@
-finalproject/LoadNews.class
 storage/DynamoConnector$LocalServer.class
 storage/DynamoConnector.class
-storage/SparkConnector.class
 storage/News.class
+rank/rankJob.class
+finalproject/LoadNews.class
+storage/SparkConnector.class
 finalproject/TokenizeNews.class

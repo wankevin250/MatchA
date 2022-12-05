@@ -221,6 +221,12 @@ const viewUsers = (req, res) => {
 
 // end of Ace
 
+// Kevin visualizer routes
+const getVisualizer = (req, res) => {
+  res.render('visualizer.pug')
+}
+
+
 const routes = {
   getSplash: getSplash,
 
@@ -246,6 +252,9 @@ const routes = {
 
   postCreateUser: postCreateUser,
   postLoginUser: postLoginUser,
+
+  // Kevin's visualizer routes
+  getVisualizer: getVisualizer,
 }
 
 module.exports = routes;

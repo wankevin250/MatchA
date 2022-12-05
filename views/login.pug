@@ -3,16 +3,20 @@ extends layouts/standard.pug
 block head
   title Login to PennBook
   link(rel='stylesheet', href='https://stackpath.bootstrapcdn.com/bootstrap/5.2.3/css/bootstrap.min.css')
-  link(rel='stylesheet', href='/css/login.css')
+  // link(rel='stylesheet', href='/css/login.css')
+  script(src="js/ajaxlogin.js")
 
 block content
   h1(class='text-center') Login Below:
   div(class='', align='center')
-    form(role='form', action='/wall', method='POST')
+    div(class='login-inputarea')
+      div(class='login-error')
+        div(id='login-clienterror')
+        div(id='login-servererror')
       div.form-group(class='w-25')
         label(for='username') Username: 
-        input#username.form-control(type='text', name='username', placeholder='Enter username here.')
+        input(type='text', id='login-username', class='form-control', name='username', placeholder='Enter username here.')
       div.form-group(class='w-25')
         label(for='password') Password:
-        input#password.form-control(type='password', name='password', placeholder='Enter password here.')
-      button.btn.btn-primary(type='submit', name='loginButton') Login
+        input(type='password', id='login-password', class='form-control', name='password', placeholder='Enter password here.')
+      button.btn.btn-primary(type='submit', onclick='checkUser()', name='loginButton') Login

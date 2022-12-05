@@ -1,4 +1,5 @@
 const AWS = require('aws-sdk');
+const req = require('express/lib/request.js');
 const usr = require('./user.js');
 
 AWS.config.update({
@@ -7,24 +8,47 @@ AWS.config.update({
 
 const db = new AWS.DynamoDB();
 
-const queryUser = (username, password, callback) => {
-  const params = {
-    KeyConditionExpression: "username = :username",
-    ExpressionAttributeValues: {
-      ":username": {S: username},
-    },
-    ProjectionExpression: "username, password, fullname",
-    TableName: "users",
-  };
+// const queryUser = (username, password, callback) => {
+//   const params = {
+//     KeyConditionExpression: "username = :username",
+//     ExpressionAttributeValues: {
+//       ":username": {S: username},
+//     },
+//     ProjectionExpression: "username, password, fullname",
+//     TableName: "users",
+//   };
   
-  db.query(params, function(err, data) {
+//   db.query(params, function(err, data) {
+//     if (err) {
+//       console.log("Error", err);
+//       callback(err, null);
+//     } else {
+//       callback(err, data);
+//     }
+//   });
+// }
+
+const loginUser = (username, password, callback) => {
+  db.query({
+    ExpressionAttributeValues: {
+      ':username': {S: username},
+    },
+    KeyConditionExpression: 'username = :username',
+    TableName: 'users',
+  }, (err, data) => {
     if (err) {
-      console.log("Error", err);
-      callback(err, null);
+      console.log(err);
+      callback(500, err, null);
     } else {
-      callback(err, data);
+      let serverPassword = data.Items[0].password.S;
+      if (password == serverPassword) {
+        callback(201, err, data);
+      } else {
+        console.log(`Incorrect password: ${password}`);
+        callback(401, err, null);
+      }
     }
-  });
+  })
 }
 
 /**
@@ -123,8 +147,9 @@ const viewOneChat = (chatid, callback) => {
 // end of ACE HOUR
 
 const database = {
-  queryUser: queryUser,
+  // queryUser: queryUser,
   createUser: createUser,
+  loginUser: loginUser,
   
   findChats: findChats,
   newChat: addChatToTable,

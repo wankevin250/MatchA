@@ -66,7 +66,7 @@ app.get('/viewchatdetails', routes.viewUsers);
 
 //AJAX Post
 app.post('/ajaxpostsignup', routes.postCreateUser);
-// app.post('/ajaxpostlogin', null);
+app.post('/ajaxpostlogin', routes.postLoginUser);
 // app.post('/ajaxgetwall', null);
 
 app.listen(PORT, () => console.log(`Example app is listening on port ${PORT}`));

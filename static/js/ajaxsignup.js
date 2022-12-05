@@ -65,7 +65,7 @@ function createUser() {
             },
             success: (response) => {
                 console.log(response);
-                window.location.href = "/wall";
+                location.reload();
             },
             error: (error) => {
                 let status = error.status;

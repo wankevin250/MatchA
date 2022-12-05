@@ -1,6 +1,7 @@
 const { sendStatus } = require('express/lib/response');
 const usr = require('../models/user');
 const db = require('../models/database');
+const user = require('../models/user');
 
 /**
  * Checks if HTTP Status code is successful (between 200-299)
@@ -13,6 +14,8 @@ const isSuccessfulStatus = (status) => {
 
 const getSplash = (req, res) => {
   if (req.session && req.session.user) {
+    console.log(req.session);
+    console.log(req.session.user);
     res.redirect('/wall');
   } else {
     res.render('splash');
@@ -39,13 +42,37 @@ const getWall = (req, res) => {
   }
 }
 
+const postLoginUser = (req, res) => {
+  let username = req.body.username;
+  let password = req.body.password;
+
+  if (req.session && req.session.user) {
+    res.redirect('/wall');
+  } else {
+    db.loginUser(username, password, (status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+        let user = data.Items[0];
+        Object.entries(data.Items[0]).forEach(d => {
+          let [key, val] = d;
+          user[key] = val.S;
+        });
+        req.session.user = user;
+        res.redirect('/wall');
+      } else {
+        res.status(status).send(new Error(err));
+      }
+    }); 
+  }
+}
+
 const postCreateUser = (req, res) => {
   let user = req.body.user;
 
   if (user && usr.checkUser(user)) {
     db.createUser(user, (status, err, data) => {
       if (isSuccessfulStatus(status)) {
-        res.sendStatus(201);
+        req.session.user = user;
+        res.redirect('/wall');
       } else {
         res.status(status).send(new Error(err));
       }
@@ -195,6 +222,8 @@ const viewUsers = (req, res) => {
 
 const routes = {
   getSplash: getSplash,
+
+  // Login, account creation
   getLogin: getLogin,
   getSignUp: getSignUp,
   getWall: getWall,
@@ -214,7 +243,8 @@ const routes = {
   reloadChats: reloadChats,
   // end of ace's routes
 
-  postCreateUser: postCreateUser
+  postCreateUser: postCreateUser,
+  postLoginUser: postLoginUser,
 }
 
 module.exports = routes;

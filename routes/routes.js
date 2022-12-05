@@ -28,6 +28,7 @@ const getSignUp = (req, res) => {
 
 const getLogin = (req, res) => {
   if (req.session && req.session.user) {
+    console.log(req.session.user);
     res.redirect('/wall');
   } else {
     res.render('login');

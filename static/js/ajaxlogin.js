@@ -26,7 +26,7 @@ function checkUser() {
                 password: password,
             },
             success: (response) => {
-                console.log(response);
+                location.reload();
             },
             error: (error) => {
                 let status = error.status;

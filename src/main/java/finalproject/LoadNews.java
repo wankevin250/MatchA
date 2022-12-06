@@ -13,12 +13,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.spark.api.java.AbstractJavaRDDLike;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.rdd.RDD;
 import org.apache.spark.api.java.JavaRDDLike;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.PairFunction;
@@ -30,6 +36,7 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructType;
 
 import com.amazonaws.services.applicationdiscovery.model.ResourceNotFoundException;
+import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughputExceededException;
 import com.amazonaws.services.dynamodbv2.document.BatchWriteItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
@@ -50,7 +57,7 @@ import com.google.gson.*;
 import storage.DynamoConnector;
 import storage.SparkConnector;
 import scala.Tuple2;
-import storage.News;
+import finalproject.TokenizeNews;
 
 public class LoadNews {
     	/**
@@ -68,6 +75,8 @@ public class LoadNews {
 	 */
 	SparkSession spark;
 	JavaSparkContext context;
+	TokenizeNews tokenizer;
+	int count = 0;
 
     /**
 	 * Initialize the database connection and open the file
@@ -96,60 +105,46 @@ public class LoadNews {
 	JavaRDD<Row> getNews(String filePath) throws IOException {
 		BufferedReader reader = null;
 		JsonParser mapper = new JsonParser();
+		reader = new BufferedReader(new FileReader(new File(filePath)));
 
-		//try {
-			reader = new BufferedReader(new FileReader(new File(filePath)));
+		String nextLine;
+		List<JsonObject> lines = new ArrayList<>();
 
-			String nextLine;
-			List<JsonObject> lines = new ArrayList<>();
-			//List<News> lines = new ArrayList<>();
-			//List<News> lines = mapper.readValue(filePath, News.class);
-
-			while((nextLine = reader.readLine()) != null) {
-				
-				//JsonElement n = ;
-				JsonObject news = mapper.parseString(nextLine).getAsJsonObject();
-				//News news = mapper.convertValue(n, News.class);
-				lines.add(news);
-			}
-
-			final StructType schema = new StructType() // Make Schema for the TedTalks
-							.add("category", "string")  
-							.add("headline", "string") 
-							.add("authors", "string")  
-							.add("link", "string") 
-							.add("short_description", "string") 
-							.add("date", "string");
-
-							/*
-							row[0] = line.category; //get("category");
-								row[1] = line.headline; // get("headline");
-								row[2] = line.authors; //get("authors");
-								row[3] = line.link; //get("link");
-								row[4] = line.short_description; //get("short_description");
-								row[5] = line.date; //get("date");*/
-
-			List<Row> rowOfNews = lines.parallelStream()
-							.map(line -> {
-								Object[] row = new Object[6]; // assign appropriate values for each Schema
-								row[0] = line.get("category").toString();
-								row[1] = line.get("headline").toString();
-								row[2] = line.get("authors").toString();
-								row[3] = line.get("link").toString();
-								row[4] = line.get("short_description").toString();
-								row[5] = line.get("date").toString();
-								System.out.println(row);
-								return new GenericRowWithSchema(row, schema);// Make Row with Schema
-							})
-							.collect(Collectors.toList());
-			JavaRDD<Row> newsRDD = context.parallelize(rowOfNews);
-
-			return newsRDD;
-		/*} finally {
-			if (reader != null)
-				reader.close();
+		while((nextLine = reader.readLine()) != null) {
+			JsonObject news = mapper.parseString(nextLine).getAsJsonObject();
+			lines.add(news);
 		}
-    	return null;*/
+
+		final StructType schema = new StructType() // Make Schema for the TedTalks
+						.add("category", "string")  
+						.add("headline", "string") 
+						.add("authors", "string")  
+						.add("link", "string") 
+						.add("short_description", "string") 
+						.add("date", "string");
+
+		List<Row> rowOfNews = lines.parallelStream()
+						.map(line -> {
+							Object[] row = new Object[6]; // assign appropriate values for each Schema
+							String ct = line.get("category").toString();
+							String hl = line.get("headline").toString();
+							String au = line.get("authors").toString();
+							String lk = line.get("link").toString();
+							String sd = line.get("short_description").toString();
+							String dt = line.get("date").toString();
+							row[0] = ct.substring(1, ct.length() - 1);
+							row[1] = hl.substring(1, hl.length() - 1);
+							row[2] = au.substring(1, au.length() - 1);
+							row[3] = lk.substring(1, lk.length() - 1);
+							row[4] = sd.substring(1, sd.length() - 1);
+							row[5] = dt.substring(1, dt.length() - 1);
+							//System.out.println(hl.substring(1, hl.length() - 1));
+							return new GenericRowWithSchema(row, schema);// Make Row with Schema
+						})
+						.collect(Collectors.toList());
+		JavaRDD<Row> newsRDD = context.parallelize(rowOfNews);
+
+		return newsRDD;
 	}
 
 	/**
@@ -175,10 +170,10 @@ public class LoadNews {
 	 * 
 	 * @param 
 	 * @return JavaPairRDD: (acceptor: string, asker: string)
-	 */
-	JavaPairRDD<String, String> getFriends(String filePath) {
+	 
+	List<String> getFriends(String user) {
 		// Read into RDD with lines as strings
-		JavaRDD<String[]> file = context.textFile(filePath)
+		JavaRDD<String[]> file = context.textFile(user)
 				.map(line -> line.toString().split(" "));
 		
 		// Convert to JavaPairRDD from JavaRDD
@@ -186,7 +181,7 @@ public class LoadNews {
 				.mapToPair(x -> new Tuple2<String, String>(x[0], x[1]));
 		
 		return friends;
-	}
+	}*/
 
 	/**
 	 * Fetch the friends table and filter only the approved status then, create an edge graph
@@ -221,7 +216,99 @@ public class LoadNews {
 		JavaRDD<Row> newsData = this.getNews("NewsCategoryData.txt");
 		
 		// upload to Dynamo_DB
-		newsData.foreachPartition(iter -> { 
+	//	try {
+			newsData.foreachPartition(iter -> { 
+				Thread.sleep(3);
+				HashSet<Item> rows = new HashSet<Item>(); 
+				HashSet<String> dupli = new HashSet<String>();
+				DynamoDB conn = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
+				String tableName = "news";
+				while (iter.hasNext()) {
+					Row news = iter.next();
+					// Create Item
+					if (!dupli.contains((String) news.getAs(1))) {
+						Thread.sleep(3);
+						LocalDate date = LocalDate.parse((String) news.getAs(5));
+						//LocalDateTime localDateTime = date.atStartOfDay(); 
+						ZonedDateTime zonedDateTime = date.atStartOfDay().atZone(ZoneId.of("UTC"));
+        				long epochMilli = zonedDateTime.toInstant().toEpochMilli();
+						String title = (String) news.getAs(1);
+						if (title.length() != 0) {
+							Item newsItem = new Item()
+											.withPrimaryKey("headline", (String) news.getAs(1), "date", epochMilli)
+											.withString("category", (String) news.getAs(0))
+											.withString("authors", (String) news.getAs(2))
+											.withString("link", (String) news.getAs(3))
+											.withString("short_description", (String) news.getAs(4));
+							Thread.sleep((long) 0.5);
+							rows.add(newsItem);
+							dupli.add((String) news.getAs(1));
+						} else {
+							System.out.println(title);
+						}
+					}
+					
+					if (rows.size() == 25 || !iter.hasNext()) {
+						Thread.sleep((long) 0.5);
+						TableWriteItems writ = new TableWriteItems(tableName).withItemsToPut(rows);
+						Thread.sleep(5);
+						BatchWriteItemOutcome ret = conn.batchWriteItem(writ);
+						Thread.sleep((long) 0.5);
+						Map<String, List<WriteRequest>> leftover = ret.getUnprocessedItems();
+						if (leftover != null && leftover.size() != 0) {
+							Thread.sleep(3);
+							conn.batchWriteItemUnprocessed(leftover);
+							Thread.sleep((long) 0.5);	
+						}
+						rows = new HashSet<Item>();
+					}	
+				}
+			});
+			
+		//} catch (Exception e) {
+		//	System.out.println("error occurred");
+	//	} 
+		/*finally {
+			//System.out.println(count + " lines read");
+			JavaPairRDD<String, Integer> categoryNodeWeight = newsData
+					.mapToPair(x -> new Tuple2<String, String>((String) x.getAs(0), (String) x.getAs(1)))
+					.mapToPair(x -> new Tuple2<String, Integer>(x._1, 1)) // c->a adjacent node weight should sum up to 1
+					.reduceByKey((x, y) -> x + y);
+			
+			JavaRDD<Tuple2<String, Integer>> rdd = JavaPairRDD.toRDD(categoryNodeWeight).toJavaRDD();
+			rdd.foreachPartition(iter -> { 
+				HashSet<Item> categories = new HashSet<Item>(); 
+				DynamoDB conn = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
+				String tableName = "newsCount";
+
+				while (iter.hasNext()) {
+					Tuple2<String, Integer> x = iter.next();
+					System.out.println(x._1 + " , " + x._2);
+					Item newsItem = new Item()
+							.withPrimaryKey("category", x._1)
+							.withInt("count", x._2);
+					categories.add(newsItem);
+						
+					if (categories.size() == 25 || !iter.hasNext()) {
+						Thread.sleep(3);
+						TableWriteItems writ = new TableWriteItems(tableName).withItemsToPut(categories);
+						BatchWriteItemOutcome ret = conn.batchWriteItem(writ);
+						Map<String, List<WriteRequest>> leftover = ret.getUnprocessedItems();
+						if (leftover != null && leftover.size() != 0) {
+							conn.batchWriteItemUnprocessed(leftover);	
+						}
+						categories = new HashSet<Item>();
+					}	
+				}
+					
+			});
+
+
+
+		}*/
+		
+		/*newsData.foreachPartition(iter -> { 
+			Thread.sleep(2);
 			HashSet<Item> rows = new HashSet<Item>(); 
 			DynamoDB conn = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
 			String tableName = "news";
@@ -229,16 +316,17 @@ public class LoadNews {
 				Row news = iter.next();
 				// Create Item
 				Item newsItem = new Item()
-						.withPrimaryKey("headline", (String) news.getAs(1))
+						.withPrimaryKey("headline", (String) news.getAs(1), "date", (String) news.getAs(5))
 						.withString("category", (String) news.getAs(0))
 						.withString("authors", (String) news.getAs(2))
 						.withString("link", (String) news.getAs(3))
-						.withString("short_description", (String) news.getAs(4))
-						.withString("date", (String) news.getAs(5));
+						.withString("short_description", (String) news.getAs(4));
+						//.withString("date", (String) news.getAs(5));
 				rows.add(newsItem);
 				
 				if (rows.size() == 25 || !iter.hasNext()) {
 					TableWriteItems writ = new TableWriteItems(tableName).withItemsToPut(rows);
+					Thread.sleep(2);
 					BatchWriteItemOutcome ret = conn.batchWriteItem(writ);
 					Map<String, List<WriteRequest>> leftover = ret.getUnprocessedItems();
 					if (leftover != null && leftover.size() != 0) {
@@ -249,18 +337,64 @@ public class LoadNews {
 			}
 		});
 
-
-		JavaPairRDD <String, String> newsPair = newsData
-				.mapToPair(x -> new Tuple2<String, String>(x.getAs(0), x.getAs(1)));
+		JavaPairRDD<String, Integer> categoryNodeWeight = newsData
+				.mapToPair(x -> new Tuple2<String, String>((String) x.getAs(0), (String) x.getAs(1)))
+				.mapToPair(x -> new Tuple2<String, Integer>(x._1, 1)) // c->a adjacent node weight should sum up to 1
+				.reduceByKey((x, y) -> x + y);
 		
+		//int count = 0;
+		JavaRDD<Tuple2<String, Integer>> rdd = JavaPairRDD.toRDD(categoryNodeWeight).toJavaRDD();
+		rdd.foreachPartition(iter -> { 
+			HashSet<Item> categories = new HashSet<Item>(); 
+			DynamoDB conn = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
+			String tableName = "newsCount";
+
+			while (iter.hasNext()) {
+				Tuple2<String, Integer> x = iter.next();
+				Item newsItem = new Item()
+						.withPrimaryKey("category", x._1)
+						.withInt("count", x._2);
+				categories.add(newsItem);
+					
+				if (categories.size() == 25 || !iter.hasNext()) {
+					TableWriteItems writ = new TableWriteItems(tableName).withItemsToPut(categories);
+					BatchWriteItemOutcome ret = conn.batchWriteItem(writ);
+					Map<String, List<WriteRequest>> leftover = ret.getUnprocessedItems();
+					if (leftover != null && leftover.size() != 0) {
+						conn.batchWriteItemUnprocessed(leftover);	
+					}
+					categories = new HashSet<Item>();
+				}	
+			}
+				
+		});*/
+	}
+
+	/*public void computeRanks() {
+		JavaRDD<Row> newsData = this.getNews("NewsCategoryData.txt");
+
+		JavaPairRDD <String, String> CtoA = newsData
+				.mapToPair(x -> new Tuple2<String, String>((String) x.getAs(0), (String) x.getAs(1)));
+
+		JavaPairRDD <String, String> newsPair = CtoA
+				.union(CtoA.mapToPair(x -> new Tuple2<String, String>(x._2, x._1)))
+				.distinct();
+
+		JavaPairRDD<String, Double> categoryNodeWeight = CtoA
+				.mapToPair(x -> new Tuple2<String, Integer>(x._1, 1)) // c->a adjacent node weight should sum up to 1
+				.reduceByKey((x, y) -> x + y) // find the degree of the node
+				.mapToPair(x -> new Tuple2<String, Double>(x._1, (1.0 /x._2)));
+
+		JavaPairRDD<String, Tuple2<String, Double>> catArtEdgeTransfer = CtoA
+				.join(categoryNodeWeight);
+
 		// JavaPairRDD <String, String> interests = getInterests("");
 
 
+		int iMax = 15;
+		int count = 0;
 
-		
-		
-		
-	}
+	}*/
 	
 
 	public void shutdown() {

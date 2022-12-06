@@ -1,16 +1,22 @@
-extends layouts/standard.pug
+html(xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en")
+  head
+    meta(http-equiv="Content-Type" content="text/html; charset=UTF-8")
+    title(Friendship Visualizer)
 
-block head
-  title PennBook Main Page
+    <!-- CSS Files -->
+    link(type="text/css" href="../css/base.css" rel="stylesheet")
 
-block content
-  h1(class="text-center italics bold") PennBook
-  div(class="row")
-    form(method="get", action="/signup")
-      button(id='splash-signup', class="btn btn-primary btn-rounded margin-left")
-        span Create your account
-    br
+    <!--[if IE]><script language="javascript" type="text/javascript" src="../../Extras/excanvas.js"></script><![endif]-->
 
-    form(method="get", action="/login")
-      button(id='splash-login', class="btn btn-primary btn-rounded margin-right")
-        span Login here
+    script(src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js")
+    <!-- JIT Library File -->
+    script(language="javascript" type="text/javascript" src="../js/jit.js")
+
+    <!-- Example File -->
+    script(language="javascript" type="text/javascript" src="../js/visualizer.js")
+
+  body
+
+    div(id="container")
+      div(id="center-container")
+          div(id="infovis")   

@@ -6,6 +6,10 @@ block head
 
 block content
     h1 Wall
+    div(class="center")
+        form(method="get", action="/visualizer")
+            button(id='wall-visualizer', class="btn btn-primary btn-rounded margin-center")
+            span See your web of friends!
     div(class="wall-content")
         div(class="wall-searchuser")
             div(class="wall-searchuser-inputarea")

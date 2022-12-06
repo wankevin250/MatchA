@@ -1,6 +1,6 @@
 
 $(document).ready(function() {
-    $.getJSON('/visualizer', function (json) {
+    $.getJSON('/friendvisualization', function (json) {
         console.log(json)
         var infovis = document.getElementById('infovis');
         var w = infovis.offsetWidth - 50, h = infovis.offsetHeight - 50;
@@ -25,7 +25,7 @@ $(document).ready(function() {
               color: "#088"
           },
           //calculate nodes offset
-          offset: 0.2,
+          offset: 0.005,
           //Change the animation transition type
           transition: $jit.Trans.Back.easeOut,
           //animation duration (in milliseconds)

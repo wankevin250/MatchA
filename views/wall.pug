@@ -1,15 +1,22 @@
 extends layouts/standard.pug
 
 block head
-    title PennBook
+    title Match-A
+    link(rel='stylesheet', href='https://stackpath.bootstrapcdn.com/bootstrap/5.2.3/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/css/wall.css')
     script(src='js/ajaxwall.js')
 
 block content
-    h1 Wall
-    div(class="center")
-        form(method="get", action="/visualizer")
-            button(id='wall-visualizer', class="btn btn-primary btn-rounded margin-center")
-            span See your web of friends!
+    div(class="wall-header")
+        h1(color=red) Match-A
+        div(class="wall-buttons")
+            form(method="get", action="/visualizer")
+                button(id='wall-visualizer', class="btn btn-primary btn-rounded margin-left")
+                    span See your web of friends!
+            form(method="get" action="/chat")
+                button(id='wall-chats', class="btn btn-primary btn-rounded margin-right")
+                    span See your chats!
+        div(class="wall-divider")
     div(class="wall-content")
         div(class="wall-searchuser")
             div(class="wall-searchuser-inputarea")

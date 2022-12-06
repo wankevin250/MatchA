@@ -148,60 +148,6 @@ public class LoadNews {
 	}
 
 	/**
-	 * Fetch the interest table and create an edge graph
-	 * 
-	 * @param 
-	 * @return JavaPairRDD: (user: string, interest: string)
-	 */
-	JavaPairRDD<String, String> getInterests(String filePath) {
-		// Read into RDD with lines as strings
-		JavaRDD<String[]> file = context.textFile(filePath)
-				.map(line -> line.toString().split(" "));
-		
-		// Convert to JavaPairRDD from JavaRDD
-		JavaPairRDD<String, String> interests = file // create edges
-				.mapToPair(x -> new Tuple2<String, String>(x[0], x[1]));
-		
-		return interests;
-	}
-
-	/**
-	 * Fetch the friends table and filter only the approved status then, create an edge graph
-	 * 
-	 * @param 
-	 * @return JavaPairRDD: (acceptor: string, asker: string)
-	 
-	List<String> getFriends(String user) {
-		// Read into RDD with lines as strings
-		JavaRDD<String[]> file = context.textFile(user)
-				.map(line -> line.toString().split(" "));
-		
-		// Convert to JavaPairRDD from JavaRDD
-		JavaPairRDD<String, String> friends = file // create edges
-				.mapToPair(x -> new Tuple2<String, String>(x[0], x[1]));
-		
-		return friends;
-	}*/
-
-	/**
-	 * Fetch the friends table and filter only the approved status then, create an edge graph
-	 * 
-	 * @param 
-	 * @return JavaPairRDD: (acceptor: string, asker: string)
-	 */
-	JavaPairRDD<String, String> getLikes(String filePath) {
-		// Read into RDD with lines as strings
-		JavaRDD<String[]> file = context.textFile(filePath)
-				.map(line -> line.toString().split(" "));
-		
-		// Convert to JavaPairRDD from JavaRDD
-		JavaPairRDD<String, String> likes = file // create edges
-				.mapToPair(x -> new Tuple2<String, String>(x[0], x[1]));
-		
-		return likes;
-	}
-
-	/**
 	 * Main functionality in the program: read and process the social network
 	 * 
 	 * @throws IOException File read, network, and other errors

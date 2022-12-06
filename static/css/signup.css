@@ -1,0 +1,14 @@
+body {
+    background: lightgreen;
+}
+
+.signup-form{
+    display:inline-block;
+    width:36%;
+    box-sizing: border-box;
+    position:fixed;
+    background: white;
+    height:69vh;
+    top:55px;
+    margin-left: 515px;
+}

@@ -321,12 +321,39 @@ public class rankJob {
 		while (delta > dMax && count < iMax) {
 			JavaPairRDD<String, Tuple2<Tuple2<String,Double>, Tuple2<String,Double>>> propagateRank = EdgeTransfer
 					.join(userNode);
-			
 
-			break;
-
+			JavaPairRDD<String, Tuple2<String,Double>> interMediateRank = propagateRank
+					.mapToPair(x -> new Tuple2<String, Tuple2<String,Double>> 
+						(x._1, new Tuple2<String, Double> (x._2._2._1, x._2._2._2 * x._2._1._2)));
+				
+			JavaPairRDD<Tuple2<String,String>, Double> sum = interMediateRank
+					.mapToPair(x -> new Tuple2<Tuple2<String, String>, Double> (new Tuple2<String, String>(x._1, x._2._1), x._2._2))
+					.reduceByKey((x, y) -> x + y);
 			
+			JavaPairRDD<String, Tuple2<String,Double>> normalizedRank = interMediateRank
+					.mapToPair(x -> new Tuple2<Tuple2<String, String>, Double> (new Tuple2<String, String>(x._1, x._2._1), x._2._2))
+					.join(sum)
+					.mapToPair(x -> new Tuple2<String, Tuple2<String,Double>> 
+						(x._1._1, new Tuple2<String, Double> (x._1._2, x._2._1/x._2._2)));
+
+			delta = userNode
+					.mapToPair(x -> new Tuple2<Tuple2<String, String>, Double> (new Tuple2<String, String>(x._1, x._2._1), x._2._2))
+					.join(normalizedRank
+						.mapToPair(x -> new Tuple2<Tuple2<String, String>, Double> (new Tuple2<String, String>(x._1, x._2._1), x._2._2)))
+					.mapToPair(item -> new Tuple2<Double, Tuple2<String,String>>
+										(Math.abs(item._2._2 - item._2._1), item._1))
+					.sortByKey(false).first()._1;
+			
+			count++;
+			userNode = normalizedRank;
+			System.out.println("Round " + count + " delta : " + delta);			
 		}
+
+		db = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
+		DynamoDB conn = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
+		JavaRDD<Tuple3<String, String, Double>> rows = userNode.map(i -> new Tuple3<String, String, Double>(i._1, i._2._1, i._2._2));
+
+		// upload it to dynamodb
 		
 		
 	}

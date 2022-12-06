@@ -9,11 +9,9 @@ function addFriend(username, callback) {
             accepter: username
         },
         success: (response) => {
-            console.log(response);
             callback(null, response);
         },
         error: (error) => {
-            console.log(error);
             callback(error, null);
         }
     })

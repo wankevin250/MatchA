@@ -69,6 +69,7 @@ import com.google.gson.*;
 import storage.DynamoConnector;
 import storage.SparkConnector;
 import scala.Tuple2;
+import scala.Tuple3;
 import finalproject.LoadNews;
 
 public class rankJob {
@@ -252,14 +253,6 @@ public class rankJob {
 				.union(CategoryNewsEdge.mapToPair(x -> new Tuple2<String, String>(x._2, x._1)))
 				.distinct();
 
-		JavaPairRDD <String, String> edgePairs = CategoryNewsEdge
-				.union(CategoryNewsEdge.mapToPair(x -> new Tuple2<String, String>(x._2, x._1)))
-				.union(UserEdge)
-				.union(UserEdge.mapToPair(x-> new Tuple2<String, String>(x._2, x._1)))
-				.union(InterestEdge)
-				.union(InterestEdge.mapToPair(x-> new Tuple2<String, String>(x._2, x._1)))
-				.distinct();
-
 		JavaPairRDD<String, Tuple2<String, Double>> catEdgeTransfer = CategoryNewsEdge
 				.join(categoryNodeWeight);
 
@@ -286,14 +279,52 @@ public class rankJob {
 					.mapToPair(x -> new Tuple2<String, Integer>(x._1, 1)) 
 					.reduceByKey((x, y) -> x + y)
 					.mapToPair(x -> new Tuple2<String, Double>(x._1, (10.0 * x._2 / 3.0))));
-					
+
+		JavaPairRDD<String, Tuple2<String, Double>> userEdgeTransfer = userNewsEdgeTransfer
+					.union(userFriendEdgeTransfer)
+					.union(userInterestEdgeTransfer)
+					.distinct();
+
+		JavaPairRDD<String, Tuple2<String, Double>> EdgeTransfer = catEdgeTransfer
+					.union(newsEdgeTransfer)
+					.union(userEdgeTransfer)	
+					.distinct();
+
+		JavaPairRDD<String, String> network = allNewsEdge
+					.union(allUserEdge)
+					.union(CategoryNewsEdge)
+					.union(CategoryNewsEdge.mapToPair(x -> new Tuple2<String, String>(x._2, x._1)))
+					.union(InterestEdge)
+					.union(InterestEdge.mapToPair(x-> new Tuple2<String, String>(x._2, x._1)))
+					.union(NewsLikeEdge)
+					.union(NewsLikeEdge.mapToPair(x-> new Tuple2<String, String>(x._2, x._1)));
+
+		JavaPairRDD<String, Tuple2<String, Double>> userNode = allUserEdge
+					.map(i -> i._1)
+					.distinct()
+					.mapToPair(x -> new Tuple2<String, Tuple2<String, Double>> (x , new Tuple2<String, Double> (x, 1.0))); 
+		
+		/*JavaPairRDD<String, Map<String, Double>> articleNode = CategoryNewsEdge
+					.map(i -> i._2)
+					.distinct()
+					.mapToPair(x -> new Tuple2<String, Map<String, Double>>(x, new HashMap<>()));*/
+
+	   // articleNode = articleNode.map(x -> x._2.put("user", 0.5));
+	// articleNode = articleNode.mapToPair(x -> new Tuple2<String, Map<String, Double>>(x._1, x._2 = x._2.put("user", 0.5)));
+		
 
 		int iMax = 15;
 		int count = 0;
-		double dMax = 30;		
+		double dMax = 0.001;		
 		double delta = Integer.MAX_VALUE; 
 
 		while (delta > dMax && count < iMax) {
+			JavaPairRDD<String, Tuple2<Tuple2<String,Double>, Tuple2<String,Double>>> propagateRank = EdgeTransfer
+					.join(userNode);
+			
+
+			break;
+
 			
 		}
 		

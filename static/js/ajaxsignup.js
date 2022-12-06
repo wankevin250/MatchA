@@ -7,7 +7,7 @@ const inputTooltipOptions = (msg) => {
 }
 
 $(document).ready(() => {
-    $('#signup-username').tooltip(inputTooltipOptions('Limit 25 characters'));
+    $('#signup-username').tooltip(inputTooltipOptions('Limit 3-25 characters'));
     $('#signup-password').tooltip(inputTooltipOptions('Password must be 8-40 characters. At least 1 letter, 1 number, and 1 special character'));
     $('#signup-firstname').tooltip(inputTooltipOptions('Limit 25 characters. Legal first name'));
     $('#signup-lastname').tooltip(inputTooltipOptions('Limit 25 characters. Legal last name'));
@@ -29,7 +29,7 @@ function createUser() {
     console.log(user.dob);
 
     let userErr = document.createElement('ul');
-    if (!user.username.match(/^\w{1,25}$/)) {
+    if (!user.username.match(/^\w{3,25}$/)) {
         userErr.innerHTML += "<li>Username unsupported. Limit 1 to 25 characters.</li>";
     }
     if (!user.password.match(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,40}$/)) {

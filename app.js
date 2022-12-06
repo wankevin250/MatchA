@@ -28,6 +28,7 @@ app.get('/', routes.getSplash);
 app.get('/signup', routes.getSignUp);
 app.get('/login', routes.getLogin);
 app.get('/wall', routes.getWall);
+app.get('/searchuser', routes.getSearchUser);
 // app.get('/profile', null);
 // app.get('/settings', null);
 // app.get('/friends', null);
@@ -67,6 +68,12 @@ app.get('/viewchatdetails', routes.viewUsers);
 //AJAX Post
 app.post('/ajaxpostsignup', routes.postCreateUser);
 app.post('/ajaxpostlogin', routes.postLoginUser);
-// app.post('/ajaxgetwall', null);
+app.post('/ajaxgetwall', routes.postWallRefresh);
+app.post('/ajaxsearchuser', routes.postScanUsers);
+app.post('/ajaxaddfriend', routes.postAddFriend);
+
+app.get('*', (req, res) => {
+  res.render('404');
+})
 
 app.listen(PORT, () => console.log(`Example app is listening on port ${PORT}`));

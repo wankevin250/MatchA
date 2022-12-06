@@ -8,25 +8,55 @@ AWS.config.update({
 
 const db = new AWS.DynamoDB();
 
-// const queryUser = (username, password, callback) => {
-//   const params = {
-//     KeyConditionExpression: "username = :username",
-//     ExpressionAttributeValues: {
-//       ":username": {S: username},
-//     },
-//     ProjectionExpression: "username, password, fullname",
-//     TableName: "users",
-//   };
-  
-//   db.query(params, function(err, data) {
-//     if (err) {
-//       console.log("Error", err);
-//       callback(err, null);
-//     } else {
-//       callback(err, data);
-//     }
-//   });
-// }
+const scanUsers = (searchQuery, callback) => {
+  if (searchQuery.length < 3) {
+    console.log("Error! Search query too small");
+    callback(403, "small", null);
+  } else {
+    const params = {
+      FilterExpression: "contains(username, :query)",
+      ExpressionAttributeValues: {
+        ":query": {S: searchQuery}
+      },
+      TableName: "users"
+    }
+
+    db.scan(params, (err, data) => {
+      if (err) {
+        console.log(err);
+        callback(500, err, null);
+      } else {
+        callback(201, err, data.Items.map(d => {
+          return {username: d.username.S, 
+            displayname: d.displayname ? d.displayname.S : d.username.S};
+        }));
+      }
+    })
+  }
+
+}
+
+const scanPosts = (username, callback) => {
+
+}
+
+const addFriend = (asker, accepter, callback) => {
+  db.putItem({
+    TableName: 'friends',
+    Item: {
+      accepter: {S: accepter},
+      asker: {S: asker},
+      status: {S: 'true'},
+      timestamp: {S: (new Date()).toUTCString()}
+    }
+  }, (err, data) => {
+    if (err) {
+      callback(500, err, null);
+    } else {
+      callback(201, err, data);
+    }
+  });
+}
 
 const loginUser = (username, password, callback) => {
   db.query({
@@ -150,6 +180,9 @@ const database = {
   // queryUser: queryUser,
   createUser: createUser,
   loginUser: loginUser,
+  scanUsers: scanUsers,
+  
+  addFriend, addFriend,
   
   findChats: findChats,
   newChat: addChatToTable,

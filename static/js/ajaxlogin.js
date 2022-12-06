@@ -7,7 +7,7 @@ function checkUser() {
     let password = $('#login-password').val();
 
     let userErr = document.createElement('ul');
-    if (!username.match(/^\w{1,25}$/)) {
+    if (!username.match(/^\w{3,25}$/)) {
         userErr.innerHTML += "<li>Please enter a valid username.</li>";
     }
     if (!password.length > 0) {

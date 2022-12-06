@@ -36,7 +36,7 @@ const subtractYear = (date, years) => {
 const checkUser = (user) => {
 
   let isInvalid = true;
-  if (user.username && user.username.match(/^\w{1,25}$/) &&
+  if (user.username && user.username.match(/^\w{3,25}$/) &&
     user.password && user.password.match(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,40}$/) &&
     user.email && user.email.match(/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/) &&
     user.firstname && user.firstname.match(/^[A-Za-z-\s']{1,25}$/) &&

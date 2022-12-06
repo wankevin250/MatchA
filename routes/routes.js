@@ -2,6 +2,7 @@ const { sendStatus } = require('express/lib/response');
 const usr = require('../models/user');
 const db = require('../models/database');
 const user = require('../models/user');
+const e = require('express');
 
 /**
  * Checks if HTTP Status code is successful (between 200-299)
@@ -14,8 +15,6 @@ const isSuccessfulStatus = (status) => {
 
 const getSplash = (req, res) => {
   if (req.session && req.session.user) {
-    console.log(req.session);
-    console.log(req.session.user);
     res.redirect('/wall');
   } else {
     res.render('splash');
@@ -28,7 +27,6 @@ const getSignUp = (req, res) => {
 
 const getLogin = (req, res) => {
   if (req.session && req.session.user) {
-    console.log(req.session.user);
     res.redirect('/wall');
   } else {
     res.render('login');
@@ -38,6 +36,61 @@ const getLogin = (req, res) => {
 const getWall = (req, res) => {
   if (req.session && req.session.user) {
     res.render('wall');
+  } else {
+    res.redirect('/login');
+  }
+}
+
+const getSearchUser = (req, res) => {
+  if (req.session && req.session.user) {
+    console.log(req.query);
+    if (req.query.term) {
+      res.render('search', {query: req.query.term});
+    } else {
+      res.redirect('/error');
+    }
+  } else {
+    res.redirect('/login');
+  }
+}
+
+const postScanUsers = (req, res) => {
+  let query = req.body.query;
+  console.log(query);
+
+  if (query && query.length > 2) {
+    db.scanUsers(query, (status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+        res.send(JSON.stringify(data));
+      } else {
+        res.status(500).send(new Error(err));
+      }
+    });
+  } else {
+    res.status(400).send(new Error("No Query"));
+  }
+}
+
+const postAddFriend = (req, res) => {
+  let accepter = req.body.accepter;
+  console.log(accepter);
+
+  if (accepter && accepter.match(/^\w{3,25}$/)) {
+    db.addFriend(req.session.user.username, accepter, (status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+        res.sendStatus(201);
+      } else {
+        res.status(status).send(new Error(err));
+      }
+    });
+  } else {
+    res.status(401).send(new Error("Unsupported username"));
+  }
+}
+
+const postWallRefresh = (req, res) => {
+  if (req.session && req.session.user) {
+    
   } else {
     res.redirect('/login');
   }
@@ -228,6 +281,7 @@ const routes = {
   getLogin: getLogin,
   getSignUp: getSignUp,
   getWall: getWall,
+  getSearchUser: getSearchUser,
   
   // ace: To Commit
   getChat: getChat,
@@ -246,6 +300,9 @@ const routes = {
 
   postCreateUser: postCreateUser,
   postLoginUser: postLoginUser,
+  postWallRefresh: postWallRefresh,
+  postScanUsers: postScanUsers,
+  postAddFriend: postAddFriend,
 }
 
 module.exports = routes;

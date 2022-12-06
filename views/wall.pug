@@ -2,10 +2,15 @@ extends layouts/standard.pug
 
 block head
     title PennBook
-    script(src='js/ajaxloadwall.js')
+    script(src='js/ajaxwall.js')
 
 block content
     h1 Wall
     div(class="wall-content")
+        div(class="wall-searchuser")
+            div(class="wall-searchuser-inputarea")
+                label(for='wall-searchuser-input')
+                input(type='text', id='wall-searchuser-input')
+            button(onclick="searchUser()")
         div(class="wall-inputarea")
             textarea(class="wall-mainpost")

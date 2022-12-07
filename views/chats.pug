@@ -1,19 +1,52 @@
 extends layouts/standard.pug
 
 block head
-  title Chats
+  script.
+    $(document).ready( function() {
+      $(".left").addClass("fullWidth");
+      
+      $(".chatBtnClass").on("click", function() {
+        let roomid = this.id;
+        $.post('/openroom', { room : roomid }, function(data) {
+          if (data.success) {
+            room = roomid;
+            
+            $(".left").removeClass("fullWidth");
+            $(".right").show();
+          }
+        });
+      });
+      
+      $("#leaveChatBtn").on("click", function() {
+        let roomid = this.id;
+        $.post('/openroom', { room : roomid }, function(data) {
+          if (data.success) {
+            room = roomid;
+            
+            $(".left").removeClass("fullWidth");
+            $(".right").show();
+          }
+        });
+      });
+      
+    });
+  
+  title Chats 
 
 block content
   h1(class="text-center italics bold") PennBook
   
   // proto button to enter first chatroom. TODO: make buttons for every chat in user's joined list  
   // TODO: js code for AJAX roomBtn.onclick -> call /openroom (opens this room)
-  // TODO: when creating list, define a class of buttons in js to conduct ajax function on
+  // when creating list, define a class of buttons in js to conduct ajax function on
+  // with AJAX, send data in type "room" that is an JSON object { roomname: "", roomid: "" }
+  // 
   div(class="left" id="prototype-button-wrapper")
-    h2#roomBtn Enter Chatroom
+    h2#roomBtn.chatBtnClass Enter Chatroom
   
   // need to show chatbox iff req.session.currentroom != null
   div(class="right" id="chatbox")
+    a.btnAce(href="#", id="leaveChatBtn") Leave
     div()
       ul#messages
     form#message-form

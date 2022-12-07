@@ -1,0 +1,15 @@
+.btnAce {
+  background-color: #49592A; /* Matcha Green */
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 20px;
+  font-family: Helvetica, Sans-Serif;
+}
+
+.btnAce:hover{
+  border: 3px solid white;
+}

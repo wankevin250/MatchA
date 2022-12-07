@@ -227,9 +227,27 @@ const openChat = (req, res) => {
 	// upon clicking one of chats in list, open chatbox in side of screen
 	// set req.session.currentroom = { id: room-uuid, name: chatname, creator: creator}
 	
+	const room = req.body.room;
+	req.session.currentroom = room;
+	
 	// KEVIN: on frontend, check session.currentroom to display chatbox, 
 	// also we need functionality so that on click of a chatroom listed it sends openChat request with req.body.chattoopen variable plz 
 	// PS: we need to refresh chatbox every 1 second
+	
+	// return res.send true?
+	/* if success: return res.send({
+		success: true
+	});
+	*/
+}
+
+/**
+  input: req, res
+  function: removes current user from chatroom
+  if error: send error message to session, console error
+ */
+const leaveChat = (req, res) => {
+	
 }
 
 /**
@@ -248,15 +266,6 @@ const reloadMsgs = (req, res) => {
 const reloadChats = (req, res) => {
 	// res.json list of user's active chats
 	// reload chats when we add a chat OR when accept chat invite
-}
-
-/**
-  input: req, res
-  function: removes current user from chatroom
-  if error: send error message to session, console error
- */
-const leaveChat = (req, res) => {
-	
 }
 
 /**

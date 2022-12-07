@@ -151,6 +151,11 @@ const createUser = (user, callback) => {
 }
 
 // ACE HOUR
+/**
+ * @param {*} 
+ * @param {*} callback callback function. Must have (code, error, data).
+ *
+ */
 const findChats = (user, callback) => {
 	// using username, query user data from table: users, get stringified list of chatrooms, return in array form to routes.js
 	

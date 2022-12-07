@@ -4,7 +4,7 @@ block head
   link(rel='stylesheet', href='/css/chats.css')
   script.
     $(document).ready( function() {
-      $(".left").addClass("fullWidth");
+      $(".leftHalf").addClass("fullWidth");
       
       $(".chatBtnClass").on("click", function() {
         let roomid = this.id;
@@ -12,45 +12,49 @@ block head
           if (data.success) {
             room = roomid;
             
-            $(".left").removeClass("fullWidth");
-            $(".right").show();
+            $(".leftHalf").css('display', 'none');
+            $(".rightHalf").css('display', 'block');
           }
         });
       });
       
-      $("#leaveChatBtn").on("click", function() {
-        $.post('/openroom', function(data) {
+      $(".btnAceLeave").on("click", function() {
+        $.post('/leaveroom', function(data) {
           if (data.success) {
             room = null;
             
-            $(".left").addClass("fullWidth");
-            $(".right").hide();
+            $(".leftHalf").css('display', 'block');
+            $(".rightHalf").css('display', 'none');
           }
         });
       });
       
     });
+    
+    function sendmessage(){
+      
+    }
   
   title Chats 
 
 block content
-  h1(class="text-center italics bold") PennBook
+  h1(class="text-center italics bold") MatchA
   
   // proto button to enter first chatroom. TODO: make buttons for every chat in user's joined list  
   // TODO: js code for AJAX roomBtn.onclick -> call /openroom (opens this room)
   // when creating list, define a class of buttons in js to conduct ajax function on
   // with AJAX, send data in type "room" that is an JSON object { roomname: "", roomid: "" }
   // 
-  div(class="left" id="prototype-button-wrapper")
-    h2#roomBtn.chatBtnClass Enter Chatroom
+  div(class="leftHalf" id="prototype-button-wrapper")
+    a#roomBtn.chatBtnClass Enter Chatroom
   
   // need to show chatbox iff req.session.currentroom != null
-  div(class="right" id="chatbox")
-    a.btnAce(href="#", id="leaveChatBtn") Leave
+  div(class="rightHalf" id="chatbox")
+    a.btnAceLeave(href="#", id="leaveChatBtn") Leave
     div()
       ul#messages
     form#message-form
     div(id="form-message")
       input(id = 'message', class = 'form-control', autocomplete='off', placeholder='Type a message...')
-      button#send-message.btn.btn-light(type='button', onclick='return sendMessage();')  Send
+      button#send-message.btnAceSend(type='button', onclick='return sendMessage();')  Send
   

@@ -142,13 +142,13 @@ app.get('/chat', routes.getChat);
 /** adds new chat to list, opens up chatroom, button to add friend, text input box + button to send text */
 app.get('/createroom', routes.addChat);
 /** opens up chatroom chosen from list */
-app.get('/openroom', routes.openChat);
+app.post('/openroom', routes.openChat);
+app.get('/leaveroom', routes.leaveChat);
 // open CHATBOX should REFRESH every 1 second. Chatbox should leave button
 /** popup list of friends user can add to chat */
 app.get('/friendstoadd', routes.popupFriends);
 /** in chatroom box, button that allows adding a friend */
 app.get('/addfriend', routes.addFriend);
-app.get('/leaveroom', routes.leaveChat);
 /** send msg to database, refreshes page */
 app.get('/sendmessage', routes.sendMessage);
 

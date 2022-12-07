@@ -167,10 +167,11 @@ public class LoadNews {
 				Thread.sleep(3);
 				HashSet<Item> rows = new HashSet<Item>(); 
 				HashSet<String> dupli = new HashSet<String>();
-				DynamoDB conn = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
+				
 				String tableName = "news";
 				while (iter.hasNext()) {
 					Row news = iter.next();
+					DynamoDB conn = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
 					// Create Item
 					if (!dupli.contains((String) news.getAs(1))) {
 						Thread.sleep(3);

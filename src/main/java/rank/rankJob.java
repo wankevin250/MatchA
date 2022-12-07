@@ -69,6 +69,7 @@ import com.google.gson.*;
 import storage.DynamoConnector;
 import storage.SparkConnector;
 import scala.Tuple2;
+import scala.Tuple3;
 import finalproject.LoadNews;
 
 public class rankJob {
@@ -252,14 +253,6 @@ public class rankJob {
 				.union(CategoryNewsEdge.mapToPair(x -> new Tuple2<String, String>(x._2, x._1)))
 				.distinct();
 
-		JavaPairRDD <String, String> edgePairs = CategoryNewsEdge
-				.union(CategoryNewsEdge.mapToPair(x -> new Tuple2<String, String>(x._2, x._1)))
-				.union(UserEdge)
-				.union(UserEdge.mapToPair(x-> new Tuple2<String, String>(x._2, x._1)))
-				.union(InterestEdge)
-				.union(InterestEdge.mapToPair(x-> new Tuple2<String, String>(x._2, x._1)))
-				.distinct();
-
 		JavaPairRDD<String, Tuple2<String, Double>> catEdgeTransfer = CategoryNewsEdge
 				.join(categoryNodeWeight);
 
@@ -286,16 +279,81 @@ public class rankJob {
 					.mapToPair(x -> new Tuple2<String, Integer>(x._1, 1)) 
 					.reduceByKey((x, y) -> x + y)
 					.mapToPair(x -> new Tuple2<String, Double>(x._1, (10.0 * x._2 / 3.0))));
-					
+
+		JavaPairRDD<String, Tuple2<String, Double>> userEdgeTransfer = userNewsEdgeTransfer
+					.union(userFriendEdgeTransfer)
+					.union(userInterestEdgeTransfer)
+					.distinct();
+
+		JavaPairRDD<String, Tuple2<String, Double>> EdgeTransfer = catEdgeTransfer
+					.union(newsEdgeTransfer)
+					.union(userEdgeTransfer)	
+					.distinct();
+
+		JavaPairRDD<String, String> network = allNewsEdge
+					.union(allUserEdge)
+					.union(CategoryNewsEdge)
+					.union(CategoryNewsEdge.mapToPair(x -> new Tuple2<String, String>(x._2, x._1)))
+					.union(InterestEdge)
+					.union(InterestEdge.mapToPair(x-> new Tuple2<String, String>(x._2, x._1)))
+					.union(NewsLikeEdge)
+					.union(NewsLikeEdge.mapToPair(x-> new Tuple2<String, String>(x._2, x._1)));
+
+		JavaPairRDD<String, Tuple2<String, Double>> userNode = allUserEdge
+					.map(i -> i._1)
+					.distinct()
+					.mapToPair(x -> new Tuple2<String, Tuple2<String, Double>> (x , new Tuple2<String, Double> (x, 1.0))); 
+		
+		/*JavaPairRDD<String, Map<String, Double>> articleNode = CategoryNewsEdge
+					.map(i -> i._2)
+					.distinct()
+					.mapToPair(x -> new Tuple2<String, Map<String, Double>>(x, new HashMap<>()));*/
+
+	   // articleNode = articleNode.map(x -> x._2.put("user", 0.5));
+	// articleNode = articleNode.mapToPair(x -> new Tuple2<String, Map<String, Double>>(x._1, x._2 = x._2.put("user", 0.5)));
+		
 
 		int iMax = 15;
 		int count = 0;
-		double dMax = 30;		
+		double dMax = 0.001;		
 		double delta = Integer.MAX_VALUE; 
 
 		while (delta > dMax && count < iMax) {
+			JavaPairRDD<String, Tuple2<Tuple2<String,Double>, Tuple2<String,Double>>> propagateRank = EdgeTransfer
+					.join(userNode);
+
+			JavaPairRDD<String, Tuple2<String,Double>> interMediateRank = propagateRank
+					.mapToPair(x -> new Tuple2<String, Tuple2<String,Double>> 
+						(x._1, new Tuple2<String, Double> (x._2._2._1, x._2._2._2 * x._2._1._2)));
+				
+			JavaPairRDD<Tuple2<String,String>, Double> sum = interMediateRank
+					.mapToPair(x -> new Tuple2<Tuple2<String, String>, Double> (new Tuple2<String, String>(x._1, x._2._1), x._2._2))
+					.reduceByKey((x, y) -> x + y);
 			
+			JavaPairRDD<String, Tuple2<String,Double>> normalizedRank = interMediateRank
+					.mapToPair(x -> new Tuple2<Tuple2<String, String>, Double> (new Tuple2<String, String>(x._1, x._2._1), x._2._2))
+					.join(sum)
+					.mapToPair(x -> new Tuple2<String, Tuple2<String,Double>> 
+						(x._1._1, new Tuple2<String, Double> (x._1._2, x._2._1/x._2._2)));
+
+			delta = userNode
+					.mapToPair(x -> new Tuple2<Tuple2<String, String>, Double> (new Tuple2<String, String>(x._1, x._2._1), x._2._2))
+					.join(normalizedRank
+						.mapToPair(x -> new Tuple2<Tuple2<String, String>, Double> (new Tuple2<String, String>(x._1, x._2._1), x._2._2)))
+					.mapToPair(item -> new Tuple2<Double, Tuple2<String,String>>
+										(Math.abs(item._2._2 - item._2._1), item._1))
+					.sortByKey(false).first()._1;
+			
+			count++;
+			userNode = normalizedRank;
+			System.out.println("Round " + count + " delta : " + delta);			
 		}
+
+		db = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
+		DynamoDB conn = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
+		JavaRDD<Tuple3<String, String, Double>> rows = userNode.map(i -> new Tuple3<String, String, Double>(i._1, i._2._1, i._2._2));
+
+		// upload it to dynamodb
 		
 		
 	}

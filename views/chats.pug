@@ -18,13 +18,12 @@ block head
       });
       
       $("#leaveChatBtn").on("click", function() {
-        let roomid = this.id;
-        $.post('/openroom', { room : roomid }, function(data) {
+        $.post('/openroom', function(data) {
           if (data.success) {
-            room = roomid;
+            room = null;
             
-            $(".left").removeClass("fullWidth");
-            $(".right").show();
+            $(".left").addClass("fullWidth");
+            $(".right").hide();
           }
         });
       });

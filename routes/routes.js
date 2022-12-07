@@ -239,6 +239,10 @@ const openChat = (req, res) => {
 		success: true
 	});
 	*/
+	
+	return res.send({
+		success: true
+	});
 }
 
 /**
@@ -247,7 +251,16 @@ const openChat = (req, res) => {
   if error: send error message to session, console error
  */
 const leaveChat = (req, res) => {
+	// return res.send true?
+	req.session.currentroom = null;
+	/* if success: return res.send({
+		success: true
+	});
+	*/
 	
+	return res.send({
+		success: true
+	});
 }
 
 /**

@@ -36,6 +36,37 @@ const scanUsers = (searchQuery, callback) => {
 
 }
 
+const getFriends = (username, callback) => {
+  let friends = [];
+
+  db.query({
+    TableName: "friends",
+    KeyConditionExpression: "accepter = :username",
+    ExpressionAttributeValues: {
+        ":username": {S: username}
+    }
+  }, (err, data1) => {
+    if (err) {
+      callback(500, err, null);
+    } else {
+      db.query({
+        TableName: 'friends',
+        IndexName: 'asker-index',
+        KeyConditionExpression: 'asker = :username',
+        ExpressionAttributeValues: {
+          ":username": {S: username}
+        }
+      }, (err, data2) => {
+        if (err) {
+          callback(500, err, null);
+        } else {
+          callback(201, err, [...data1.Items, ...data2.Items]);
+        }
+      })
+    }
+  });
+}
+
 const scanPosts = (username, callback) => {
 
 }
@@ -150,7 +181,120 @@ const createUser = (user, callback) => {
   }
 }
 
+const checkUsername = (username, skip, callback) => {
+  if (skip){
+    callback(201, null, null);
+  } else {
+    db.query({
+      ExpressionAttributeValues: {
+        ':username': {S: username},
+      },
+      KeyConditionExpression: 'username = :username',
+      TableName: 'users',
+    }, (err, data) => {
+      if (err) {
+        callback(500, err, null);
+      } else if (data.Items.length > 0) {
+        callback(401, "username", null);
+      } else {
+        callback(201, err, data);
+      }
+    });
+  }
+}
+
+const checkEmail = (email, skip, callback) => {
+  if (!skip) {
+    db.query({
+      ExpressionAttributeValues: {
+        ':email': {S: user.email},
+      },
+      KeyConditionExpression: 'email = :email',
+      TableName: 'users',
+      IndexName: 'email'
+    }, (err, data) => {
+      if (err) {
+        console.log(err);
+        callback(500, err, null);
+      } else {
+        if (data.Items.length > 0) {
+          callback(403, 'email', null);
+        } else {          
+          callback(201, err, null);
+        }
+      }
+    });
+  } else {
+    callback(201, null, null);
+  }
+}
+
+const editUser = (user, isUsernameChanged, isEmailChanged, callback) => {
+  if (usr.checkUser(user)) {
+    let item = {};
+    Object.entries(user).forEach(entry => {
+      let [key, val] = entry;
+      item[key] = {S: val};
+    });
+
+    db.query({
+      ExpressionAttributeValues: {
+        ':username': {S: user.username},
+      },
+      KeyConditionExpression: 'username = :username',
+      TableName: 'users',
+    }, (err, data) => {
+      if (err) {
+        console.log(err);
+        callback(500, err, null);
+      } else {
+        if (data.Items.length > 0 && isUsernameChanged) {
+          callback(403, "username", null);
+        } else {
+          db.query({
+            ExpressionAttributeValues: {
+              ':email': {S: user.email},
+            },
+            KeyConditionExpression: 'email = :email',
+            TableName: 'users',
+            IndexName: 'email'
+          }, (err, data) => {
+            if (err) {
+              console.log(err);
+              callback(500, err, null);
+            } else {
+              if (data.Items.length > 0 && isEmailChanged) {
+                callback(403, 'email', null);
+              } else {          
+                // put to database. respond with no data if server error.
+                db.putItem({
+                  Item: item,
+                  TableName: 'users',
+                }, (err, data) => {
+                  if (err) {
+                    console.log("Error", err);
+                    callback(500, err, null);
+                  } else {
+                    callback(201, err, data);
+                  }
+                });
+              }
+            }
+          });
+        }
+      }
+    });
+  } else {
+    callback(401, null, null);
+  }
+}
+
 // ACE HOUR
+/**
+ * @param {*} 
+ * @param {*} callback callback function. Must have (code, error, data).
+ *
+ */
 const findChats = (user, callback) => {
 	// using username, query user data from table: users, get stringified list of chatrooms, return in array form to routes.js
 	
@@ -179,10 +323,12 @@ const viewOneChat = (chatid, callback) => {
 const database = {
   // queryUser: queryUser,
   createUser: createUser,
+  editUser: editUser,
   loginUser: loginUser,
   scanUsers: scanUsers,
   
   addFriend, addFriend,
+  getFriends: getFriends,
   
   findChats: findChats,
   newChat: addChatToTable,

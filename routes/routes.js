@@ -54,6 +54,24 @@ const getSearchUser = (req, res) => {
   }
 }
 
+const getFriends = (req, res) => {
+  if (req.session && req.session.user) {
+    res.render('friends');
+  } else {
+    res.redirect('/login');
+  }
+}
+
+const getSettings = (req, res) => {
+  if (req.session && req.session.user) {
+    let user = req.session.user;
+    console.log(user);
+    res.render('settings', {user: user});
+  } else {
+    res.redirect('/login');
+  }
+}
+
 const postScanUsers = (req, res) => {
   let query = req.body.query;
   console.log(query);
@@ -68,6 +86,23 @@ const postScanUsers = (req, res) => {
     });
   } else {
     res.status(400).send(new Error("No Query"));
+  }
+}
+
+const postGetFriend = (req, res) => {
+  let username = req.session.user.username;
+  
+  if (username && username.match(/^\w{3,25}$/)) {
+    db.getFriends(username, (status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+        let cleanData = data.map(d => {
+          return d.accepter.S == username ? d.asker.S : d.accepter.S
+        });
+        res.send(JSON.stringify(cleanData));
+      } else {
+        res.status(status).send(new Error(err));
+      }
+    });
   }
 }
 
@@ -119,6 +154,33 @@ const postLoginUser = (req, res) => {
   }
 }
 
+const postEditUser = (req, res) => {
+  if (req.session.user && req.body.user) {
+    let newUserInfo = req.body.user;
+    let currUser = structuredClone(req.session.user);
+
+    Object.entries(newUserInfo).forEach(entry => {
+      let [key, val] = entry;
+      currUser[key] = val;
+    });
+    
+    db.editUser(currUser, 
+      newUserInfo.username, 
+      newUserInfo.email, 
+      (status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+        req.session.user = currUser;
+        res.sendStatus(201);
+      } else {
+        res.status(status).send(new Error(err));
+      }
+    });
+    
+  } else {
+    res.status(401).send(new Error("Invalid user input"));
+  }
+}
+
 const postCreateUser = (req, res) => {
   let user = req.body.user;
 
@@ -126,7 +188,7 @@ const postCreateUser = (req, res) => {
     db.createUser(user, (status, err, data) => {
       if (isSuccessfulStatus(status)) {
         req.session.user = user;
-        res.redirect('/wall');
+        res.sendStatus(201);
       } else {
         res.status(status).send(new Error(err));
       }
@@ -227,9 +289,40 @@ const openChat = (req, res) => {
 	// upon clicking one of chats in list, open chatbox in side of screen
 	// set req.session.currentroom = { id: room-uuid, name: chatname, creator: creator}
 	
+	const room = req.body.room;
+	req.session.currentroom = room;
+	
 	// KEVIN: on frontend, check session.currentroom to display chatbox, 
 	// also we need functionality so that on click of a chatroom listed it sends openChat request with req.body.chattoopen variable plz 
 	// PS: we need to refresh chatbox every 1 second
+	
+	// return res.send true?
+	/* if success: return res.send({
+		success: true
+	});
+	*/
+	
+	return res.send({
+		success: true
+	});
+}
+
+/**
+  input: req, res
+  function: removes current user from chatroom
+  if error: send error message to session, console error
+ */
+const leaveChat = (req, res) => {
+	// return res.send true?
+	req.session.currentroom = null;
+	/* if success: return res.send({
+		success: true
+	});
+	*/
+	
+	return res.send({
+		success: true
+	});
 }
 
 /**
@@ -248,15 +341,6 @@ const reloadMsgs = (req, res) => {
 const reloadChats = (req, res) => {
 	// res.json list of user's active chats
 	// reload chats when we add a chat OR when accept chat invite
-}
-
-/**
-  input: req, res
-  function: removes current user from chatroom
-  if error: send error message to session, console error
- */
-const leaveChat = (req, res) => {
-	
 }
 
 /**
@@ -288,6 +372,8 @@ const routes = {
   getSignUp: getSignUp,
   getWall: getWall,
   getSearchUser: getSearchUser,
+  getFriends: getFriends,
+  getSettings: getSettings,
   
   // ace: To Commit
   getChat: getChat,
@@ -305,10 +391,13 @@ const routes = {
   // end of ace's routes
 
   postCreateUser: postCreateUser,
+  postEditUser: postEditUser,
   postLoginUser: postLoginUser,
   postWallRefresh: postWallRefresh,
   postScanUsers: postScanUsers,
+
   postAddFriend: postAddFriend,
+  postGetFriend: postGetFriend,
 
   // Kevin's visualizer routes
   getVisualizer: getVisualizer,

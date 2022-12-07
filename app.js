@@ -30,8 +30,8 @@ app.get('/login', routes.getLogin);
 app.get('/wall', routes.getWall);
 app.get('/searchuser', routes.getSearchUser);
 // app.get('/profile', null);
-// app.get('/settings', null);
-// app.get('/friends', null);
+app.get('/settings', routes.getSettings);
+app.get('/friends', routes.getFriends);
 
 //kevin: visualizer routes call
 app.get('/visualizer', routes.getVisualizer);
@@ -142,13 +142,13 @@ app.get('/chat', routes.getChat);
 /** adds new chat to list, opens up chatroom, button to add friend, text input box + button to send text */
 app.get('/createroom', routes.addChat);
 /** opens up chatroom chosen from list */
-app.get('/openroom', routes.openChat);
+app.post('/openroom', routes.openChat);
+app.get('/leaveroom', routes.leaveChat);
 // open CHATBOX should REFRESH every 1 second. Chatbox should leave button
 /** popup list of friends user can add to chat */
 app.get('/friendstoadd', routes.popupFriends);
 /** in chatroom box, button that allows adding a friend */
 app.get('/addfriend', routes.addFriend);
-app.get('/leaveroom', routes.leaveChat);
 /** send msg to database, refreshes page */
 app.get('/sendmessage', routes.sendMessage);
 
@@ -172,6 +172,8 @@ app.post('/ajaxpostlogin', routes.postLoginUser);
 app.post('/ajaxgetwall', routes.postWallRefresh);
 app.post('/ajaxsearchuser', routes.postScanUsers);
 app.post('/ajaxaddfriend', routes.postAddFriend);
+app.post('/ajaxgetfriends', routes.postGetFriend);
+app.post('/ajaxedituser', routes.postEditUser);
 
 app.get('*', (req, res) => {
   res.render('404');

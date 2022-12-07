@@ -54,6 +54,24 @@ const getSearchUser = (req, res) => {
   }
 }
 
+const getFriends = (req, res) => {
+  if (req.session && req.session.user) {
+    res.render('friends');
+  } else {
+    res.redirect('/login');
+  }
+}
+
+const getSettings = (req, res) => {
+  if (req.session && req.session.user) {
+    let user = req.session.user;
+    console.log(user);
+    res.render('settings', {user: user});
+  } else {
+    res.redirect('/login');
+  }
+}
+
 const postScanUsers = (req, res) => {
   let query = req.body.query;
   console.log(query);
@@ -68,6 +86,23 @@ const postScanUsers = (req, res) => {
     });
   } else {
     res.status(400).send(new Error("No Query"));
+  }
+}
+
+const postGetFriend = (req, res) => {
+  let username = req.session.user.username;
+  
+  if (username && username.match(/^\w{3,25}$/)) {
+    db.getFriends(username, (status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+        let cleanData = data.map(d => {
+          return d.accepter.S == username ? d.asker.S : d.accepter.S
+        });
+        res.send(JSON.stringify(cleanData));
+      } else {
+        res.status(status).send(new Error(err));
+      }
+    });
   }
 }
 
@@ -119,6 +154,33 @@ const postLoginUser = (req, res) => {
   }
 }
 
+const postEditUser = (req, res) => {
+  if (req.session.user && req.body.user) {
+    let newUserInfo = req.body.user;
+    let currUser = structuredClone(req.session.user);
+
+    Object.entries(newUserInfo).forEach(entry => {
+      let [key, val] = entry;
+      currUser[key] = val;
+    });
+    
+    db.editUser(currUser, 
+      newUserInfo.username, 
+      newUserInfo.email, 
+      (status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+        req.session.user = currUser;
+        res.sendStatus(201);
+      } else {
+        res.status(status).send(new Error(err));
+      }
+    });
+    
+  } else {
+    res.status(401).send(new Error("Invalid user input"));
+  }
+}
+
 const postCreateUser = (req, res) => {
   let user = req.body.user;
 
@@ -126,7 +188,7 @@ const postCreateUser = (req, res) => {
     db.createUser(user, (status, err, data) => {
       if (isSuccessfulStatus(status)) {
         req.session.user = user;
-        res.redirect('/wall');
+        res.sendStatus(201);
       } else {
         res.status(status).send(new Error(err));
       }
@@ -311,6 +373,8 @@ const routes = {
   getSignUp: getSignUp,
   getWall: getWall,
   getSearchUser: getSearchUser,
+  getFriends: getFriends,
+  getSettings: getSettings,
   
   // ace: To Commit
   getChat: getChat,
@@ -328,10 +392,13 @@ const routes = {
   // end of ace's routes
 
   postCreateUser: postCreateUser,
+  postEditUser: postEditUser,
   postLoginUser: postLoginUser,
   postWallRefresh: postWallRefresh,
   postScanUsers: postScanUsers,
+
   postAddFriend: postAddFriend,
+  postGetFriend: postGetFriend,
 
   // Kevin's visualizer routes
   getVisualizer: getVisualizer,

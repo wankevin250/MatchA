@@ -16,3 +16,22 @@ function addFriend(username, callback) {
         }
     })
 }
+
+function getFriends(username, callback) {
+    console.log(username);
+    $.ajax({
+        url: 'ajaxgetfriends',
+        type: 'POST',
+        async: true,
+        datatype: 'json',
+        data: {
+            username: username
+        },
+        success: (response) => {
+            callback(null, response);
+        },
+        error: (error) => {
+            callback(error, null);
+        }
+    })
+}

@@ -5,9 +5,9 @@
     font-size:xx-large;
     font-weight: bold;
     text-align: center;
-    padding-top: 30px;
     width: 100%;
-    padding-top: 30px;
+    position:fixed;
+    top:0;
 }
 
 .divider{
@@ -20,6 +20,7 @@
     background:lightgreen;
     text-align: center;
     width: 100%;
+    padding-top: 10%;
 }
 
 .login-footer{

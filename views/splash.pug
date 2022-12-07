@@ -1,19 +1,22 @@
 extends layouts/standard.pug
 
 block head
-  title Welcome to PennBook
+  title Welcome to MatchA
+  link(rel='stylesheet', href='/css/splash.css')
 
 block content
-  h1(class="text-center") Welcome to PennBook!
-  div(class="row", align='center')
-    div(class='col')
-      h3 Don't Have An Account? Create an Account Here!
-      form(method="get", action="/signup")
-        button(id='splash-signup', class="btn btn-primary btn-rounded margin-left")
-          span Create your account
-    br
-    div(class='col')
-      h3 Already have an account? Login Here!
-      form(method="get", action="/login")
-        button(id='splash-login', class="btn btn-primary btn-rounded margin-right")
-          span Login
+  div(class="container")
+    div(class="title") 
+      h1 Welcome to MatchA!
+    div(class='divider')
+    div(class="row", align='center')
+      div(class='col')
+        h3 Don't Have An Account? Create an Account Here!
+        form(method="get", action="/signup")
+          button(id='splash-signup', class="btn btn-primary btn-rounded margin-left")
+            span Create your account
+      div(class='col')
+        h3 Already have an account? Login Here!
+        form(method="get", action="/login")
+          button(id='splash-login', class="btn btn-primary btn-rounded margin-right")
+            span Login

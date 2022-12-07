@@ -4,6 +4,20 @@ form {
     text-align: center;
 }
 
+.parallax{
+    /* The image used */
+    background-image: url("https://www.popsci.com/uploads/2021/10/15/close-up-photo-of-a-matcha-latte-cup.jpg?auto=webp");
+
+    /* Set a specific height */
+    min-height: 500px;
+
+    /* Create the parallax scrolling effect */
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
 .wall-header{
     display:inline-block;
     background:lightgreen;
@@ -35,6 +49,8 @@ form {
     margin-top: 105px;
     background:lightgreen;
     text-align: center;
-    width: 100%;
+    width: 85%;
+    margin-left:auto;
+    margin-right:auto;
     height: 100vh;
 }

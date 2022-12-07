@@ -221,7 +221,7 @@ const getChat = (req, res) => {
 	} else {
 		// not logged in, return to homepage & log reason on console
 		console.log("Not logged in, returned to homepage.");
-		res.render('splash');
+		res.render('chats');
 	}
 }
 
@@ -291,6 +291,7 @@ const openChat = (req, res) => {
 	
 	const room = req.body.room;
 	req.session.currentroom = room;
+	console.log(req.body.room);
 	
 	// KEVIN: on frontend, check session.currentroom to display chatbox, 
 	// also we need functionality so that on click of a chatroom listed it sends openChat request with req.body.chattoopen variable plz 

@@ -30,8 +30,8 @@ app.get('/login', routes.getLogin);
 app.get('/wall', routes.getWall);
 app.get('/searchuser', routes.getSearchUser);
 // app.get('/profile', null);
-// app.get('/settings', null);
-// app.get('/friends', null);
+app.get('/settings', routes.getSettings);
+app.get('/friends', routes.getFriends);
 
 //kevin: visualizer routes call
 app.get('/visualizer', routes.getVisualizer);
@@ -172,6 +172,8 @@ app.post('/ajaxpostlogin', routes.postLoginUser);
 app.post('/ajaxgetwall', routes.postWallRefresh);
 app.post('/ajaxsearchuser', routes.postScanUsers);
 app.post('/ajaxaddfriend', routes.postAddFriend);
+app.post('/ajaxgetfriends', routes.postGetFriend);
+app.post('/ajaxedituser', routes.postEditUser);
 
 app.get('*', (req, res) => {
   res.render('404');

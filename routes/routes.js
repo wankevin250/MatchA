@@ -365,20 +365,24 @@ const getVisualizer = (req, res) => {
 }
 
 const sendFriends = (req, res) => {
+  console.log("Made it to sendFriends!");
   if (req.session.user != null) {
 		let user = req.session.user;
+    console.log(user);
 
-    db.getFriends(user, (err, data) => {
+    db.getFriends(user.username, (statuscode, err, data2) => {
       if (err) {
+        console.log("Status code: " + statuscode);
         console.log(err);
       } else {
         console.log("Made it to else statement!");
-        res.send(JSON.stringify(data));
+        console.log(data2);
+        res.send(JSON.stringify(data2));
       }
     })
   } else {
     console.log("Not logged in, returned to homepage.");
-		res.render('splash');
+		res.redirect('splash.pug');
   }
 }
 

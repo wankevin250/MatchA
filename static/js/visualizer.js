@@ -35,10 +35,10 @@ $(document).ready(function() {
           //creation
   
           onCreateLabel: function(domElement, node){
-              domElement.innerHTML = node.name;
+              domElement.innerHTML = node.displayname; //changed name to displayname
               domElement.style.cursor = "pointer";
               domElement.onclick = function() {
-                  $.getJSON('/getFriends/'+node.id, function(json) {
+                  $.getJSON('/getFriends/'+node.username, function(json) { //changed .id to .username
                       ht.op.sum(json, {
                           type: "fade:seq",
                           fps: 30,

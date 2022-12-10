@@ -142,25 +142,25 @@ app.get('/getFriends/:user', routes.sendFriends);
 // ace: routes call
 
 // socket io setup for chat function
-var io = require('socket.io').listen(app);
+// var io = require('socket.io').listen(app);
 
-function sendTime() {
-	io.emit('message', {message: new Date().toJSON()});
-}
+// function sendTime() {
+// 	io.emit('message', {message: new Date().toJSON()});
+// }
 
-setInterval(sendTime, 10000);
+// setInterval(sendTime, 10000);
 
-io.on('connection', function(socket) {
-	socket.emit('welcome', {message: 'Welcome!', id: socket.id});
-	socket.on('client', function(data) {
-		console.log(data.message);
-	});
-	socket.on('message', function(data) {
-		console.log(data.message);
-	});
-});
+// io.on('connection', function(socket) {
+// 	socket.emit('welcome', {message: 'Welcome!', id: socket.id});
+// 	socket.on('client', function(data) {
+// 		console.log(data.message);
+// 	});
+// 	socket.on('message', function(data) {
+// 		console.log(data.message);
+// 	});
+// });
 
-server.listen(3000);
+// server.listen(3000);
 
 /** moves to chat page: should have a list of user's chats, and a new chat room button. REFRESH every 3 seconds */
 app.get('/chat', routes.getChat);

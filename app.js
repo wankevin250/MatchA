@@ -1,8 +1,10 @@
 const express = require('express');
 const session = require('express-session');
+const { createUser } = require('./models/database.js');
 
 const app = express();
 const PORT = 8080; // port
+const server = require('http').createServer(app);
 
 const routes = require('./routes/routes.js');
 
@@ -157,6 +159,8 @@ io.on('connection', function(socket) {
 		console.log(data.message);
 	});
 });
+
+server.listen(3000);
 
 /** moves to chat page: should have a list of user's chats, and a new chat room button. REFRESH every 3 seconds */
 app.get('/chat', routes.getChat);

@@ -136,23 +136,25 @@ public class rankJob {
 		AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
 		DynamoDB dynamoDB = new DynamoDB(client);
 		Table table = dynamoDB.getTable(tablename);
-		LocalDate date = LocalDate.now().minusYears(5);
+		LocalDate ldate = LocalDate.now().minusYears(5);
 		ZoneId zoneId = ZoneId.systemDefault();
-		long epochToday = date.atStartOfDay(zoneId).toEpochSecond();
+		long epochToday = ldate.atStartOfDay(zoneId).toEpochSecond();
 
 		QuerySpec spec = new QuerySpec()
-			.withKeyConditionExpression("date > :v_today")
+			.withFilterExpression("category != :v_today")
 			.withValueMap(new ValueMap()
-				.withInt(":v_today", 0)); //change it back to string format data and use the sent link
+				.withString(":v_today", "CRIME")); //change it back to string format data and use the sent link
 
 		ItemCollection<QueryOutcome> items = table.query(spec);
 		List<String[]> friends = new ArrayList<>();
 		Iterator<Item> iter = items.iterator();
 		while (iter.hasNext()) {
 			Item f = iter.next();
+			//fix this part
 			String[] row = new String[2];
-			row[0] = f.get("acceptor").toString();
-			row[1] = f.get("asker").toString();
+			row[0] = f.get("headline").toString();
+			row[1] = f.get("category").toString();
+			System.out.println(row[0] + "and" + row[1]);
 			friends.add(row);
 		}
 		JavaRDD<String[]> inArr = context.parallelize(friends);
@@ -171,11 +173,11 @@ public class rankJob {
 		ScanResult scanResult = client.scan(scanRequest);
 		List<String[]> rowOfInterest = scanResult.getItems().parallelStream()
 						.map(line -> {
-							String[] news = new String[2];
-							news[0] = line.get("username").getS();
-							news[1] = line.get("interest").getS();
-							System.out.println(news[1]);
-							return news;// Make Row with Schema
+							String[] inter = new String[2];
+							inter[0] = line.get("username").getS();
+							inter[1] = line.get("interest").getS();
+							System.out.println("interest:"+inter[0]+inter[1]);
+							return inter;// Make Row with Schema
 						})
 						.collect(Collectors.toList());
 		JavaRDD<String[]> inArr = context.parallelize(rowOfInterest);
@@ -196,7 +198,7 @@ public class rankJob {
 							String[] news = new String[2];
 							news[0] = line.get("username").getS();
 							news[1] = line.get("headline").getS();
-							System.out.println(news[1]);
+							System.out.println("newslike:"+news[0]+news[1]);
 							return news;// Make Row with Schema
 						})
 						.collect(Collectors.toList());
@@ -214,9 +216,12 @@ public class rankJob {
 
 		Table table = dynamoDB.getTable(tablename);
 		Index index = table.getIndex("status-index");
+		Map<String, String> nm = new HashMap<String, String>();
+		nm.put("#v_name", "status");
 
 		QuerySpec spec = new QuerySpec()
-			.withKeyConditionExpression("status = :v_status")
+			.withKeyConditionExpression("#v_name = :v_status")
+			.withNameMap(nm)
 			.withValueMap(new ValueMap()
 				.withString(":v_status", "true"));
 
@@ -225,9 +230,11 @@ public class rankJob {
 		Iterator<Item> iter = items.iterator();
 		while (iter.hasNext()) {
 			Item f = iter.next();
+			System.out.println(f);
 			String[] row = new String[2];
 			row[0] = f.get("acceptor").toString();
 			row[1] = f.get("asker").toString();
+			System.out.println("freinds"+row[0] + "and" + row[1]);
 			friends.add(row);
 		}
 		JavaRDD<String[]> inArr = context.parallelize(friends);
@@ -239,11 +246,12 @@ public class rankJob {
 
 
 	public void run() {
-		JavaPairRDD<String, String> CategoryNewsEdge = getCategoryArticleEdge();
+		
 		JavaPairRDD<String, String> UserEdge = getFriendsEdge();
 		JavaPairRDD<String, String> InterestEdge = getInteretsEdge();
 		JavaPairRDD<String, String> NewsLikeEdge = getNewsLikeEdge();
 		JavaPairRDD<String, Double> categoryNodeWeight = getCategoryWeight(categoryEdgeURL);
+		JavaPairRDD<String, String> CategoryNewsEdge = getCategoryArticleEdge();
 
 		JavaPairRDD<String, String> allUserEdge = UserEdge
 				.union(UserEdge.mapToPair(x-> new Tuple2<String, String>(x._2, x._1)))
@@ -287,9 +295,10 @@ public class rankJob {
 
 		JavaPairRDD<String, Tuple2<String, Double>> EdgeTransfer = catEdgeTransfer
 					.union(newsEdgeTransfer)
-					.union(userEdgeTransfer)	
-					.distinct();
-
+					.union(userEdgeTransfer)
+					.distinct()
+					.mapToPair(x -> new Tuple2<String, Tuple2<String, Double>>(x._2._1, new Tuple2<String, Double>(x._1, x._2._2)));	
+					
 		JavaPairRDD<String, String> network = allNewsEdge
 					.union(allUserEdge)
 					.union(CategoryNewsEdge)
@@ -304,16 +313,28 @@ public class rankJob {
 					.distinct()
 					.mapToPair(x -> new Tuple2<String, Tuple2<String, Double>> (x , new Tuple2<String, Double> (x, 1.0))); 
 		
-		/*JavaPairRDD<String, Map<String, Double>> articleNode = CategoryNewsEdge
+		JavaPairRDD<String, Double> elseNode = CategoryNewsEdge
+					.map(i -> i._2)
+					.union(CategoryNewsEdge.map(i -> i._1))
+					.distinct()
+					.mapToPair(x -> new Tuple2<String, Double>(x, 0.0));
+		
+		JavaPairRDD<String, Map<String, Double>> articleNode = CategoryNewsEdge
 					.map(i -> i._2)
 					.distinct()
-					.mapToPair(x -> new Tuple2<String, Map<String, Double>>(x, new HashMap<>()));*/
+					.mapToPair(x -> new Tuple2<String, Map<String, Double>>(x, new HashMap<>()));
 
-	   // articleNode = articleNode.map(x -> x._2.put("user", 0.5));
-	// articleNode = articleNode.mapToPair(x -> new Tuple2<String, Map<String, Double>>(x._1, x._2 = x._2.put("user", 0.5)));
-		
+	    articleNode = articleNode.mapToPair(x ->{ x._2.put("user", 0.5); return new Tuple2<String, Map<String, Double>>(x._1, x._2);});
 
-		int iMax = 15;
+		/*JavaPairRDD<String, Tuple2<String, Double>> nd = articleNode.mapToPair(
+			x -> {for (Map.Entry<String,Double> entry : x._2.entrySet()) {
+				return new Tuple2<String, Tuple2<String, Double>> (x._1, new Tuple2<String, Double>(entry.getKey(), entry.getValue()));
+			}
+			}
+		);*/
+
+
+		int iMax = 3;
 		int count = 0;
 		double dMax = 0.001;		
 		double delta = Integer.MAX_VALUE; 
@@ -325,10 +346,41 @@ public class rankJob {
 			JavaPairRDD<String, Tuple2<String,Double>> interMediateRank = propagateRank
 					.mapToPair(x -> new Tuple2<String, Tuple2<String,Double>> 
 						(x._1, new Tuple2<String, Double> (x._2._2._1, x._2._2._2 * x._2._1._2)));
-				
-			JavaPairRDD<Tuple2<String,String>, Double> sum = interMediateRank
+
+			JavaPairRDD<Tuple2<String,String>, Double> sum;
+
+			if (count <= 8) {
+				JavaPairRDD<Tuple2<String,String>, Double> rankNotEntered = EdgeTransfer
+					.join(elseNode)
+					.mapToPair(x -> new Tuple2<String, Tuple2<String, Double>> (x._2._1._1, new Tuple2<String, Double>(x._1, x._2._1._2)))
+					.join(userNode)
+					/*.mapToPair(x -> new Tuple2<String, Tuple2<Tuple2<String,Double>, Tuple2<String,Double>>> 
+						(x._2._1._1, new Tuple2<<Tuple2<String,Double>, Tuple2<String,Double>>> (new Tuple2<String, Double>(x._1, x._2._1._2), x._2._2)))
+					.mapToPair(x -> new Tuple2<String, Tuple2<String,Double>> 
+						(x._1, new Tuple2<String, Double> (x._2._2._1, x._2._2._2 * x._2._1._2)))
+					.mapToPair(x -> new Tuple2<Tuple2<String, String>, Double> (new Tuple2<String, String>(x._1, x._2._1), x._2._2))*/
+					.mapToPair(x -> new Tuple2<Tuple2<String, String>, Double> (new Tuple2<String, String> (x._2._1._1, x._2._2._1) , x._2._2._2 * x._2._1._2))
+					.subtractByKey(interMediateRank
+									.mapToPair(x -> new Tuple2<Tuple2<String, String>, Double> (new Tuple2<String, String>(x._1, x._2._1), x._2._2)));
+
+				sum = interMediateRank
 					.mapToPair(x -> new Tuple2<Tuple2<String, String>, Double> (new Tuple2<String, String>(x._1, x._2._1), x._2._2))
+					.union(rankNotEntered)
+					.distinct()
 					.reduceByKey((x, y) -> x + y);
+			} else {
+				sum = interMediateRank
+					.mapToPair(x -> new Tuple2<Tuple2<String, String>, Double> (new Tuple2<String, String>(x._1, x._2._1), x._2._2))
+					.distinct()
+					.reduceByKey((x, y) -> x + y);
+
+			}
+				
+			/*JavaPairRDD<Tuple2<String,String>, Double> sum = interMediateRank
+					.mapToPair(x -> new Tuple2<Tuple2<String, String>, Double> (new Tuple2<String, String>(x._1, x._2._1), x._2._2))
+					.union(rankNotEntered)
+					.distinct()
+					.reduceByKey((x, y) -> x + y);*/
 			
 			JavaPairRDD<String, Tuple2<String,Double>> normalizedRank = interMediateRank
 					.mapToPair(x -> new Tuple2<Tuple2<String, String>, Double> (new Tuple2<String, String>(x._1, x._2._1), x._2._2))
@@ -343,6 +395,10 @@ public class rankJob {
 					.mapToPair(item -> new Tuple2<Double, Tuple2<String,String>>
 										(Math.abs(item._2._2 - item._2._1), item._1))
 					.sortByKey(false).first()._1;
+
+			if (count > 8) {
+				userNode = userNode.filter( x -> x._2._2 >= 0.5);
+			}
 			
 			count++;
 			userNode = normalizedRank;
@@ -352,7 +408,6 @@ public class rankJob {
 		db = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
 		DynamoDB conn = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
 		JavaRDD<Tuple3<String, String, Double>> rows = userNode.map(i -> new Tuple3<String, String, Double>(i._1, i._2._1, i._2._2));
-
 		// upload it to dynamodb
 		
 		

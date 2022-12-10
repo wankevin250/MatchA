@@ -177,12 +177,12 @@ public class LoadNews {
 						Thread.sleep(3);
 						LocalDate date = LocalDate.parse((String) news.getAs(5));
 						//LocalDateTime localDateTime = date.atStartOfDay(); 
-						ZonedDateTime zonedDateTime = date.atStartOfDay().atZone(ZoneId.of("UTC"));
-        				long epochMilli = zonedDateTime.toInstant().toEpochMilli();
+						//ZonedDateTime zonedDateTime = date.atStartOfDay().atZone(ZoneId.of("UTC"));
+        				//long epochMilli = zonedDateTime.toInstant().toEpochMilli();
 						String title = (String) news.getAs(1);
 						if (title.length() != 0) {
 							Item newsItem = new Item()
-											.withPrimaryKey("headline", (String) news.getAs(1), "date", epochMilli)
+											.withPrimaryKey("headline", (String) news.getAs(1), "date", date)
 											.withString("category", (String) news.getAs(0))
 											.withString("authors", (String) news.getAs(2))
 											.withString("link", (String) news.getAs(3))

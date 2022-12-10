@@ -6,6 +6,8 @@ block head
   script.
     var socket = io();
     var myID = -1;
+    var room = null;
+    
     socket.on('welcome', function(data) {
       myID = data.id;
       socket.emit('client', {message: 'hello!', id: data.id});
@@ -17,7 +19,8 @@ block head
       socket.emit('message', {message: 'I am still here', id: myID})
     });
     
-  script.
+    // when running /openroom, load all prev messages to #messages using loop
+    
     $(document).ready( function() {
       $(".leftHalf").addClass("fullWidth");
       
@@ -46,9 +49,39 @@ block head
       
     });
     
-    function sendmessage(){
-      
+    function sendMessage(){
+      if ($('#message').val().trim() !== '') {
+        socket.emit('chat message', {
+          test: $('#message').val().trim(),
+          sender: id,
+          roomid: room
+        });
+        
+        $('#message').val('');
+        $('#message').focus();
+      }
     }
+    
+    $(document).ready(function() {
+      socket.on('chat message', function (msg) {
+        socket.on('chat message', function (msg) {
+          var message_temp = document.createElement("li");
+
+          if (id === msg.sender) {
+            message_temp.setAttribute("class", "me");
+          } else {
+            message_temp.setAttribute("class", msg.sender);
+          }
+
+          message_temp.appendChild(document.createTextNode(msg.text));
+
+          $('#messages').append(message_temp);
+          $('#messages').animate({
+            scrollTop: $('#messages').get(0).scrollHeight
+          }, 0);
+        });
+      });
+    });
   
   title Chats 
 
@@ -72,4 +105,6 @@ block content
     div(id="form-message")
       input(id = 'message', class = 'form-control', autocomplete='off', placeholder='Type a message...')
       button#send-message.btnAceSend(type='button', onclick='return sendMessage();')  Send
+  
+  
   

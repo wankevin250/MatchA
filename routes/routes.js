@@ -364,6 +364,24 @@ const getVisualizer = (req, res) => {
   res.render('visualizer.pug')
 }
 
+const sendFriends = (req, res) => {
+  if (req.session.user != null) {
+		let user = req.session.user;
+
+    db.getFriends(user, (err, data) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("Made it to else statement!");
+        res.send(JSON.stringify(data));
+      }
+    })
+  } else {
+    console.log("Not logged in, returned to homepage.");
+		res.render('splash');
+  }
+}
+
 
 const routes = {
   getSplash: getSplash,
@@ -402,6 +420,7 @@ const routes = {
 
   // Kevin's visualizer routes
   getVisualizer: getVisualizer,
+  sendFriends: sendFriends,
 }
 
 module.exports = routes;

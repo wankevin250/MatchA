@@ -166,7 +166,7 @@ server.listen(3000);
 app.get('/chat', routes.getChat);
 /** adds new chat to list, opens up chatroom, button to add friend, text input box + button to send text */
 app.get('/createroom', routes.addChat);
-/** opens up chatroom chosen from list */
+/** opens up chatroom chosen from list; loads and outputs list of previous messages */
 app.post('/openroom', routes.openChat);
 app.post('/leaveroom', routes.leaveChat);
 // open CHATBOX should REFRESH every 1 second. Chatbox should leave button

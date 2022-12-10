@@ -2,6 +2,20 @@ extends layouts/standard.pug
 
 block head
   link(rel='stylesheet', href='/css/chats.css')
+  script(src='/socket.io/socket.io.js')
+  script.
+    var socket = io();
+    var myID = -1;
+    socket.on('welcome', function(data) {
+      myID = data.id;
+      socket.emit('client', {message: 'hello!', id: data.id});
+    });
+    socket.on('message', function(data) {
+      console.log(data.message);
+    });
+    setInterval(function() {
+      socket.emit('message', {message: 'I am still here', id: myID})
+    });
   script.
     $(document).ready( function() {
       $(".leftHalf").addClass("fullWidth");

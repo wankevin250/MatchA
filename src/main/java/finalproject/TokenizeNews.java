@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.Serializable;
+//import java.io.NotSerializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -54,7 +56,7 @@ import storage.DynamoConnector;
 import storage.SparkConnector;
 import scala.Tuple2;
 
-public class TokenizeNews {
+public class TokenizeNews implements Serializable {
     static Logger logger = LogManager.getLogger(TokenizeNews.class);
 
     final static String tbName = "tokenizedNews";
@@ -112,10 +114,13 @@ public class TokenizeNews {
 		List<Row> rowOfNews = lines.parallelStream()
 						.map(line -> {
 							Object[] row = new Object[3]; // assign appropriate values for each Schema
-							row[0] = line.get("category").toString();
-							row[1] = line.get("headline").toString();
-							row[2] = line.get("date").toString();
-							//System.out.println(row);
+							String ct = line.get("category").toString();
+							String hl = line.get("headline").toString();
+							String dt = line.get("date").toString();
+							row[0] = ct.substring(1, ct.length() - 1);
+							row[1] = hl.substring(1, hl.length() - 1);
+							row[2] = dt.substring(1, dt.length() - 1);
+							//System.out.println(row[1]);
 							return new GenericRowWithSchema(row, schema);// Make Row with Schema
 						})
 						.collect(Collectors.toList());
@@ -126,52 +131,70 @@ public class TokenizeNews {
 
     //
     public void uploadTokenized() throws IOException, DynamoDbException, InterruptedException {
+	   System.out.println("RUNNING");
        JavaRDD<Row> newsData = this.getNews("newsTestData.txt");
-       newsData.foreachPartition(iter -> { 
-			HashSet<Item> rows = new HashSet<Item>(); 
-			String tableName = this.tbName;
-            HashSet<String> dupli = new HashSet<String>();
-            while (iter.hasNext()) {
-                Row news = iter.next();
-                String[] tokens = model.tokenize((String) news.getAs(1));
-                HashSet<Item> words = new HashSet<Item>(); 
-                for (int j = 0; j < tokens.length; j++) {
-                    tokens[j] = tokens[j].toLowerCase();
-                    if (tokens[j].matches("^[a-zA-Z]*$") && !(tokens[j].equals("a") || tokens[j].equals("all") 
-                        || tokens[j].equals("any") || tokens[j].equals("but") || tokens[j].equals("the"))) {
-                        tokens[j] = (String) stemmer.stem(tokens[j]);
-                        if (!dupli.contains(tokens[j])) {
-                            dupli.add(tokens[j]);
-                            try {
-                                Thread.sleep((long) 1.0);
-                            } catch (InterruptedException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            }
-                            Item word = new Item()
-                                            .withPrimaryKey("keyword", tokens[j], "headline", (String) news.getAs(1))
-                                            .withString("category", (String) news.getAs(0))
-                                            .withString("date", (String) news.getAs(2));
-                            words.add(word);
-                        }
-                    }
+	   System.out.println("TOKENIZING");
 
-                    if (words.size() == 25 || j == tokens.length - 1) {
-                        TableWriteItems writ = new TableWriteItems(tableName).withItemsToPut(words);
-                        try {
-                            Thread.sleep((long) 2.0);
-                        } catch (InterruptedException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-                        BatchWriteItemOutcome ret = db.batchWriteItem(writ);
-                        Map<String, List<WriteRequest>> leftover = ret.getUnprocessedItems();
-                        if (leftover != null && leftover.size() != 0) {
-                            db.batchWriteItemUnprocessed(leftover);	
-                        }
-                        words = new HashSet<Item>();
-                    }
-                }
+       newsData.foreachPartition(iter -> { 
+			//NotSerializable notSerializable = new NotSerializable();
+			String tableName = this.tbName;
+			System.out.println("ENTER");
+			HashSet<Item> words = new HashSet<Item>(); 
+            while (iter.hasNext()) {
+				DynamoDB conn = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
+                Row news = iter.next();
+				HashSet<String> dupli = new HashSet<String>();
+				String title = (String) news.getAs(1);
+				//System.out.println(title);
+				if (title.length() != 0) {
+					System.out.println("TOKENED");
+					String[] tokens =title.split(" ");
+					//String[] tokens = model.tokenize(title);
+					System.out.println(tokens[0]);
+					for (int j = 0; j < tokens.length; j++) {
+						if (tokens[j].matches("^[a-zA-Z]*$")) {
+							tokens[j] = tokens[j].toLowerCase();
+							if (tokens[j].matches("^[a-zA-Z]*$") && !(tokens[j].equals("a") || tokens[j].equals("all") 
+								|| tokens[j].equals("any") || tokens[j].equals("but") || tokens[j].equals("the"))) {
+								tokens[j] = (String) stemmer.stem(tokens[j]);
+								if (!dupli.contains(tokens[j])) {
+									dupli.add(tokens[j]);
+									try {
+										Thread.sleep((long) 1.0);
+									} catch (InterruptedException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+									Item word = new Item()
+													.withPrimaryKey("keyword", tokens[j], "headline", (String) news.getAs(1))
+													.withString("category", (String) news.getAs(0))
+													.withString("date", (String) news.getAs(2));
+									words.add(word);
+								}
+							}
+						}
+
+						if (words.size() == 25 || j == tokens.length - 1) {
+							TableWriteItems writ = new TableWriteItems(tableName).withItemsToPut(words);
+							try {
+								Thread.sleep((long) 2.0);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							BatchWriteItemOutcome ret = conn.batchWriteItem(writ);
+							Map<String, List<WriteRequest>> leftover = ret.getUnprocessedItems();
+							if (leftover != null && leftover.size() != 0) {
+								conn.batchWriteItemUnprocessed(leftover);	
+							}
+							words = new HashSet<Item>();
+						}
+					}
+					
+				} else {
+					System.out.println(title);
+				}
+               
             }
 			
 		});

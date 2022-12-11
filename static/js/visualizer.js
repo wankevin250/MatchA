@@ -35,6 +35,7 @@ $(document).ready(function() {
           //creation
   
           onCreateLabel: function(domElement, node){
+              console.log(node.displayname);
               domElement.innerHTML = node.displayname; //changed name to displayname
               domElement.style.cursor = "pointer";
               domElement.onclick = function() {

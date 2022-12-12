@@ -111,14 +111,25 @@ public class rankJob {
 	 */
 	JavaPairRDD<String,Double> getCategoryWeight(String filePath) {
 		// TODO Your code from ComputeRanks here
-		JavaRDD<String[]> file = context.textFile(filePath, 5)
-				.map(line -> line.toString().split(" |	" ));  // consider space and tab both as delimiter
-		JavaPairRDD<String, Double> categoryWeight = file // create edges
-				.mapToPair(x -> new Tuple2<String, Integer>(x[0], Integer.parseInt(x[1])))
-				.mapToPair(x -> new Tuple2<String, Double>(x._1, (1.0 / x._2)))
-				.distinct();  // discard duplicates
-			
-         return categoryWeight;
+		String tablename = "newsCount";
+		AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
+		ScanRequest scanRequest = new ScanRequest()
+    								.withTableName(tablename);
+		ScanResult scanResult = client.scan(scanRequest);
+		List<String[]> rowOfInterest = scanResult.getItems().parallelStream()
+						.map(line -> {
+							String[] inter = new String[2];
+							inter[0] = line.get("category").getS();
+							inter[1] = line.get("count").getN().toString();
+							System.out.println("cateogory count:"+inter[0]+inter[1]);
+							return inter;// Make Row with Schema
+						})
+						.collect(Collectors.toList());
+		JavaRDD<String[]> inArr = context.parallelize(rowOfInterest);
+		JavaPairRDD<String, Double> result = inArr
+											.mapToPair(x -> new Tuple2<String, Double>(x[0], Double.parseDouble(x[1])));
+		
+		return result;
 	}
 
 	private JavaRDD<Integer> getSinks(JavaPairRDD<Integer,Integer> graph) {
@@ -136,12 +147,14 @@ public class rankJob {
 		AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
 		DynamoDB dynamoDB = new DynamoDB(client);
 		Table table = dynamoDB.getTable(tablename);
-		LocalDate ldate = LocalDate.now().minusYears(5);
-		ZoneId zoneId = ZoneId.systemDefault();
-		long epochToday = ldate.atStartOfDay(zoneId).toEpochSecond();
+		Map<String, String> nm = new HashMap<String, String>();
+		nm.put("#v_name", "headline");
+		
 
 		QuerySpec spec = new QuerySpec()
-			.withFilterExpression("category != :v_today")
+			//.withFilterExpression("headline <> :v_today")
+			.withKeyConditionExpression("headline <> :v_today")
+			//.withNameMap(nm)
 			.withValueMap(new ValueMap()
 				.withString(":v_today", "CRIME")); //change it back to string format data and use the sent link
 
@@ -166,7 +179,7 @@ public class rankJob {
 	}
 
 	JavaPairRDD<String, String> getInteretsEdge() {
-		String tablename = "interest";
+		String tablename = "interests";
 		AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
 		ScanRequest scanRequest = new ScanRequest()
     								.withTableName(tablename);
@@ -232,7 +245,7 @@ public class rankJob {
 			Item f = iter.next();
 			System.out.println(f);
 			String[] row = new String[2];
-			row[0] = f.get("acceptor").toString();
+			row[0] = f.get("accepter").toString();
 			row[1] = f.get("asker").toString();
 			System.out.println("freinds"+row[0] + "and" + row[1]);
 			friends.add(row);

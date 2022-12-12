@@ -168,21 +168,25 @@ public class LoadNews {
 				HashSet<Item> rows = new HashSet<Item>(); 
 				HashSet<String> dupli = new HashSet<String>();
 				
-				String tableName = "news";
+				String tableName = "newsData";
 				while (iter.hasNext()) {
 					Row news = iter.next();
 					DynamoDB conn = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
 					// Create Item
 					if (!dupli.contains((String) news.getAs(1))) {
 						Thread.sleep(3);
-						LocalDate date = LocalDate.parse((String) news.getAs(5));
+						LocalDate ldate = LocalDate.parse((String) news.getAs(5)).plusYears(5);
 						//LocalDateTime localDateTime = date.atStartOfDay(); 
 						//ZonedDateTime zonedDateTime = date.atStartOfDay().atZone(ZoneId.of("UTC"));
         				//long epochMilli = zonedDateTime.toInstant().toEpochMilli();
+						//ZoneId zoneId = ZoneId.systemDefault();
+						String dt = ldate.toString();
+						System.out.println(dt);
+						//long epochToday = ldate.atStartOfDay(zoneId).toEpochSecond();
 						String title = (String) news.getAs(1);
 						if (title.length() != 0) {
 							Item newsItem = new Item()
-											.withPrimaryKey("headline", (String) news.getAs(1), "date", date)
+											.withPrimaryKey("headline", (String) news.getAs(1), "date", dt)
 											.withString("category", (String) news.getAs(0))
 											.withString("authors", (String) news.getAs(2))
 											.withString("link", (String) news.getAs(3))

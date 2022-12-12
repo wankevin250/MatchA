@@ -93,7 +93,7 @@ public class TokenizeNews implements Serializable {
 
     //
 
-    JavaRDD<Row> getNews(String filePath) throws IOException {
+    List<Row>  getNews(String filePath) throws IOException {
 		BufferedReader reader = null;
 		JsonParser mapper = new JsonParser();
 		reader = new BufferedReader(new FileReader(new File(filePath)));
@@ -124,25 +124,25 @@ public class TokenizeNews implements Serializable {
 							return new GenericRowWithSchema(row, schema);// Make Row with Schema
 						})
 						.collect(Collectors.toList());
-		JavaRDD<Row> newsRDD = context.parallelize(rowOfNews);
+		//JavaRDD<Row> newsRDD = context.parallelize(rowOfNews);
 
-		return newsRDD;
+		return rowOfNews;
 	}
 
     //
     public void uploadTokenized() throws IOException, DynamoDbException, InterruptedException {
 	   System.out.println("RUNNING");
-       JavaRDD<Row> newsData = this.getNews("newsTestData.txt");
+       List<Row> newsData = this.getNews("newsTestData.txt");
 	   System.out.println("TOKENIZING");
 
-       newsData.foreachPartition(iter -> { 
+       newsData.forEach(news -> { 
 			//NotSerializable notSerializable = new NotSerializable();
 			String tableName = this.tbName;
 			System.out.println("ENTER");
 			HashSet<Item> words = new HashSet<Item>(); 
-            while (iter.hasNext()) {
+           // while (iter.hasNext()) {
 				DynamoDB conn = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
-                Row news = iter.next();
+               // Row news = iter.next();
 				HashSet<String> dupli = new HashSet<String>();
 				String title = (String) news.getAs(1);
 				//System.out.println(title);
@@ -157,7 +157,7 @@ public class TokenizeNews implements Serializable {
 							if (tokens[j].matches("^[a-zA-Z]*$") && !(tokens[j].equals("a") || tokens[j].equals("all") 
 								|| tokens[j].equals("any") || tokens[j].equals("but") || tokens[j].equals("the"))) {
 								tokens[j] = (String) stemmer.stem(tokens[j]);
-								if (!dupli.contains(tokens[j])) {
+								if (!dupli.contains(tokens[j]) || tokens[j].length != "") { // check if it is not an empty string
 									dupli.add(tokens[j]);
 									try {
 										Thread.sleep((long) 1.0);
@@ -195,7 +195,7 @@ public class TokenizeNews implements Serializable {
 					System.out.println(title);
 				}
                
-            }
+            //}
 			
 		});
 

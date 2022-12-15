@@ -4,7 +4,9 @@ const { createUser } = require('./models/database.js');
 
 const app = express();
 const PORT = 8080; // port
-const server = require('http').createServer(app);
+const http = require('http');
+const server = http.createServer(app);
+const {Server} = require("socket.io");
 
 const routes = require('./routes/routes.js');
 
@@ -142,23 +144,21 @@ app.get('/getFriends/:user', routes.postGetFriend); //routes.sendFriends?
 // ace: routes call
 
 // socket io setup for chat function
-// var io = require('socket.io').listen(app);
+    const io = new Server(server);
 
-// function sendTime() {
-// 	io.emit('message', {message: new Date().toJSON()});
-// }
+    function sendTime() {
+	    io.emit('message', {message: new Date().toJSON()});
+    }
 
-// setInterval(sendTime, 10000);
+    setInterval(sendTime, 10000);
 
-// io.on('connection', function(socket) {
-// 	socket.emit('welcome', {message: 'Welcome!', id: socket.id});
-// 	socket.on('client', function(data) {
-// 		console.log(data.message);
-// 	});
-// 	socket.on('message', function(data) {
-// 		console.log(data.message);
-// 	});
-// });
+    io.on('connection', function(socket) {
+	
+        socket.on('chat message', function(){
+			
+		});
+		
+    });
 
 // server.listen(3000);
 
@@ -204,4 +204,7 @@ app.get('*', (req, res) => {
   res.render('404');
 })
 
-app.listen(PORT, () => console.log(`Example app is listening on port ${PORT}`));
+// app.listen(PORT, () => console.log(`Example app is listening on port ${PORT}`));
+server.listen(PORT, () => console.log(`Example app is listening on port ${PORT}`));
+
+

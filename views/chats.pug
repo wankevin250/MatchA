@@ -4,9 +4,41 @@ block head
   link(rel='stylesheet', href='/css/chats.css')
   script(src='/socket.io/socket.io.js')
   script.
-    var myID = '!{currentuser}';
+    var myID = -1;
     var roomuuid = null;
     const socket = io();
+    var chatlist = [];
+    
+    
+      if (chatlist != null) {
+        for (let i = 0; i < chatlist.length; i++) {
+          var chatbutton_temp = document.createElement("a");
+          chatbutton_temp.className += "chatBtnClass";
+          chatbutton_temp?.setAttribute('id', data[i].roomid);
+          
+          $('prototype-button-wrapper').appendChild(chatbutton_temp);
+        }
+      }
+      
+    /**
+    $(window).on('load', function() {
+      $.post('/chatlist', function(data) {
+        chatlist = data.chatlist;
+        myID = data.currentuser;
+        
+        if (chatlist != null) {
+          for (let i = 0; i < chatlist.length; i++) {
+            var chatbutton_temp = document.createElement("a");
+            chatbutton_temp.className += "chatBtnClass";
+            chatbutton_temp?.setAttribute('id', chatlist[i].roomid);
+            chatbutton_temp.appendChild(document.createTextNode(chatlist[i].chatname));
+            
+            $('#prototype-button-wrapper').appendChild(chatbutton_temp);
+          }
+        }
+      });
+    });
+    */
     
     // when running /openroom, load all prev messages to #messages using loop
     
@@ -26,7 +58,7 @@ block head
             });
             
             // load all prev. messages to #messages using loop
-            
+                        
             $(".leftHalf").css('display', 'none');
             $(".rightHalf").css('display', 'block');
           }
@@ -44,18 +76,31 @@ block head
         });
       });
       
+      
     });
     
     function sendMessage(){
-      if ($('#message').val().trim() !== '') {
-        socket.emit('chat message', {
-          text: $('#message').val().trim(),
-          sender: myID,
-          room: room,
-        });
+        if ($('#message').val().trim() !== '') {
+          // scrub text?
+          
+          socket.emit('chat message', {
+          
+              text: $('#message').val().trim(),
+              sender: myID,
+              room: room,
+          });
         
-        $('#message').val('');
-        $('#message').focus();
+          $.post('/sendmessage', { 
+              text: $('#message').val().trim(),
+              sender: myID,
+              room: room,}, 
+              
+              function (data){
+                // something with returned data?
+          });
+            
+          $('#message').val('');
+          $('#message').focus();
       }
     }
     
@@ -94,7 +139,7 @@ block content
   
   // need to show chatbox iff req.session.currentroom != null
   div(class="rightHalf" id="chatbox")
-    a.btnAceLeave(href="#", id="leaveChatBtn") Leave
+    a.btnAceLeave(id="leaveChatBtn") Leave
     div()
       ul#messages.messageDisplay
     form#message-form

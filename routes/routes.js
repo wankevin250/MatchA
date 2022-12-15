@@ -209,23 +209,34 @@ const getChat = (req, res) => {
 		let user = req.session.user;
 		// call db method to query
 		
-		/**
+		res.render('chats');		
+		
+	} else {
+		// not logged in, return to homepage & log reason on console
+		res.render('chats');
+	}
+}
+
+const sendChatList = (req, res) => {
+	// call user from req.session.user
+	if (req.session.user != null) {
+		let user = req.session.user;
+		// call db method to query
+		
 		db.findChats(user, (err, data) => {
 			// create js array using data, save array to session: req.session.chats
 			if (err) {
 				console.log(err);
 			} else {
-				req.session.chats = data;
+				// render chats page: if req.session.chats == null or empty list, show a specific message on the page (FRONTEND)
+				return res.json({currentuser: user.username, chatlist: data});
 			}
-		}); 
-		*/
+		});
 		
-		// render chats page: if req.session.chats == null or empty list, show a specific message on the page (FRONTEND)
-		res.render('chats', {currentuser: user.username, chatlist: "data"});
 	} else {
 		// not logged in, return to homepage & log reason on console
 		console.log("Not logged in, returned to homepage.");
-		res.render('chats', {currentuser: "bobthetester", chatlist: ""});
+		return res.json({currentuser: "bobthetester", chatlist: ""});
 	}
 }
 
@@ -403,7 +414,8 @@ const routes = {
   getSettings: getSettings,
   
   // ace: To Commit
-  getChat: getChat,
+  loadChatPage: getChat,
+  getChats: sendChatList,
   addChat: addChat,
   popupFriends: viewFriends,
   addFriend: addFriend,

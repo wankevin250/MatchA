@@ -297,7 +297,27 @@ const editUser = (user, isUsernameChanged, isEmailChanged, callback) => {
  */
 const findChats = (user, callback) => {
 	// using username, query user data from table: users, get stringified list of chatrooms, return in array form to routes.js
-	callback(null, null)
+	callback(null, null);
+	// query for strigified list of chatrooms where each object has { roomid: roomid, creator: user.username, chatname}
+	
+	var params = {
+	    ExpressionAttributeValues: {
+	      ':username': {S: user.username},
+	    },
+	    KeyConditionExpression: 'username = :username',
+	    TableName: 'users'
+    };
+    
+    db.query(params, function(err, data) {
+		if (err) {
+	        callback(err, null);
+	    } else if (data.Items.length == 0) {
+		    callback(err, null);
+	    } else {
+			console.log(JSON.parse(data.Items[0].chatrooms.S));
+			callback(err, JSON.parse(data.Items[0].chatrooms.S));
+		}
+    });
 }
 
 const addChatToTable = (user, callback) => {

@@ -314,8 +314,9 @@ const findChats = (user, callback) => {
 	    } else if (data.Items.length == 0) {
 		    callback(err, null);
 	    } else {
-			console.log(JSON.parse(data.Items[0].chatrooms.S));
-			callback(err, JSON.parse(data.Items[0].chatrooms.S));
+			// console.log(JSON.parse(data.Items[0].chatrooms.S));
+			let chatlist = JSON.parse(data.Items[0].chatrooms.S);
+			callback(err, chatlist);
 		}
     });
 }

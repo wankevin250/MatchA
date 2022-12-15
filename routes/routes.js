@@ -223,20 +223,26 @@ const sendChatList = (req, res) => {
 		let user = req.session.user;
 		// call db method to query
 		
+		let chats = [];
+		
 		db.findChats(user, (err, data) => {
 			// create js array using data, save array to session: req.session.chats
 			if (err) {
 				console.log(err);
 			} else {
 				// render chats page: if req.session.chats == null or empty list, show a specific message on the page (FRONTEND)
-				return res.json({currentuser: user.username, chatlist: data});
+				chats = data;
 			}
 		});
+		
+		console.log(chats);
+		return res.json({currentuser: user.username, chatlist: chats});
 		
 	} else {
 		// not logged in, return to homepage & log reason on console
 		console.log("Not logged in, returned to homepage.");
-		return res.json({currentuser: "bobthetester", chatlist: ""});
+		return res.json({currentuser: "bobthetester", 
+		  chatlist: [ {roomid: "testroom1", chatname: "Test One", creator: "ace"}]});
 	}
 }
 

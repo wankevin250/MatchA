@@ -10,16 +10,6 @@ block head
     var chatlist = [];
     
     
-      if (chatlist != null) {
-        for (let i = 0; i < chatlist.length; i++) {
-          var chatbutton_temp = document.createElement("a");
-          chatbutton_temp.className += "chatBtnClass";
-          chatbutton_temp?.setAttribute('id', data[i].roomid);
-          
-          $('prototype-button-wrapper').appendChild(chatbutton_temp);
-        }
-      }
-      
     /**
     $(window).on('load', function() {
       $.post('/chatlist', function(data) {
@@ -79,6 +69,24 @@ block head
       
     });
     
+    $(document).ready( function() {
+      $.post('/chatlist', function(data) {
+        chatlist = data.chatlist;
+        myID = data.currentuser;
+        
+        if (chatlist != null) {
+          for (let i = 0; i < chatlist.length; i++) {
+            var chatbutton_temp = document.createElement("a");
+            chatbutton_temp.className += "chatBtnClass";
+            chatbutton_temp?.setAttribute('id', chatlist[i].roomid);
+            chatbutton_temp.appendChild(document.createTextNode(chatlist[i].chatname));
+            
+            $('#prototype-button-wrapper').appendChild(chatbutton_temp);
+          }
+        }
+      });
+    });
+    
     function sendMessage(){
         if ($('#message').val().trim() !== '') {
           // scrub text?
@@ -127,6 +135,7 @@ block head
   title Chats 
 
 block content
+    
   h1(class="text-center italics bold") MatchA
   
   // proto button to enter first chatroom. TODO: make buttons for every chat in user's joined list  

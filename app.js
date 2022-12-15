@@ -153,9 +153,20 @@ app.get('/getFriends/:user', routes.postGetFriend); //routes.sendFriends?
     setInterval(sendTime, 10000);
 
     io.on('connection', function(socket) {
+		
 	
-        socket.on('chat message', function(){
-			
+        socket.on('chat message', function(obj){
+			console.log(obj.text);
+			io.to(obj.room).emit('chat message', obj);
+		});
+		
+		socket.on('join room', obj => {
+			socket.join(obj.room);
+			console.log(obj.room);
+		});
+		
+		socket.on('leave room', obj =>{
+			socket.leave(obj.room);
 		});
 		
     });

@@ -297,7 +297,7 @@ const editUser = (user, isUsernameChanged, isEmailChanged, callback) => {
  */
 const findChats = (user, callback) => {
 	// using username, query user data from table: users, get stringified list of chatrooms, return in array form to routes.js
-	
+	callback(null, null)
 }
 
 const addChatToTable = (user, callback) => {

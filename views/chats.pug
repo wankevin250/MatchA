@@ -4,8 +4,8 @@ block head
   link(rel='stylesheet', href='/css/chats.css')
   script(src='/socket.io/socket.io.js')
   script.
-    var myID = -1;
-    var room = null;
+    var myID = '!{currentuser}';
+    var roomuuid = null;
     const socket = io();
     
     // when running /openroom, load all prev messages to #messages using loop
@@ -18,12 +18,20 @@ block head
         $.post('/openroom', { room : roomid }, function(data) {
           if (data.success) {
             room = roomid;
+            roomuuid = roomid;
+            
+            socket.emit('join room', {
+                user: myID,
+                room: roomid,
+            });
+            
+            // load all prev. messages to #messages using loop
             
             $(".leftHalf").css('display', 'none');
             $(".rightHalf").css('display', 'block');
           }
         });
-      });
+      });	
       
       $(".btnAceLeave").on("click", function() {
         $.post('/leaveroom', function(data) {
@@ -41,15 +49,34 @@ block head
     function sendMessage(){
       if ($('#message').val().trim() !== '') {
         socket.emit('chat message', {
-          test: $('#message').val().trim(),
-          sender: id,
-          roomid: room
+          text: $('#message').val().trim(),
+          sender: myID,
+          room: room,
         });
         
         $('#message').val('');
         $('#message').focus();
       }
     }
+    
+    $(document).ready(function() {
+      socket.on('chat message', function (msg) {
+          var message_temp = document.createElement("li");
+
+          if (myID === msg.sender) {
+            message_temp.setAttribute("class", "me");
+          } else {
+            message_temp.setAttribute("class", "other");
+          }
+          
+          // somehow add the name of the person who sent the message
+          
+          message_temp.appendChild(document.createTextNode(msg.text));
+
+          $('#messages').append(message_temp);
+          
+      });
+    });
     
   
   title Chats 
@@ -69,7 +96,7 @@ block content
   div(class="rightHalf" id="chatbox")
     a.btnAceLeave(href="#", id="leaveChatBtn") Leave
     div()
-      ul#messages
+      ul#messages.messageDisplay
     form#message-form
     div(id="form-message")
       input(id = 'message', class = 'form-control', autocomplete='off', placeholder='Type a message...')

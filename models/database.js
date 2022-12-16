@@ -295,14 +295,14 @@ const editUser = (user, isUsernameChanged, isEmailChanged, callback) => {
  * @param {*} callback callback function. Must have (code, error, data).
  *
  */
-var findChats = function (user, callback) {
+var findChats = function (username, callback) {
 	// using username, query user data from table: users, get stringified list of chatrooms, return in array form to routes.js
 	callback(null, null);
 	// query for strigified list of chatrooms where each object has { roomid: roomid, creator: user.username, chatname}
 	
 	var params = {
 	    ExpressionAttributeValues: {
-	      ':username': {S: user.username},
+	      ':username': {S: username},
 	    },
 	    KeyConditionExpression: 'username = :username',
 	    TableName: 'users'

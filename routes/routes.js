@@ -208,38 +208,38 @@ const getChat = (req, res) => {
 	let user = req.session.user;
 	
 	if (req.session.user != null) {
-		db.findChats(user, (err, data) => {
-			if (data != null) {
-				console.log(data);
-				let data2 = JSON.parse(data);
-				console.log(data2);
-				return res.render('chats', {chatlist: data2, username: user.username});
-			} else {
-				console.log(err);
-			}
-		});
-		return;
+		res.render('chats');
 	} else {
 		// not logged in, return to homepage & log reason on console
 		res.redirect('/');
-		return;
 	}
 }
 
-
-const sendChatList = function (req, res) {
+/**
+var sendChatList = function (req, res) {
 	// call user from req.session.user
 	let user = req.session.user;
 	
 	db.findChats(user, (err, data) => {
 		if (err != null) {
 			console.log(err);
-			return;
 		} else {
-			res.send(JSON.stringify({currentuser: user.username, clist: data}));
-			return;
+			return res.json({clist: JSON.parse(data)}); //{currentuser: user.username, clist: data}));
 		}
 	});
+} */
+
+const sendChatList = (req, res) => {
+  let username = req.session.user.username;
+  db.findChats(username, (err, data) => {
+	if(data != null) {
+		console.log(data);
+		var obj = {'clist' : JSON.parse(data), 'username': username};
+		res.send(obj);
+	} else {
+		console.log(err);
+	}
+  });
 }
 
 /**
@@ -320,7 +320,7 @@ const openChat = (req, res) => {
 	});
 	*/
 	
-	return res.send({
+	res.send({
 		success: true
 	});
 }
@@ -338,7 +338,7 @@ const leaveChat = (req, res) => {
 	});
 	*/
 	
-	return res.send({
+	res.send({
 		success: true
 	});
 }

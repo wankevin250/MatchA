@@ -407,6 +407,17 @@ const sendFriends = (req, res) => {
   }
 }
 
+// Sebin routes for news
+
+const calculateRank = (req, res) => {
+	// res ? 
+	// execute the java command
+}
+
+const searchNews = (req, res) => {
+	// res ? 
+	// query the news
+}
 
 const routes = {
   getSplash: getSplash,
@@ -447,6 +458,10 @@ const routes = {
   // Kevin's visualizer routes
   getVisualizer: getVisualizer,
   sendFriends: sendFriends,
+
+  //Sebin's new
+  calculateRank: calculateRank,
+  searchNews: searchNews,
 }
 
 module.exports = routes;

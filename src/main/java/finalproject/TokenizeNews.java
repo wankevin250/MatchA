@@ -157,7 +157,7 @@ public class TokenizeNews implements Serializable {
 							if (tokens[j].matches("^[a-zA-Z]*$") && !(tokens[j].equals("a") || tokens[j].equals("all") 
 								|| tokens[j].equals("any") || tokens[j].equals("but") || tokens[j].equals("the"))) {
 								tokens[j] = (String) stemmer.stem(tokens[j]);
-								if (!dupli.contains(tokens[j]) || tokens[j].length != "") { // check if it is not an empty string
+								if (!dupli.contains(tokens[j]) || tokens[j] != "") { // check if it is not an empty string
 									dupli.add(tokens[j]);
 									try {
 										Thread.sleep((long) 1.0);

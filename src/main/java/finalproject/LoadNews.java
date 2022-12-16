@@ -176,13 +176,8 @@ public class LoadNews {
 					if (!dupli.contains((String) news.getAs(1))) {
 						Thread.sleep(3);
 						LocalDate ldate = LocalDate.parse((String) news.getAs(5)).plusYears(5);
-						//LocalDateTime localDateTime = date.atStartOfDay(); 
-						//ZonedDateTime zonedDateTime = date.atStartOfDay().atZone(ZoneId.of("UTC"));
-        				//long epochMilli = zonedDateTime.toInstant().toEpochMilli();
-						//ZoneId zoneId = ZoneId.systemDefault();
 						String dt = ldate.toString();
 						System.out.println(dt);
-						//long epochToday = ldate.atStartOfDay(zoneId).toEpochSecond();
 						String title = (String) news.getAs(1);
 						if (title.length() != 0) {
 							Item newsItem = new Item()

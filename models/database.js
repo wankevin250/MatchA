@@ -341,6 +341,46 @@ const viewOneChat = (chatid, callback) => {
 
 // end of ACE HOUR
 
+
+// start of Sebin News
+const computeRank = (user, callback) => {
+	// using username as an input for run, execute the whole rankJob.class
+	var exec = require('child_process').exec;
+  
+  exec('mvn exec:@java ranker' + ' -Dexec.args=' + user,
+    function (error, stdout, stderr) {
+        //console.log('stdout: ' + stdout);
+        //console.log('stderr: ' + stderr);
+        if (error !== null) {
+             console.log('exec error: ' + error);
+        }
+    });
+
+    db.query({
+      ExpressionAttributeValues: {
+        ':username': {S: user.username},
+      },
+      KeyConditionExpression: 'username = :username',
+      TableName: 'rankedNews',
+      IndexName: 'username'
+    }, (err, data) => {
+      if (err) {
+        console.log(err);
+        //callback(500, err, null);
+      } else {
+        if (data.Items.length > 0) {
+          callback(err, data.Items);
+          //callback(403, 'email', null);
+        } else {          
+          //callback(201, err, null);
+        }
+      }
+    });
+
+
+	// callback: (chatinfo, err, data)
+}
+
 const database = {
   // queryUser: queryUser,
   createUser: createUser,
@@ -356,6 +396,8 @@ const database = {
   viewFriends: displayFriends,
   addFriendToChat: addFriendToChat,
   viewChat: viewOneChat, 
+
+  computeRank:  computeRank,
   
 }
 

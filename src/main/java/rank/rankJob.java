@@ -159,11 +159,9 @@ public class rankJob {
 								String[] inter = new String[2];
 								inter[0] = line.get("headline").getS();
 								inter[1] = line.get("category").getS();
-								//System.out.println("news count:"+inter[0]+inter[1]+ dt);
 								rowOfInterest.add(inter);
 							}
 						});
-						//.collect(Collectors.toList());
 		JavaRDD<String[]> inArr = context.parallelize(rowOfInterest);
 		JavaPairRDD<String, String> result = inArr
 											.mapToPair(x -> new Tuple2<String, String>(x[0], x[1]));
@@ -354,7 +352,7 @@ public class rankJob {
 				});
 
 
-		int iMax = 3;
+		int iMax = 15;
 		int count = 0;
 		double dMax = 0.001;		
 		double delta = Integer.MAX_VALUE; 
@@ -362,77 +360,77 @@ public class rankJob {
 		while (delta > dMax && count < iMax) {
 			JavaPairRDD<String, Tuple2<Tuple2<String,Double>, Tuple2<String,Double>>> propagateRank = EdgeTransfer// to->from, transfer.join(EdgeTransfer
 					.mapToPair(x -> new Tuple2<>(x._2._1, new Tuple2<>(x._1, x._2._2))) 
-					.join(rank); // self, flag, weight
+					.join(rank) // self, flag(x._2._2._1), rank
+					.mapToPair(x -> new Tuple2<>(x._2._1._1, new Tuple2<>(new Tuple2<>(x._1, x._2._1._2), x._2._2)))
+					.join(rank.mapToPair(x-> new Tuple2<>(x._1, x._2._1)))
+					.mapToPair(x -> new Tuple2<>(x._2._1._1._1, 
+						new Tuple2<>(new Tuple2<>(x._1, x._2._1._1._2), new Tuple2<>(x._2._2, x._2._1._2._2)))); 	
 
-					// 받는 사람 잘 구분하기.. 여기가 문제인듯
 
 			JavaPairRDD<String, Tuple2<String,Double>> interMediateRank = propagateRank
 					.mapToPair(x -> new Tuple2<String, Tuple2<String,Double>> 
-					(x._2._1._1, new Tuple2<String, Double> (x._2._2._1, x._2._2._2 * x._2._1._2)));	//x._2._1._1
-
-			interMediateRank.mapToPair(x -> new Tuple2<>(x._2._2, x._1)).sortByKey(false).collect().stream().limit(6)
-					.forEach(item ->
-				{System.out.println(item._1 + "interm === " + item._2);
-				});
+					(x._2._1._1, new Tuple2<String, Double> (x._2._2._1, x._2._2._2 * x._2._1._2)));
 
 			JavaPairRDD<String, Double> sum  = interMediateRank
 					.mapToPair(x -> new Tuple2<String, Double> (x._1, x._2._2))
 					.reduceByKey((x, y) -> x+y )
 					.mapToPair(x -> { if (x._2 > 1.0) {return new Tuple2<>(x._1, 1.0);} else {return new Tuple2<>(x._1, x._2);}});
-
-			sum.mapToPair(x -> new Tuple2<>(x._2, x._1)).sortByKey(false).collect().stream().limit(6)
-					.forEach(item ->
-				{System.out.println(item._1 + "sum === " + item._2);
-				});
 			
 			JavaPairRDD<String, Tuple2<String,Double>> normalizedRank = interMediateRank
-					//.mapToPair(x -> new Tuple2<> (x._2._1, new Tuple2<>(x._1, x._2._2)))
 					.join(sum)
 					.mapToPair(x -> new Tuple2<String, Tuple2<String,Double>> 
 						(x._1, new Tuple2<String, Double> (x._2._1._1, x._2._2)));
 
-			normalizedRank.mapToPair(x -> new Tuple2<>(x._2._2, x._1)).sortByKey(false).collect().stream().limit(6)
-					.forEach(item ->
-				{System.out.println(item._1 + "normal === " + item._2);
-				});
-
 			delta = rank
-					//.mapToPair(x -> new Tuple2<Tuple2<String, String>, Double> (new Tuple2<String, String>(x._1, x._2._1), x._2._2))
-					.join(normalizedRank
-						//.mapToPair(x -> new Tuple2<Tuple2<String, String>, Double> (new Tuple2<String, String>(x._1, x._2._1), x._2._2))
-						)
+					.join(normalizedRank)
 					.mapToPair(item -> new Tuple2<Double, String>
 										(Math.abs(item._2._2._2 - item._2._1._2), item._1))
 					.sortByKey(false).first()._1;
-
-			if (count > 8) {
-				userNode = userNode.filter( x -> x._2._2 >= 0.5);
-			}
 			
 			count++;
 			rank = normalizedRank.distinct();
 			System.out.println("Round " + count + " delta : " + delta);			
 		}
 
+		System.out.println("EXIT");
+
 		db = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
 		DynamoDB conn = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
+		String tableName = "newsRanked";
 
-		rank
-		.mapToPair(x -> new Tuple2<>(x._2._1, new Tuple2<>(x._1, x._2._2)))
-		.filter(x -> x._1.compareTo("a") == 0)
+		/*rank 
 		.mapToPair(x -> new Tuple2<>(x._2._2, new Tuple2<>(x._1, x._2._1)))
 		.sortByKey(false)
 		.collect().stream()
 		.limit(10).forEach(item ->{
-			System.out.println(item._2._2 + " -> " + item._1);
-		});
+			System.out.println(item._2._1 + " -> " + item._1 + "type:" + item._2._2 + (item._2._2.compareTo("a") == 0));
+		});*/
 
-		/*Item newsItem = new Item()
-							.withPrimaryKey("username", username, "rank", dt)
-							.withString("category", (String) news.getAs(0));*/
-		// upload it to dynamodb
-		
-		
+		Iterator<Tuple2<Double, Tuple2<String, String>>> iter = rank
+												.filter(x -> x._2._1.compareTo("a") == 0) 
+												.mapToPair(x -> new Tuple2<>(x._2._2, new Tuple2<>(x._1, x._2._1)))
+												.sortByKey(false)
+												.collect().stream().limit(10)
+												.collect(Collectors.toList())
+												.iterator();
+
+		int arti = 0;
+		HashSet<Item> rows = new HashSet<Item>(); 
+		while (iter.hasNext()) {
+			Tuple2<Double, Tuple2<String, String>> now = iter.next();
+			arti++;
+			Item newsItem = new Item()
+						.withPrimaryKey("username", username, "rank", arti)
+						.withString("headline", now._2._1);
+			rows.add(newsItem);
+		}
+
+		TableWriteItems writ = new TableWriteItems(tableName).withItemsToPut(rows);
+		BatchWriteItemOutcome ret = conn.batchWriteItem(writ);
+		Map<String, List<WriteRequest>> leftover = ret.getUnprocessedItems();
+		if (leftover != null && leftover.size() != 0) {
+			conn.batchWriteItemUnprocessed(leftover);
+		}	
 	}
 
 	public void shutdown() {

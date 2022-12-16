@@ -205,45 +205,41 @@ const postCreateUser = (req, res) => {
  */
 const getChat = (req, res) => {
 	// call user from req.session.user
+	let user = req.session.user;
+	
 	if (req.session.user != null) {
-		let user = req.session.user;
-		// call db method to query
-		
-		res.render('chats');		
-		
+		db.findChats(user, (err, data) => {
+			if (data != null) {
+				console.log(data);
+				let data2 = JSON.parse(data);
+				console.log(data2);
+				return res.render('chats', {chatlist: data2, username: user.username});
+			} else {
+				console.log(err);
+			}
+		});
+		return;
 	} else {
 		// not logged in, return to homepage & log reason on console
-		res.render('chats');
+		res.redirect('/');
+		return;
 	}
 }
 
-const sendChatList = (req, res) => {
+
+const sendChatList = function (req, res) {
 	// call user from req.session.user
-	if (req.session.user != null) {
-		let user = req.session.user;
-		// call db method to query
-		
-		let chats = [];
-		
-		db.findChats(user, (err, data) => {
-			// create js array using data, save array to session: req.session.chats
-			if (err) {
-				console.log(err);
-			} else {
-				// render chats page: if req.session.chats == null or empty list, show a specific message on the page (FRONTEND)
-				chats = data;
-			}
-		});
-		
-		console.log(chats);
-		return res.json({currentuser: user.username, chatlist: chats});
-		
-	} else {
-		// not logged in, return to homepage & log reason on console
-		console.log("Not logged in, returned to homepage.");
-		return res.json({currentuser: "bobthetester", 
-		  chatlist: [ {roomid: "testroom1", chatname: "Test One", creator: "ace"}]});
-	}
+	let user = req.session.user;
+	
+	db.findChats(user, (err, data) => {
+		if (err != null) {
+			console.log(err);
+			return;
+		} else {
+			res.send(JSON.stringify({currentuser: user.username, clist: data}));
+			return;
+		}
+	});
 }
 
 /**
@@ -421,7 +417,7 @@ const routes = {
   
   // ace: To Commit
   loadChatPage: getChat,
-  getChats: sendChatList,
+  postChatList: sendChatList,
   addChat: addChat,
   popupFriends: viewFriends,
   addFriend: addFriend,

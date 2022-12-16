@@ -175,7 +175,7 @@ app.get('/getFriends/:user', routes.postGetFriend); //routes.sendFriends?
 
 /** moves to chat page: should have a list of user's chats, and a new chat room button. REFRESH every 3 seconds */
 app.get('/chat', routes.loadChatPage);
-app.post('/chatlist', routes.getChats);
+app.post('/chatlist', routes.postChatList);
 /** adds new chat to list, opens up chatroom, button to add friend, text input box + button to send text */
 app.get('/createroom', routes.addChat);
 /** opens up chatroom chosen from list; loads and outputs list of previous messages */

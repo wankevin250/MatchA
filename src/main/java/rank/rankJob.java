@@ -123,13 +123,13 @@ public class rankJob {
 							String[] inter = new String[2];
 							inter[0] = line.get("category").getS();
 							inter[1] = line.get("count").getN().toString();
-							System.out.println("cateogory count:"+inter[0]+inter[1]);
+							System.out.println("cateogory count:"+inter[0]+1/Double.parseDouble(inter[1]));
 							return inter;
 						})
 						.collect(Collectors.toList());
 		JavaRDD<String[]> inArr = context.parallelize(rowOfInterest);
 		JavaPairRDD<String, Double> result = inArr
-											.mapToPair(x -> new Tuple2<String, Double>(x[0], Double.parseDouble(x[1])));
+											.mapToPair(x -> new Tuple2<String, Double>(x[0], 1/Double.parseDouble(x[1])));
 		
 		return result;
 	}
@@ -159,7 +159,7 @@ public class rankJob {
 								String[] inter = new String[2];
 								inter[0] = line.get("headline").getS();
 								inter[1] = line.get("category").getS();
-								System.out.println("news count:"+inter[0]+inter[1]+ dt);
+								//System.out.println("news count:"+inter[0]+inter[1]+ dt);
 								rowOfInterest.add(inter);
 							}
 						});
@@ -255,14 +255,15 @@ public class rankJob {
 		
 		JavaPairRDD<String, String> UserEdge = getFriendsEdge();
 		JavaPairRDD<String, String> InterestEdge = getInteretsEdge();
-		JavaPairRDD<String, String> NewsLikeEdge = getNewsLikeEdge();
+		JavaPairRDD<String, String> NewsLikeEdge = getNewsLikeEdge(); // user -> hd
 		JavaPairRDD<String, Double> categoryNodeWeight = getCategoryWeight(categoryEdgeURL);
-		JavaPairRDD<String, String> CategoryNewsEdge = getCategoryArticleEdge();
+		JavaPairRDD<String, String> CategoryNewsEdge = getCategoryArticleEdge(); // hd -> ct
 
 		JavaPairRDD<String, String> allUserEdge = UserEdge
 				.union(UserEdge.mapToPair(x-> new Tuple2<String, String>(x._2, x._1)))
 				.distinct();
 		
+		// news -> sth
 		JavaPairRDD<String, String> allNewsEdge = NewsLikeEdge
 				.union(CategoryNewsEdge.mapToPair(x -> new Tuple2<String, String>(x._2, x._1)))
 				.distinct();
@@ -270,39 +271,44 @@ public class rankJob {
 		JavaPairRDD<String, Tuple2<String, Double>> catEdgeTransfer = CategoryNewsEdge
 				.join(categoryNodeWeight);
 
-		JavaPairRDD<String, Tuple2<String, Double>> newsEdgeTransfer =  allNewsEdge
-				.join(allNewsEdge
-					.mapToPair(x -> new Tuple2<String, Integer>(x._1, 1)) 
+		// (news from, (to, weight))
+		JavaPairRDD<String, Tuple2<String, Double>> newsEdgeTransfer = allNewsEdge
+				.join(
+					allNewsEdge
+					.mapToPair(x -> new Tuple2<String, Integer>(x._1, 1))
+				    //.union(CategoryNewsEdge.mapToPair(x -> new Tuple2<String, Integer>(x._1, 1)) 
 					.reduceByKey((x, y) -> x + y)
-					.mapToPair(x -> new Tuple2<String, Double>(x._1, (10.0 * x._2 / 3.0))));
+					.mapToPair(x -> new Tuple2<String, Double>(x._1, (1.0/x._2))));
 
+		
 		JavaPairRDD<String, Tuple2<String, Double>> userFriendEdgeTransfer = allUserEdge
 				.join(allUserEdge
 					.mapToPair(x -> new Tuple2<String, Integer>(x._1, 1)) 
 					.reduceByKey((x, y) -> x + y)
-					.mapToPair(x -> new Tuple2<String, Double>(x._1, (10.0 * x._2 / 4.0))));
+					.mapToPair(x -> new Tuple2<String, Double>(x._1, (0.3/x._2))));
 
 		JavaPairRDD<String, Tuple2<String, Double>> userInterestEdgeTransfer = InterestEdge
 				.join(InterestEdge
 					.mapToPair(x -> new Tuple2<String, Integer>(x._1, 1)) 
 					.reduceByKey((x, y) -> x + y)
-					.mapToPair(x -> new Tuple2<String, Double>(x._1, (10.0 * x._2 / 3.0))));
+					.mapToPair(x -> new Tuple2<String, Double>(x._1, (0.3/x._2))));
 		
+		// for user, article edge
 		JavaPairRDD<String, Tuple2<String, Double>> userNewsEdgeTransfer =  NewsLikeEdge
 				.join(NewsLikeEdge
 					.mapToPair(x -> new Tuple2<String, Integer>(x._1, 1)) 
 					.reduceByKey((x, y) -> x + y)
-					.mapToPair(x -> new Tuple2<String, Double>(x._1, (10.0 * x._2 / 3.0))));
+					.mapToPair(x -> new Tuple2<String, Double>(x._1, (0.4/x._2))));
 
 		JavaPairRDD<String, Tuple2<String, Double>> userEdgeTransfer = userNewsEdgeTransfer
 					.union(userFriendEdgeTransfer)
-					.union(userInterestEdgeTransfer)
-					.distinct();
+					.union(userInterestEdgeTransfer);
+					//.distinct();
 
 		JavaPairRDD<String, Tuple2<String, Double>> EdgeTransfer = catEdgeTransfer
 					.union(newsEdgeTransfer)
 					.union(userEdgeTransfer)
-					.distinct()
+					//.distinct()
 					.mapToPair(x -> new Tuple2<String, Tuple2<String, Double>>(x._2._1, new Tuple2<String, Double>(x._1, x._2._2)));	
 					
 		JavaPairRDD<String, String> network = allNewsEdge
@@ -342,6 +348,10 @@ public class rankJob {
 				{System.out.println(item._1 + " -> " + item._2._2);
 				});
 					//.forEach(x->System.out.println(x._1 + "," + x._2._2));
+		EdgeTransfer.mapToPair(x -> new Tuple2<>(x._2._2, new Tuple2<>(x._1, x._2._1))).sortByKey(false).collect().stream().limit(15)
+					.forEach(item ->
+				{System.out.println(item._1 + " === " + item._2._1 + "to<-from" + item._2._2);
+				});
 
 
 		int iMax = 3;
@@ -350,22 +360,41 @@ public class rankJob {
 		double delta = Integer.MAX_VALUE; 
 
 		while (delta > dMax && count < iMax) {
-			JavaPairRDD<String, Tuple2<Tuple2<String,Double>, Tuple2<String,Double>>> propagateRank = EdgeTransfer
-					.join(rank);
+			JavaPairRDD<String, Tuple2<Tuple2<String,Double>, Tuple2<String,Double>>> propagateRank = EdgeTransfer// to->from, transfer.join(EdgeTransfer
+					.mapToPair(x -> new Tuple2<>(x._2._1, new Tuple2<>(x._1, x._2._2))) 
+					.join(rank); // self, flag, weight
+
+					// 받는 사람 잘 구분하기.. 여기가 문제인듯
 
 			JavaPairRDD<String, Tuple2<String,Double>> interMediateRank = propagateRank
 					.mapToPair(x -> new Tuple2<String, Tuple2<String,Double>> 
-						(x._1, new Tuple2<String, Double> (x._2._2._1, x._2._2._2 * x._2._1._2)));
+					(x._2._1._1, new Tuple2<String, Double> (x._2._2._1, x._2._2._2 * x._2._1._2)));	//x._2._1._1
+
+			interMediateRank.mapToPair(x -> new Tuple2<>(x._2._2, x._1)).sortByKey(false).collect().stream().limit(6)
+					.forEach(item ->
+				{System.out.println(item._1 + "interm === " + item._2);
+				});
 
 			JavaPairRDD<String, Double> sum  = interMediateRank
-					.mapToPair(x -> new Tuple2<String, Double> (x._2._1, x._2._2))
-					.reduceByKey((x, y) -> x + y);
+					.mapToPair(x -> new Tuple2<String, Double> (x._1, x._2._2))
+					.reduceByKey((x, y) -> x+y )
+					.mapToPair(x -> { if (x._2 > 1.0) {return new Tuple2<>(x._1, 1.0);} else {return new Tuple2<>(x._1, x._2);}});
+
+			sum.mapToPair(x -> new Tuple2<>(x._2, x._1)).sortByKey(false).collect().stream().limit(6)
+					.forEach(item ->
+				{System.out.println(item._1 + "sum === " + item._2);
+				});
 			
 			JavaPairRDD<String, Tuple2<String,Double>> normalizedRank = interMediateRank
-					.mapToPair(x -> new Tuple2<> (x._2._1, new Tuple2<>(x._1, x._2._2)))
+					//.mapToPair(x -> new Tuple2<> (x._2._1, new Tuple2<>(x._1, x._2._2)))
 					.join(sum)
 					.mapToPair(x -> new Tuple2<String, Tuple2<String,Double>> 
-						(x._2._1._1, new Tuple2<String, Double> (x._1, x._2._1._2/x._2._2)));
+						(x._1, new Tuple2<String, Double> (x._2._1._1, x._2._2)));
+
+			normalizedRank.mapToPair(x -> new Tuple2<>(x._2._2, x._1)).sortByKey(false).collect().stream().limit(6)
+					.forEach(item ->
+				{System.out.println(item._1 + "normal === " + item._2);
+				});
 
 			delta = rank
 					//.mapToPair(x -> new Tuple2<Tuple2<String, String>, Double> (new Tuple2<String, String>(x._1, x._2._1), x._2._2))
@@ -381,7 +410,7 @@ public class rankJob {
 			}
 			
 			count++;
-			rank = normalizedRank;
+			rank = normalizedRank.distinct();
 			System.out.println("Round " + count + " delta : " + delta);			
 		}
 
@@ -394,17 +423,15 @@ public class rankJob {
 		.mapToPair(x -> new Tuple2<>(x._2._2, new Tuple2<>(x._1, x._2._1)))
 		.sortByKey(false)
 		.collect().stream()
-		.limit(10).forEach(item ->
-				{System.out.println(item._2._2 + " -> " + item._1);
-				});
+		.limit(10).forEach(item ->{
+			System.out.println(item._2._2 + " -> " + item._1);
+		});
 
 		/*Item newsItem = new Item()
 							.withPrimaryKey("username", username, "rank", dt)
 							.withString("category", (String) news.getAs(0));*/
 		// upload it to dynamodb
 		
-
-		shutdown();
 		
 	}
 

@@ -205,45 +205,41 @@ const postCreateUser = (req, res) => {
  */
 const getChat = (req, res) => {
 	// call user from req.session.user
+	let user = req.session.user;
+	
 	if (req.session.user != null) {
-		let user = req.session.user;
-		// call db method to query
-		
-		res.render('chats');		
-		
+		res.render('chats');
 	} else {
 		// not logged in, return to homepage & log reason on console
-		res.render('chats');
+		res.redirect('/');
 	}
 }
 
-const sendChatList = (req, res) => {
+/**
+var sendChatList = function (req, res) {
 	// call user from req.session.user
-	if (req.session.user != null) {
-		let user = req.session.user;
-		// call db method to query
-		
-		let chats = [];
-		
-		db.findChats(user, (err, data) => {
-			// create js array using data, save array to session: req.session.chats
-			if (err) {
-				console.log(err);
-			} else {
-				// render chats page: if req.session.chats == null or empty list, show a specific message on the page (FRONTEND)
-				chats = data;
-			}
-		});
-		
-		console.log(chats);
-		return res.json({currentuser: user.username, chatlist: chats});
-		
+	let user = req.session.user;
+	
+	db.findChats(user, (err, data) => {
+		if (err != null) {
+			console.log(err);
+		} else {
+			return res.json({clist: JSON.parse(data)}); //{currentuser: user.username, clist: data}));
+		}
+	});
+} */
+
+const sendChatList = (req, res) => {
+  let username = req.session.user.username;
+  db.findChats(username, (err, data) => {
+	if(data != null) {
+		console.log(data);
+		var obj = {'clist' : JSON.parse(data), 'username': username};
+		res.send(obj);
 	} else {
-		// not logged in, return to homepage & log reason on console
-		console.log("Not logged in, returned to homepage.");
-		return res.json({currentuser: "bobthetester", 
-		  chatlist: [ {roomid: "testroom1", chatname: "Test One", creator: "ace"}]});
+		console.log(err);
 	}
+  });
 }
 
 /**
@@ -324,7 +320,7 @@ const openChat = (req, res) => {
 	});
 	*/
 	
-	return res.send({
+	res.send({
 		success: true
 	});
 }
@@ -342,7 +338,7 @@ const leaveChat = (req, res) => {
 	});
 	*/
 	
-	return res.send({
+	res.send({
 		success: true
 	});
 }
@@ -432,7 +428,7 @@ const routes = {
   
   // ace: To Commit
   loadChatPage: getChat,
-  getChats: sendChatList,
+  postChatList: sendChatList,
   addChat: addChat,
   popupFriends: viewFriends,
   addFriend: addFriend,

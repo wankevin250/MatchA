@@ -293,10 +293,14 @@ const addChat = (req, res) => {
 		
 		let chatinfo = {
 			creator : user.username,
-			chatname : req.body.chatname,
+			chatname : req.body.chatnameinput,
 			roomid : roomid,
 		};
+		
+		console.log(chatinfo);
+		
 		// call newChat function
+		
 		db.newChat(chatinfo, (status, err, data) => {
 			// return chatinfo = {roomid: value, chatname: chat name, }
 			if (status != 200) {

@@ -337,9 +337,9 @@ const addChatToTable = (chatdata, callback) => {
 	// using username, query user data from table: users, get stringified list of chatrooms, return in array form to routes.js
 	// callback: (status, err, data)
 	if (chatdata != null) {
-		let userlist = [username];
+		let userlist = [chatdata.creator];
 		let item = { 
-			'room-uuid': {S: chatdata.roomid}, 
+			'roomid': {S: chatdata.roomid}, 
 			'creator': {S: chatdata.creator},
 			'users': {S: JSON.stringify(userlist)}, 
 			'chatname': {S: chatdata.chatname}
@@ -362,7 +362,7 @@ const addChatToTable = (chatdata, callback) => {
 					if (err) {
 						callback(500, err, null);
 					} else {
-						if (addChatHelper(chatdata.username, chatdata.roomid, chatdata.chatname) == 0) {
+						if (addChatHelper(chatdata.creator, chatdata.roomid, chatdata.chatname) == 0) {
 							let itemret = { roomid: chatdata.roomid, chatname: chatdata.chatname};
 							callback(200, err, itemret);
 						} else {
@@ -374,7 +374,7 @@ const addChatToTable = (chatdata, callback) => {
 				// generate uuid
 				let newid = uuidv4();
 				let refresheditem = {
-					'room-uuid': {S: newid},
+					'roomid': {S: newid},
 					'creator': {S: chatdata.creator},
 					'users': {S: JSON.stringify(userlist)}, 
 					'chatname': {S: chatdata.chatname}
@@ -384,8 +384,7 @@ const addChatToTable = (chatdata, callback) => {
 					if (err) {
 						callback(500, err, null);
 					} else {
-						
-						if (addChatHelper(chatdata.username, newid, chatdata.chatname) == 0) {
+						if (addChatHelper(chatdata.creator, newid, chatdata.chatname) == 0) {
 							let itemreturn = { roomid: newid, chatname: chatdata.chatname};
 							callback(200, err, itemreturn);
 						} else {
@@ -402,45 +401,51 @@ const addChatToTable = (chatdata, callback) => {
 }
 
 var addChatHelper = function (username, chatid, chatname) {
-	let params = {
-		ExpressionAttributeValues: {
+	console.log(username);
+	
+	var params = {
+	    ExpressionAttributeValues: {
 	      ':username': {S: username},
 	    },
 	    KeyConditionExpression: 'username = :username',
 	    TableName: 'users'
-	};
+    };
 	
 	db.query(params, function(err, data) {
 		if (err) {
+			console.log(err);
 			return -1;
 		} else if (data.Items.length == 0) {
+			console.log("no such user");
 			return -1;
 		} else {
 			let newarr = [];
-			if (data.Items[0].chatrooms != null) {
-				newarr = JSON.parse(data.Items[0].chatrooms);
-			}
 			
+			if (data.Items[0].chatrooms != null) {
+				newarr = JSON.parse(data.Items[0].chatrooms.S);
+			}
 			newarr = newarr.concat({roomid: chatid, chatname: chatname});
 			
+			var newarrstring = JSON.stringify(newarr);
 			console.log(newarr);
 			
 			let listparams = {
 				TableName: 'users',
                 Key: {
-                    id: {
+                    username: {
                         'S': username
                     }
                 },
                 UpdateExpression: "SET chatrooms = :newchatrooms",
                 ExpressionAttributeValues: {
-					":newchatrooms": JSON.stringify(newarr),
+					":newchatrooms": {S: newarrstring},
 				},
 				ReturnValues: "UPDATED_NEW",
 			};
 			
 			db.updateItem(listparams, function(err, data) {
 				if (err) {
+					console.log(err)
 					return -1;
 				} else {
 					return 0; // success!

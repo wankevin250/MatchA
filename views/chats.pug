@@ -3,6 +3,7 @@ extends layouts/standard.pug
 block head
   link(rel='stylesheet', href='/css/chats.css')
   script(src='/socket.io/socket.io.js')
+  script(src="jquery.js")
   script.
     var myID = -1;
     var roomuuid = null;
@@ -67,10 +68,17 @@ block head
         });
       });
       
-      $("#newChat").on("click", function() {
-          createChat()
-      });	
+      chatDataForm
       
+      $('#chatDataForm').on('submit', function(e) {
+            $.post('/createroom', $('#chatDataForm').serialize(), function (data) {
+                
+            }).error(function() {
+                // if call fails
+                alert('Something went wrong. Try again!');
+            });
+            e.preventDefault();
+      });
     });
     
     
@@ -186,12 +194,12 @@ block content
   div(class="leftHalf" id="listbox")
     a#createBtn.createBtnClass(onclick = "openNewChatForm()") Create New Chat
     #chatForm.form-popup
-      form.form-container(action='/action_page.php')
-        label(style='font-family: Helvetica, Sans-Serif; margin:10px')
-          b New Chatroom Name
-        input(type='text', placeholder='Chat Name', name='chatnameinput', required='true', style='font-family: Helvetica, Sans-Serif; margin:10px')
-        button.btnAceBasic(type='submit' style='font-family: Helvetica, Sans-Serif; margin:10px') Create Chat
-        button.btnAceBasic.cancel(type='button', onclick='closeForm()') Close
+        #chatDataForm.form(action='', method='')
+          label(style='font-family: Helvetica, Sans-Serif; margin:10px')
+            b New Chatroom Name
+          input(type='text', placeholder='Chat Name', name='chatnameinput', required='true', style='font-family: Helvetica, Sans-Serif; margin:10px')
+          button.btnAceBasic(type='submit' style='font-family: Helvetica, Sans-Serif; margin:10px') Create Chat
+          button.btnAceBasic.cancel(type='button', onclick='closeForm()') Close
   
   // need to show chatbox iff req.session.currentroom != null
   div(class="rightHalf" id="chatbox")

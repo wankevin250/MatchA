@@ -233,7 +233,7 @@ const sendChatList = (req, res) => {
   let username = req.session.user.username;
   db.findChats(username, (err, data) => {
 	if(data != null) {
-		console.log(data);
+		console.log(JSON.parse(JSON.parse(data)[0].users)[0]);
 		var obj = {'clist' : JSON.parse(data), 'username': username};
 		res.send(obj);
 	} else {

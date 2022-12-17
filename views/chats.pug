@@ -48,6 +48,7 @@ block head
             
             roomuuid = null;
             room = null;
+            currentchatusers = [];
             
             const myNode = document.getElementById("messages");
             myNode.textContent = '';
@@ -127,16 +128,20 @@ block head
                 
                 $("#" + chatlist[i].roomid).on("click", function() {
                     let roomid = chatlist[i].roomid;
+                    let userlist = JSON.parse(chatlist[i].users); 
+                    alert(userlist);
                     
                     $.post('/openroom', { room : roomid }, function(data) {
                         if (data.success) {
                             room = roomid;
                             roomuuid = roomid;
+                            currentchatusers = userlist;
                             socket.emit('join room', {
                                 user: myID,
                                 room: roomid,
                             });
-                        // load all prev. messages to #messages using loop
+                            
+                            // load all prev. messages to #messages using loop
                         
                             $(".leftHalf").css('display', 'none');
                             $(".rightHalf").css('display', 'block');

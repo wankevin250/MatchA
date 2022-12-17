@@ -558,7 +558,7 @@ const computeRank = (user, callback) => {
   
   exec(cmnd,  { encoding: 'utf-8' },
     function (error, stdout, stderr) {
-        console.log('stdout: ' + stdout);
+        console.log('stdout: ' + "adsorption complete");
         console.log('stderr: ' + stderr);
         if (error !== null) {
            // console.log('exec error: ' + error);
@@ -566,12 +566,12 @@ const computeRank = (user, callback) => {
         } // 이 안으로 들여오기  밑에 코드
     });
 
-    console.log("ran exec");
+    //console.log("ran exec");
 
     db.query({
       ExpressionAttributeValues: {
         ':username': {S: user.username},
-        ':maxrank': {N: '10'}
+        ':maxrank': {N: '5'}
       },
       ExpressionAttributeNames: {
         '#rank' : 'rank'
@@ -586,7 +586,7 @@ const computeRank = (user, callback) => {
           //console.log(data);
           callback(null, data.Items);
         } else {     
-          console.log( data.Items);   
+          //console.log( data.Items);   
           callback(null, data.Items);  
         }
       }
@@ -622,7 +622,7 @@ const fetchNewsData = (headlines, callback) => {
         results.push(result);
        }
      }
-     console.log(results);
+     //console.log(results);
      callback(null, results);
    },
    err => {
@@ -630,6 +630,72 @@ const fetchNewsData = (headlines, callback) => {
    } 
  )
 }
+
+const addViewHistory = (user, articles, callback) => {
+    let displayed = "";
+    console.log(articles);
+    for (let i = 0; i < articles.length; i++) {
+      displayed = displayed.concat(articles[i]);
+      displayed = displayed.concat("*");
+    }
+    // let displayed = articles;
+    console.log(displayed);
+    
+
+    db.query({
+      ExpressionAttributeValues: {
+        ':username': {S: user.username},
+      },
+      KeyConditionExpression: 'username = :username',
+      TableName: 'newsViewed',
+    }, (err, data) => {
+      console.log(data);
+      if (err) {
+        callback(err, null);
+      } else if (data.Items.length > 0) {
+        console.log(data.Items[0].viewed.S);
+        let prev = data.Items[0].viewed.S;
+        params = {
+          TableName: 'newsViewed',
+                  Key: {
+                      username: {
+                          'S': user.username
+                      }
+                  },
+                  UpdateExpression: "SET viewed = :viewed",
+                  ExpressionAttributeValues: {
+            ":viewed": {S: prev.concat(displayed)},
+          },
+          ReturnValues: "UPDATED_NEW",
+        };
+        
+        db.updateItem(params, function(err, data) {
+          if (err) {
+            console.log(err)
+            callback(err, null);
+          } else {
+            callback(null, "updated"); // success!
+          }
+        });
+      } else {
+        db.putItem({
+          TableName: 'newsViewed',
+          Item: {
+            username: {S: user.username},
+            viewed : {S: displayed}
+          }
+        },(err, data) => {
+          if (err) {
+            callback(err, null);
+          } else {
+            callback(null, "first");
+          }
+          });
+      }
+    });
+}
+
+
 
 const findNews = (keyword, callback) => {
   //var docClient = new AWS.DynamoDB.DocumentClient();
@@ -695,6 +761,7 @@ const database = {
 
   computeRank:  computeRank,
   fetchNewsData: fetchNewsData,
+  addViewHistory: addViewHistory,
   
 }
 

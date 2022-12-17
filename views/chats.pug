@@ -128,8 +128,7 @@ block head
                 
                 $("#" + chatlist[i].roomid).on("click", function() {
                     let roomid = chatlist[i].roomid;
-                    let userlist = JSON.parse(chatlist[i].users); 
-                    alert(userlist);
+                    let userlist = JSON.parse(chatlist[i].users);
                     
                     $.post('/openroom', { room : roomid }, function(data) {
                         if (data.success) {

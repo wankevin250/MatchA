@@ -460,7 +460,7 @@ public class rankJob {
 
 		int arti = 0;
 		HashSet<Item> rows = new HashSet<Item>(); 
-		while (iter.hasNext() && arti < 8) {
+		while (iter.hasNext() && arti < 25) {
 			Tuple2<Double, Tuple2<String, String>> now = iter.next();
 			if (today.size() == 0 || today.contains(now._2._1)) {
 				arti++;

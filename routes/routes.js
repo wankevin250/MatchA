@@ -440,8 +440,17 @@ const calculateRank = (req, res) => {
 }
 
 const searchNews = (req, res) => {
-	// res ? 
-	// query the news
+  word = request.query.keyword;
+  arr = word.split(" ");
+
+  db.findNews(arr, (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(data);
+      //res.send()
+    }
+  })
 }
 
 const routes = {

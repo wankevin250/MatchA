@@ -359,8 +359,9 @@ const computeRank = (user, callback) => {
     db.query({
       ExpressionAttributeValues: {
         ':username': {S: user.username},
+        ':maxrank': 10
       },
-      KeyConditionExpression: 'username = :username',
+      KeyConditionExpression: 'username = :username and rank <= :maxrank',
       TableName: 'rankedNews'
     }, (err, data) => {
       if (err) {
@@ -410,6 +411,29 @@ const fetchNewsData = (headlines, callback) => {
 }
 
 const findNews = (keyword, callback) => {
+  var docClient = new AWS.DynamoDB.DocumentClient();
+  var result =[];
+  var promises = [];
+
+  for (let i = 0; i < arr.length; i++) {
+    searchWord = keyword[i];
+    searchWord = searchWord.toLowerCase(); // change the search word into lowercase letter
+      if (!(searchWord == ("a") || searchWord == ("all") || searchWord == ("any") || searchWord == ("but") || searchWord == ("the"))) { //filter the words
+          searchWord = stemmer(searchWord); //stem the word
+          var params = {
+        TableName : "tokenizedNews",
+        Limit : 15,
+        ExpressionAttributeValues : {
+          ':k' : searchWord
+        },
+        KeyConditionExpression : 'keyword = :k',
+        };
+        
+        let prom = docClient.query(params).promise(); //create promise for each talk id
+        promises.push(prom);
+      }
+    } 
+
     db.query({
       ExpressionAttributeValues: {
         ':keyword': {S: keyword},
@@ -428,6 +452,7 @@ const findNews = (keyword, callback) => {
       }
     });
 }
+
 
 
 

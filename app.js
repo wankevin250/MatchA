@@ -212,6 +212,13 @@ app.post('/ajaxaddfriend', routes.postAddFriend);
 app.post('/ajaxgetfriends', routes.postGetFriend);
 app.post('/ajaxedituser', routes.postEditUser);
 
+// news
+
+app.get('/news', routes.calculateRank);
+app.get('/newSearch', routes.searchNews);
+
+
+
 app.get('*', (req, res) => {
   res.render('404');
 })

@@ -211,9 +211,10 @@ app.post('/ajaxpostsignup', routes.postCreateUser);
 app.post('/ajaxpostlogin', routes.postLoginUser);
 app.post('/ajaxgetwall', routes.postWallRefresh);
 app.post('/ajaxsearchuser', routes.postScanUsers);
-app.post('/ajaxaddfriend', routes.postAddFriend);
+app.post('/ajaxsendfriendrequest', routes.postSendFriendRequest);
 app.post('/ajaxgetfriends', routes.postGetFriend);
 app.post('/ajaxedituser', routes.postEditUser);
+app.post('/ajaxviewfriendinvites', routes.viewFriendInvites);
 
 // news
 

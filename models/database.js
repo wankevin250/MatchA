@@ -37,6 +37,27 @@ const scanUsers = (searchQuery, callback) => {
 
 }
 
+const queryFriendInvites = (accepter, status, callback) => {
+  db.query({
+    TableName: 'friends',
+    KeyConditionExpression: 'accepter = :accepter',
+    ExpressionAttributeValues: {
+      ':accepter': {S: accepter},
+      ':status': {S: status},
+    },
+    ExpressionAttributeNames: {
+      '#status': {S: 'status'}
+    },
+    FilterExpression: '#status = :status',
+  }, (err, data) => {
+    if (err) {
+      callback(500, err, null);
+    } else {
+      callback(500, err, data.Items);
+    }
+  });
+}
+
 const getFriends = (username, callback) => {
   let friends = [];
 
@@ -84,23 +105,73 @@ const queryPosts = (userwall, callback) => {
   });
 }
 
-const addFriend = (asker, accepter, callback) => {
-  db.putItem({
-    TableName: 'friends',
-    Item: {
-      accepter: {S: accepter},
-      asker: {S: asker},
-      status: {S: 'false'},
-      timestamp: {S: (new Date()).toUTCString()}
+const sendFriendRequest = (asker, accepter, callback) => {
+  db.query({
+    TableName: 'users',
+    KeyConditionExpression: 'username = :username',
+    ExpressionAttributeValues: {
+      ':username': {S: asker}
     }
   }, (err, data) => {
     if (err) {
       callback(500, err, null);
     } else {
-      callback(201, err, data);
+      let askerUser = data.Items[0];
+      let rPrev = askerUser.sentRequests;
+      let item = {};
+      askerUser.sentRequests = rPrev ? JSON.stringify(JSON.parse(rPrev).append(accepter)) 
+        : JSON.stringify([].append(accepter));
+
+      Object.entries(askerUser).forEach(entry => {
+        let [key, val] = entry;
+        item[key] = {S: val};
+      });
+      db.putItem({
+        TableName: 'users',
+        Item: item,
+      }, (err, data) => {
+        if (err) {
+          callback(500, err, null);
+        } else {
+          db.putItem({
+            TableName: 'friends',
+            Item: {
+              accepter: {S: accepter},
+              asker: {S: asker},
+              status: {S: 'false'},
+              timestamp: {S: (new Date()).toUTCString()}
+            }
+          }, (err, data) => {
+            if (err) {
+              callback(500, err, null);
+            } else {
+              callback(201, err, data);
+            }
+          });
+        }
+      });
     }
-  });
+  })
 }
+
+// const addFriend = (asker, accepter, callback) => {
+
+//   db.putItem({
+//     TableName: 'friends',
+//     Item: {
+//       accepter: {S: accepter},
+//       asker: {S: asker},
+//       status: {S: 'false'},
+//       timestamp: {S: (new Date()).toUTCString()}
+//     }
+//   }, (err, data) => {
+//     if (err) {
+//       callback(500, err, null);
+//     } else {
+//       callback(201, err, data);
+//     }
+//   });
+// }
 
 const loginUser = (username, password, callback) => {
   db.query({
@@ -592,9 +663,6 @@ const findNews = (keyword, callback) => {
     });
 }
 
-
-
-
 const database = {
   // queryUser: queryUser,
   createUser: createUser,
@@ -602,8 +670,9 @@ const database = {
   loginUser: loginUser,
   scanUsers: scanUsers,
   
-  addFriend, addFriend,
+  sendFriendRequest: sendFriendRequest,
   getFriends: getFriends,
+  queryFriendInvites: queryFriendInvites,
 
   queryPosts: queryPosts,
   

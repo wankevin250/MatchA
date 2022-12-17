@@ -92,6 +92,20 @@ const getNotifications = (req, res) => {
   }
 }
 
+const viewFriendInvites = (req, res) => {
+  if (req.session && req.session.user) {
+    db.queryFriendInvites(req.session.user.username, false, (status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+        res.send(JSON.stringify(data));
+      } else {
+        res.status(status).send(new Error(err));
+      }
+    })
+  } else {
+    res.status(401).send(new Error("No user"))
+  }
+}
+
 const postScanUsers = (req, res) => {
   let query = req.body.query;
   console.log(query);
@@ -126,12 +140,12 @@ const postGetFriend = (req, res) => {
   }
 }
 
-const postAddFriend = (req, res) => {
+const postSendFriendRequest = (req, res) => {
   let accepter = req.body.accepter;
   console.log(accepter);
 
   if (accepter && accepter.match(/^\w{3,25}$/)) {
-    db.addFriend(req.session.user.username, accepter, (status, err, data) => {
+    db.sendFriendRequest(req.session.user.username, accepter, (status, err, data) => {
       if (isSuccessfulStatus(status)) {
         res.sendStatus(201);
       } else {
@@ -499,8 +513,9 @@ const routes = {
   postWallRefresh: postWallRefresh,
   postScanUsers: postScanUsers,
 
-  postAddFriend: postAddFriend,
+  postSendFriendRequest: postSendFriendRequest,
   postGetFriend: postGetFriend,
+  viewFriendInvites: viewFriendInvites,
 
   // Kevin's visualizer routes
   getVisualizer: getVisualizer,

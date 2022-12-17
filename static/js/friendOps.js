@@ -1,7 +1,7 @@
 function addFriend(username, callback) {
     console.log(username);
     $.ajax({
-        url: 'ajaxaddfriend',
+        url: 'ajaxsendfriendrequest',
         type: 'POST',
         async: true,
         datatype: 'json',

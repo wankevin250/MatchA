@@ -72,6 +72,16 @@ const getSettings = (req, res) => {
   }
 }
 
+const getMyWall = (req, res) => {
+  let homeUser = req.params.username;
+
+  if (req.session && req.session.username) {
+    res.render('mywall', {homeuser: homeUser});
+  } else {
+    res.redirect('/login');
+  }
+}
+
 const postScanUsers = (req, res) => {
   let query = req.body.query;
   console.log(query);
@@ -123,11 +133,26 @@ const postAddFriend = (req, res) => {
   }
 }
 
+const postMyWallRefresh = (req, res) => {
+  let userwall = req.body.userwall;
+
+  if (req.session && req.session.user) {
+    db.queryPosts(userwall, (status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+
+      } else {
+        res.status(status).send(new Error(err));
+      }
+    });
+  } else {
+    res.status(401).send(new Error("No user signed in"));
+  }
+}
+
 const postWallRefresh = (req, res) => {
   if (req.session && req.session.user) {
-    
   } else {
-    res.redirect('/login');
+    res.status(401).send(new Error("No user signed in"));
   }
 }
 
@@ -136,7 +161,7 @@ const postLoginUser = (req, res) => {
   let password = req.body.password;
 
   if (req.session && req.session.user) {
-    res.redirect('/wall');
+    res.status(403).send(new Error("User already signed in"));
   } else {
     db.loginUser(username, password, (status, err, data) => {
       if (isSuccessfulStatus(status)) {
@@ -412,7 +437,7 @@ const calculateRank = (req, res) => {
 		let user = req.session.user;
     console.log(user);
 
-    db.computeRank(user.username, (err, data) => {
+    db.computeRank(user, (err, data) => {
       if (err) {
         console.log(err);
       } else {
@@ -435,7 +460,11 @@ const calculateRank = (req, res) => {
     })
   } else {
     console.log("Not logged in, returned to homepage.");
-		res.redirect('splash.pug');
+<<<<<<< HEAD
+		res.redirect('/');
+=======
+		res.redirect('/login');
+>>>>>>> b7bce3e8a6987e2643b42b3c2ce0c4c385bd1193
   }
 }
 
@@ -463,6 +492,7 @@ const routes = {
   getSearchUser: getSearchUser,
   getFriends: getFriends,
   getSettings: getSettings,
+  getMyWall: getMyWall,
   
   // ace: To Commit
   loadChatPage: getChat,

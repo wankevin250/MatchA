@@ -590,15 +590,18 @@ var displayFriends = function (username, chatid, callback) {
 									listofuserschat = JSON.parse(data.Items[0].users.S);
 									
 									// console.log(compareLists(listoffriends, listofuserschat));
+									var listfriends = extractUserNames(compareLists(listoffriends, listofuserschat));
 									callback(200, null, compareLists(listoffriends, listofuserschat));
 								} else {
 									// console.log(compareLists(listoffriends, listofuserschat));
+									var listfriends = extractUserNames(compareLists(listoffriends, listofuserschat));
 									callback(200, null, compareLists(listoffriends, listofuserschat));
 								}
 							} else {
 								console.log("No users in this chat!");
 								
 								// console.log(compareLists(listoffriends, listofuserschat));
+								var listfriends = extractUserNames(compareLists(listoffriends, listofuserschat));
 								callback(200, null, compareLists(listoffriends, listofuserschat));
 							}
 						}
@@ -616,15 +619,18 @@ var displayFriends = function (username, chatid, callback) {
 									listofuserschat = JSON.parse(data.Items[0].users.S);
 									
 									// console.log(compareLists(listoffriends, listofuserschat));
+									var listfriends = extractUserNames(compareLists(listoffriends, listofuserschat));
 									callback(200, null, compareLists(listoffriends, listofuserschat));
 								} else {
 									// console.log(compareLists(listoffriends, listofuserschat));
+									var listfriends = extractUserNames(compareLists(listoffriends, listofuserschat));
 									callback(200, null, compareLists(listoffriends, listofuserschat));
 								}
 							} else {
 								console.log("No users in this chat!");
 								
 								// console.log(compareLists(listoffriends, listofuserschat));
+								var listfriends = extractUserNames(compareLists(listoffriends, listofuserschat));
 								callback(200, null, compareLists(listoffriends, listofuserschat));
 							}
 						}
@@ -640,17 +646,20 @@ var displayFriends = function (username, chatid, callback) {
 							console.log(data.Items[0].users);
 							if (data.Items[0].users.S != '') {
 								listofuserschat = JSON.parse(data.Items[0].users.S);
-								var answer = [];
+								
 								// console.log(compareLists(listoffriends, listofuserschat));
+								var listfriends = extractUserNames(compareLists(listoffriends, listofuserschat));
 								callback(200, null, compareLists(listoffriends, listofuserschat));
 							} else {
 								// console.log(compareLists(listoffriends, listofuserschat));
+								var listfriends = extractUserNames(compareLists(listoffriends, listofuserschat));
 								callback(200, null, compareLists(listoffriends, listofuserschat));
 							}
 						} else {
 							console.log("No users in this chat!");
 							
 							// console.log(compareLists(listoffriends, listofuserschat));
+							var listfriends = extractUserNames(compareLists(listoffriends, listofuserschat));
 							callback(200, null, compareLists(listoffriends, listofuserschat));
 						}
 					}
@@ -675,6 +684,49 @@ function compareLists (arrayA, arrayB) {
 	console.log(ans);
 	return ans;
 }
+
+/***
+ * 
+ * @params
+ */
+ 
+ function extractUserNames (userlist) {
+	var ans = [];
+	
+	if (userlist == null) {
+		userlist = [];
+	}
+	
+	for (let i = 0; i < userlist.length; i++) {
+		let username = userlist[i];
+		var params = {
+			ExpressionAttributeValues: {
+				':username': {S: username},
+			},
+			KeyConditionExpression: 'username = :username',
+			TableName: 'users'
+		}
+		db.query(params, (err, data) => {
+			var userdisplay = '';
+			if (data.Items[0].displayname != null && data.Items[0].displayname.S != '') {
+				userdisplay = data.Items[0].displayname.S;
+			}
+			var userfullname = '';
+			if (data.Items[0].firstname != null && data.Items[0].lastname != null) {
+				userfullname = data.Items[0].firstname.S + " " + data.Items[0].lastname.S;
+			}
+			
+			var userobj = {username: username, displayname: userdisplay, fullname: userfullname};
+			
+			ans.push(userobj);
+		});
+		
+	}
+	
+	console.log (ans);
+	return ans;
+}
+
 /***
  * @params (friend id, chat id, callback (status, err, data))
  */

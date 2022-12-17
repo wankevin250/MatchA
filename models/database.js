@@ -362,12 +362,16 @@ const addChatToTable = (chatdata, callback) => {
 					if (err) {
 						callback(500, err, null);
 					} else {
+						console.log(addChatHelper(chatdata.creator, chatdata.roomid, chatdata.chatname));
+						let itemret = { roomid: chatdata.roomid, chatname: chatdata.chatname};
+						callback(200, err, itemret);
+						/** 
 						if (addChatHelper(chatdata.creator, chatdata.roomid, chatdata.chatname) == 0) {
 							let itemret = { roomid: chatdata.roomid, chatname: chatdata.chatname};
 							callback(200, err, itemret);
 						} else {
 							callback(500, err, null);
-						}
+						} */
 					}
 				});
 			} else {
@@ -384,12 +388,16 @@ const addChatToTable = (chatdata, callback) => {
 					if (err) {
 						callback(500, err, null);
 					} else {
-						if (addChatHelper(chatdata.creator, newid, chatdata.chatname) == 0) {
+						console.log(addChatHelper(chatdata.creator, newid, chatdata.chatname));
+						let itemreturn = { roomid: newid, chatname: chatdata.chatname};
+						callback(200, err, itemreturn);
+						/**
+						if (addChatHelper(chatdata.creator, newid, chatdata.chatname) != 0) {
 							let itemreturn = { roomid: newid, chatname: chatdata.chatname};
 							callback(200, err, itemreturn);
 						} else {
 							callback(500, err, null);
-						}
+						} */
 					}
 				});
 			}
@@ -421,13 +429,13 @@ var addChatHelper = function (username, chatid, chatname) {
 		} else {
 			let newarr = [];
 			
-			if (data.Items[0].chatrooms != null) {
+			if (data.Items[0].chatrooms != null && data.Items[0].chatrooms.S != "") {
 				newarr = JSON.parse(data.Items[0].chatrooms.S);
 			}
+			
 			newarr = newarr.concat({roomid: chatid, chatname: chatname});
 			
 			var newarrstring = JSON.stringify(newarr);
-			console.log(newarr);
 			
 			let listparams = {
 				TableName: 'users',

@@ -3,7 +3,6 @@ extends layouts/standard.pug
 block head
   link(rel='stylesheet', href='/css/chats.css')
   script(src='/socket.io/socket.io.js')
-  script(src="jquery.js")
   script.
     var myID = -1;
     var roomuuid = null;
@@ -68,16 +67,53 @@ block head
         });
       });
       
-      chatDataForm
-      
-      $('#chatDataForm').on('submit', function(e) {
-            $.post('/createroom', $('#chatDataForm').serialize(), function (data) {
-                
-            }).error(function() {
-                // if call fails
-                alert('Something went wrong. Try again!');
-            });
-            e.preventDefault();
+      $('#submitData').on('click', function(e) {
+          var inputdata = document.getElementById("chatnameinput").value
+          
+          if (inputdata.trim().length == 0) {
+              alert("You MUST input a name!");
+          } else {
+              $.post('/createroom', { chatnameinput : inputdata } , function (data) {
+                  document.getElementById("chatnameinput").value = "";
+                  document.getElementById("chatForm").style.display = "none";
+                  
+                  
+                  if (data != null) {
+                    var chatbutton_temp = document.createElement("a");
+                    chatbutton_temp.setAttribute("class", "chatBtnClass");
+                    chatbutton_temp.setAttribute('id', data.roomid);
+                    chatbutton_temp.appendChild(document.createTextNode(data.chatname));
+                    
+                    $('#listbox').append(chatbutton_temp);
+                    
+                    $("#" + data.roomid).on("click", function() {
+                        let roomid = data.roomid;
+                        
+                        $.post('/openroom', { room : roomid }, function(d) {
+                            if (d.success) {
+                                room = roomid;
+                                roomuuid = roomid;
+                                currentchatusers = d.userlist;
+                                
+                                socket.emit('join room', {
+                                    user: myID,
+                                    room: roomid,
+                                });
+                                
+                               // load all prev. messages to #messages using loop
+                               
+                                $(".leftHalf").css('display', 'none');
+                                $(".rightHalf").css('display', 'block');
+                            }
+                        });
+                    });
+                  }
+              }).error(function() {
+                    // if call fails
+                    alert('Something went wrong. Try again!');
+              });
+          }
+          
       });
     });
     
@@ -174,12 +210,6 @@ block head
     	});
     }
     
-    async function createChat(chatname) {
-    	$.post('/createroom', { chatname : roomuuid }, function(data) {
-    	    
-    	});
-    }
-    
   title Chats 
 
 block content
@@ -194,11 +224,11 @@ block content
   div(class="leftHalf" id="listbox")
     a#createBtn.createBtnClass(onclick = "openNewChatForm()") Create New Chat
     #chatForm.form-popup
-        #chatDataForm.form(action='', method='')
+        div
           label(style='font-family: Helvetica, Sans-Serif; margin:10px')
             b New Chatroom Name
-          input(type='text', placeholder='Chat Name', name='chatnameinput', required='true', style='font-family: Helvetica, Sans-Serif; margin:10px')
-          button.btnAceBasic(type='submit' style='font-family: Helvetica, Sans-Serif; margin:10px') Create Chat
+          input(type='text', placeholder='Chat Name', id='chatnameinput', required='true', style='font-family: Helvetica, Sans-Serif; margin:10px; display:inline-block')
+          #submitData.button.btnAceBasic(style='display:inline-block') Create Chat
           button.btnAceBasic.cancel(type='button', onclick='closeForm()') Close
   
   // need to show chatbox iff req.session.currentroom != null

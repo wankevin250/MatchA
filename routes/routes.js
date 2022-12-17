@@ -268,8 +268,13 @@ const sendChatList = (req, res) => {
   let username = req.session.user.username;
   db.findChats(username, (err, data) => {
 	if(data != null) {
-		var obj = {'clist' : JSON.parse(data), 'username': username};
-		res.send(obj);
+		if (data.length == 0 || data === "[]") {
+			var obj = {'clist' : [], 'username': username};
+			res.send(obj);
+		} else {
+			var obj = {'clist' : JSON.parse(data), 'username': username};
+			res.send(obj);
+		}
 	} else {
 		console.log(err);
 	}
@@ -297,29 +302,24 @@ const addChat = (req, res) => {
 			roomid : roomid,
 		};
 		
-		console.log(chatinfo);
-		
 		// call newChat function
-		
 		db.newChat(chatinfo, (status, err, data) => {
 			// return chatinfo = {roomid: value, chatname: chat name, }
 			if (status != 200) {
+				console.log(status);
 				console.log(err);
-				
 				if (status == 500) {
-					res.status(status).send(new Error(err));
+					return res.status(status).send(new Error(err));
 				} else {
-					res.sendStatus(status);
+					return res.sendStatus(status);
 				}
 			} else {
 				// set req.session.currentroom = { id: room-uuid, name: chatname, creator: req.session.user }
 				req.session.currentroom = data.roomid;
-				console.log(data);
-				res.send(data);
+				return res.send(data);
 			}
 		});
 		// KEVIN: on frontend we need to call reloadData on the chatlist div after addChat 
-		
 	} else {
 		// not logged in, return to homepage & log reason on console
 		console.log("Not logged in, returned to homepage.");

@@ -124,7 +124,7 @@ public class rankJob {
 							String[] inter = new String[2];
 							inter[0] = line.get("category").getS();
 							inter[1] = line.get("count").getN().toString();
-							System.out.println("cateogory count:"+inter[0]+1/Double.parseDouble(inter[1]));
+							//System.out.println("cateogory count:"+inter[0]+1/Double.parseDouble(inter[1]));
 							return inter;
 						})
 						.collect(Collectors.toList());
@@ -222,7 +222,7 @@ public class rankJob {
 							String[] inter = new String[2];
 							inter[0] = line.get("username").getS();
 							inter[1] = line.get("interest").getS();
-							System.out.println("interest:"+inter[0]+inter[1]);
+							//System.out.println("interest:"+inter[0]+inter[1]);
 							return inter;// Make Row with Schema
 						})
 						.collect(Collectors.toList());
@@ -244,7 +244,7 @@ public class rankJob {
 							String[] news = new String[2];
 							news[0] = line.get("username").getS();
 							news[1] = line.get("headline").getS();
-							System.out.println("newslike:"+news[0]+news[1]);
+							//System.out.println("newslike:"+news[0]+news[1]);
 							return news;// Make Row with Schema
 						})
 						.collect(Collectors.toList());
@@ -276,11 +276,11 @@ public class rankJob {
 		Iterator<Item> iter = items.iterator();
 		while (iter.hasNext()) {
 			Item f = iter.next();
-			System.out.println(f);
+			//System.out.println(f);
 			String[] row = new String[2];
 			row[0] = f.get("accepter").toString();
 			row[1] = f.get("asker").toString();
-			System.out.println("freinds"+row[0] + "and" + row[1]);
+			//System.out.println("freinds"+row[0] + "and" + row[1]);
 			friends.add(row);
 		}
 		JavaRDD<String[]> inArr = context.parallelize(friends);

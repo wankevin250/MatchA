@@ -549,15 +549,17 @@ const viewOneChat = (chatid, callback) => {
 // end of ACE HOUR
 
 
+
 // start of Sebin News
 const computeRank = (user, callback) => {
 	// using username as an input for run, execute the whole rankJob.class
 	var exec = require('child_process').exec;
+  var cmnd = 'mvn exec:java@ranker' + ' -Dexec.args=' + user.username;
   
-  exec('mvn exec:java@ranker' + ' -Dexec.args=' + user.username,
+  exec(cmnd,  { encoding: 'utf-8' },
     function (error, stdout, stderr) {
-        console.log('stdout: ' + user.username);
-        //console.log('stderr: ' + stderr);
+        console.log('stdout: ' + stdout);
+        console.log('stderr: ' + stderr);
         if (error !== null) {
            // console.log('exec error: ' + error);
             callback(error, null);
@@ -569,18 +571,23 @@ const computeRank = (user, callback) => {
     db.query({
       ExpressionAttributeValues: {
         ':username': {S: user.username},
-        //':maxrank': {N: 10}
+        ':maxrank': {N: '10'}
       },
-      KeyConditionExpression: 'username = :username', // and rank <= :maxrank',
+      ExpressionAttributeNames: {
+        '#rank' : 'rank'
+      },
+      KeyConditionExpression: 'username = :username and #rank <= :maxrank',
       TableName: 'newsRanked'
     }, (err, data) => {
       if (err) {
         callback(err, null);
       } else {
         if (data.Items.length > 0) {
+          //console.log(data);
           callback(null, data.Items);
-        } else {        
-           callback(null, data.Item);  
+        } else {     
+          console.log( data.Items);   
+          callback(null, data.Items);  
         }
       }
     });
@@ -592,6 +599,7 @@ const fetchNewsData = (headlines, callback) => {
   var promises = [];
   
   for (let i = 0; i < headlines.length; i++) {
+    console.log(headlines[i]);
    var params = {
     ExpressionAttributeValues: {
       ':headline': {S: headlines[i]},
@@ -607,17 +615,20 @@ const fetchNewsData = (headlines, callback) => {
   Promise.all(promises).then (
    data => {
      for (let i = 0; i < data.length; i++) {
+       //console.log(data);
        if (data[i].length != 0) {
         result = data[i].Items; // or Items[0]?
+        console.log(result);
         results.push(result);
        }
      }
+     console.log(results);
+     callback(null, results);
    },
    err => {
     callback(err, null);
    } 
  )
-  callback(null, results);
 }
 
 const findNews = (keyword, callback) => {

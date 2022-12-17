@@ -15,9 +15,16 @@ block head
     function openNewChatForm() {
         document.getElementById("chatForm").style.display = "block";
     }
-    function closeForm() {
+    function closeChatForm() {
         document.getElementById("chatForm").style.display = "none";
     } 
+    
+    function openFriendList() {
+        document.getElementById("friendPopup").style.display = "block";
+    }
+    function closeFriendList() {
+        document.getElementById("friendPopup").style.display = "none";
+    }
     
     // clickables
     $(document).ready( function() {
@@ -115,6 +122,15 @@ block head
           }
           
       });
+      
+      $('#addFriends').on('click', function(event) {
+          openFriendList();
+          
+          $.post('/addfriend', {roomid : roomuuid}, function (data) {
+              
+          });
+      });
+      
     });
     
     
@@ -229,11 +245,15 @@ block content
             b New Chatroom Name
           input(type='text', placeholder='Chat Name', id='chatnameinput', required='true', style='font-family: Helvetica, Sans-Serif; margin:10px; display:inline-block')
           #submitData.button.btnAceBasic(style='display:inline-block') Create Chat
-          button.btnAceBasic.cancel(type='button', onclick='closeForm()') Close
+          button.btnAceBasic.cancel(type='button', onclick='closeChatForm()') Close
   
   // need to show chatbox iff req.session.currentroom != null
   div(class="rightHalf" id="chatbox")
     a.btnAceLeave(id="leaveChatBtn") Leave
+    a.btnAceBasic(id="addFriends") Invite Friends
+    #friendPopup.friendspopup
+        ul#friendList
+        button.btnAceBasic(type='button', onclick='closeFriendList()') Close
     div()
       ul#messages.messageDisplay
     form#message-form

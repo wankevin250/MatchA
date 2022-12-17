@@ -403,7 +403,11 @@ var findChats = function (username, callback) {
 		}
     });
 }
-
+/*** 
+ * adds chat with given data to table; if chatid is already in existence (rare occurence) generates a new id, tries again.
+ * modifies: chatrooms table
+ * @params chatdats { roomid: randomly generated uuid, creator: user who sent the request, chatname: user input}, callback
+ */
 const addChatToTable = (chatdata, callback) => {
 	// using username, query user data from table: users, get stringified list of chatrooms, return in array form to routes.js
 	// callback: (status, err, data)
@@ -479,6 +483,11 @@ const addChatToTable = (chatdata, callback) => {
 	}
 }
 
+/*** 
+ * adds corresponding chat info into the user's list of chats in table users
+ * modifies: users table, chatrooms attribute
+ * @params username, chatid, chatname
+ */
 var addChatHelper = function (username, chatid, chatname) {
 	console.log(username);
 	
@@ -534,8 +543,55 @@ var addChatHelper = function (username, chatid, chatname) {
 	})
 }
 
-const displayFriends = (user, callback) => {
-	// display list of friends, called when click on invite friend button
+var displayFriends = function (username, chatid, callback) {
+	// display list of friends: req.session.friendslist
+	// extract list of friends in user; then extract list of users in chat
+	// compare two, send list of friends of user
+	var listoffriends = [];
+	var listofuserschat = [];
+	
+	var paramsUsers = {
+		ExpressionAttributeValues: {
+	      ':username': {S: username},
+	    },
+	    KeyConditionExpression: 'username = :username',
+	    TableName: 'users'
+	};
+	
+	var paramsChatrooms = {
+		ExpressionAttributeValues: {
+	      ':chatid': {S: chatid},
+	    },
+	    KeyConditionExpression: 'roomid = :chatid',
+	    TableName: 'chatrooms'
+	}
+	
+	db.query(paramsUsers, function (err, data) {
+		if (err) {
+			callback(500, err, null);
+		} else {
+			if (data.Items[0].friends != null) {
+				if (data.Items[0].friends.S != '') {
+					listoffriends = JSON.parse(data.Items[0].friends.S);
+				}
+			}
+		}
+	});
+	
+	db.query(paramsChatrooms, function (err, data) {
+		if (err) {
+			callback(500, err, null);
+		} else {
+			if (data.Items[0].users != null) {
+				if (data.Items[0].users.S != '') {
+					listofuserschat = JSON.parse(data.Items[0].users.S);
+				}
+			}
+		}
+	});
+	
+	console.log(listoffriends);
+	console.log(listofuserschat);
 }
 
 const addFriendToChat = (friend, callback) => {
@@ -755,7 +811,7 @@ const database = {
   
   findChats: findChats,
   newChat: addChatToTable,
-  viewFriends: displayFriends,
+  getFriendsList: displayFriends,
   addFriendToChat: addFriendToChat,
   viewChat: viewOneChat, 
 

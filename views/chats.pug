@@ -11,6 +11,14 @@ block head
     const socket = io();
     var chatlist = [];
     
+    // simpler functions
+    function openNewChatForm() {
+        document.getElementById("chatForm").style.display = "block";
+    }
+    function closeForm() {
+        document.getElementById("chatForm").style.display = "none";
+    } 
+    
     // clickables
     $(document).ready( function() {
     
@@ -58,6 +66,10 @@ block head
           }
         });
       });
+      
+      $("#newChat").on("click", function() {
+          createChat()
+      });	
       
     });
     
@@ -128,13 +140,13 @@ block head
                 
                 $("#" + chatlist[i].roomid).on("click", function() {
                     let roomid = chatlist[i].roomid;
-                    let userlist = JSON.parse(chatlist[i].users);
                     
                     $.post('/openroom', { room : roomid }, function(data) {
                         if (data.success) {
                             room = roomid;
                             roomuuid = roomid;
-                            currentchatusers = userlist;
+                            currentchatusers = data.userlist;
+                            
                             socket.emit('join room', {
                                 user: myID,
                                 room: roomid,
@@ -172,7 +184,14 @@ block content
   // with AJAX, send data in type "room" that is an JSON object { roomname: "", roomid: "" }
   // 
   div(class="leftHalf" id="listbox")
-    a#roomBtn.chatBtnClass Enter Chatroom
+    a#createBtn.createBtnClass(onclick = "openNewChatForm()") Create New Chat
+    #chatForm.form-popup
+      form.form-container(action='/action_page.php')
+        label(style='font-family: Helvetica, Sans-Serif; margin:10px')
+          b New Chatroom Name
+        input(type='text', placeholder='Chat Name', name='chatnameinput', required='true', style='font-family: Helvetica, Sans-Serif; margin:10px')
+        button.btnAceBasic(type='submit' style='font-family: Helvetica, Sans-Serif; margin:10px') Create Chat
+        button.btnAceBasic.cancel(type='button', onclick='closeForm()') Close
   
   // need to show chatbox iff req.session.currentroom != null
   div(class="rightHalf" id="chatbox")

@@ -339,8 +339,8 @@ const addChatToTable = (chatdata, callback) => {
 	if (chatdata != null) {
 		let userlist = [username];
 		let item = { 
+			'room-uuid': {S: chatdata.roomid}, 
 			'creator': {S: chatdata.creator},
-			'roomid': {S: chatdata.roomid}, 
 			'users': {S: JSON.stringify(userlist)}, 
 			'chatname': {S: chatdata.chatname}
 			};
@@ -362,15 +362,20 @@ const addChatToTable = (chatdata, callback) => {
 					if (err) {
 						callback(500, err, null);
 					} else {
-						callback(200, err, data);
+						if (addChatHelper(chatdata.username, chatdata.roomid, chatdata.chatname) == 0) {
+							let itemret = { roomid: chatdata.roomid, chatname: chatdata.chatname};
+							callback(200, err, itemret);
+						} else {
+							callback(500, err, null);
+						}
 					}
 				});
 			} else {
 				// generate uuid
 				let newid = uuidv4();
 				let refresheditem = {
+					'room-uuid': {S: newid},
 					'creator': {S: chatdata.creator},
-					'roomid': {S: newid}, 
 					'users': {S: JSON.stringify(userlist)}, 
 					'chatname': {S: chatdata.chatname}
 				};
@@ -379,7 +384,13 @@ const addChatToTable = (chatdata, callback) => {
 					if (err) {
 						callback(500, err, null);
 					} else {
-						callback(200, err, data);
+						
+						if (addChatHelper(chatdata.username, newid, chatdata.chatname) == 0) {
+							let itemreturn = { roomid: newid, chatname: chatdata.chatname};
+							callback(200, err, itemreturn);
+						} else {
+							callback(500, err, null);
+						}
 					}
 				});
 			}
@@ -388,6 +399,55 @@ const addChatToTable = (chatdata, callback) => {
 	} else {
 		callback(400, null, null);
 	}
+}
+
+var addChatHelper = function (username, chatid, chatname) {
+	let params = {
+		ExpressionAttributeValues: {
+	      ':username': {S: username},
+	    },
+	    KeyConditionExpression: 'username = :username',
+	    TableName: 'users'
+	};
+	
+	db.query(params, function(err, data) {
+		if (err) {
+			return -1;
+		} else if (data.Items.length == 0) {
+			return -1;
+		} else {
+			let newarr = [];
+			if (data.Items[0].chatrooms != null) {
+				newarr = JSON.parse(data.Items[0].chatrooms);
+			}
+			
+			newarr = newarr.concat({roomid: chatid, chatname: chatname});
+			
+			console.log(newarr);
+			
+			let listparams = {
+				TableName: 'users',
+                Key: {
+                    id: {
+                        'S': username
+                    }
+                },
+                UpdateExpression: "SET chatrooms = :newchatrooms",
+                ExpressionAttributeValues: {
+					":newchatrooms": JSON.stringify(newarr),
+				},
+				ReturnValues: "UPDATED_NEW",
+			};
+			
+			db.updateItem(listparams, function(err, data) {
+				if (err) {
+					return -1;
+				} else {
+					return 0; // success!
+				}
+			});
+		}
+	})
 }
 
 const displayFriends = (user, callback) => {

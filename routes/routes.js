@@ -268,7 +268,6 @@ const sendChatList = (req, res) => {
   let username = req.session.user.username;
   db.findChats(username, (err, data) => {
 	if(data != null) {
-		console.log(JSON.parse(JSON.parse(data)[0].users)[0]);
 		var obj = {'clist' : JSON.parse(data), 'username': username};
 		res.send(obj);
 	} else {
@@ -290,6 +289,7 @@ const addChat = (req, res) => {
 		let user = req.session.user;
 		// generate uuid
 		let roomid = uuidv4();
+		console.log(roomid);
 		
 		let chatinfo = {
 			creator : user.username,
@@ -299,11 +299,19 @@ const addChat = (req, res) => {
 		// call newChat function
 		db.newChat(chatinfo, (status, err, data) => {
 			// return chatinfo = {roomid: value, chatname: chat name, }
-			if (err) {
+			if (status != 200) {
 				console.log(err);
+				
+				if (status == 500) {
+					res.status(status).send(new Error(err));
+				} else {
+					res.sendStatus(status);
+				}
 			} else {
 				// set req.session.currentroom = { id: room-uuid, name: chatname, creator: req.session.user }
-				req.session.currentroom = roomid;
+				req.session.currentroom = data.roomid;
+				console.log(data);
+				res.send(data);
 			}
 		});
 		// KEVIN: on frontend we need to call reloadData on the chatlist div after addChat 
@@ -363,6 +371,9 @@ const openChat = (req, res) => {
 		success: true
 	});
 	*/
+	
+	// return data.userlist
+	// return all messages
 	
 	res.send({
 		success: true

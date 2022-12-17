@@ -47,6 +47,21 @@
     font-family: Helvetica, Sans-Serif;
 }
 
+.createBtnClass {
+	background-color: #D4CB8C;
+    border: none;
+    color: black;
+    padding: 10px 10px;
+    margin: 10px;
+    overflow-wrap: normal;
+    
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    font-size: 20px;
+    font-family: Helvetica, Sans-Serif;
+}
+
 .leftHalf {
 	background-color: #74A12E;
 	padding: 10px 20px;
@@ -106,4 +121,34 @@
 	
 	font-size: 14px;
 	font-family: Helvetica, Sans-Serif;
+}
+
+.form-popup {
+  display: none;
+  background-color: #D4CB8C;
+  border: 3px solid #424106;
+  
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  z-index: 9;
+}
+
+.btnAceBasic {
+  background-color: #49592A; /* Matcha Green */
+  border: none;
+  color: white;
+  padding: 10px 10px;
+  text-align: center;
+  text-decoration: none;
+  margin: 10px;
+  
+  font-size: 16px;
+  font-family: Helvetica, Sans-Serif;
+}
+
+.btnAceBasic:hover{
+  border: 3px solid white;
 }

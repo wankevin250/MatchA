@@ -22,7 +22,8 @@ $(document).ready(function() {
       
           Edge: {
               //overridable: true,
-              color: "#088"
+              color: "#088",
+              lineWidth: 5
           },
           //calculate nodes offset
           offset: 0.005,
@@ -35,8 +36,8 @@ $(document).ready(function() {
           //creation
   
           onCreateLabel: function(domElement, node){
-              console.log(node.displayname);
-              domElement.innerHTML = node.displayname; //changed name to displayname
+              console.log(node.name);
+              domElement.innerHTML = node.name; //changed name to displayname and then back
               domElement.style.cursor = "pointer";
               domElement.onclick = function() {
                   $.getJSON('/getFriends/'+node.username, function(json) { //changed .id to .username

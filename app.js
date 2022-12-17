@@ -36,6 +36,7 @@ app.get('/searchuser', routes.getSearchUser);
 // app.get('/profile', null);
 app.get('/settings', routes.getSettings);
 app.get('/friends', routes.getFriends);
+app.get('/mywall/:username', routes.getMyWall);
 
 //kevin: visualizer routes call
 app.get('/visualizer', routes.getVisualizer);
@@ -216,8 +217,6 @@ app.post('/ajaxedituser', routes.postEditUser);
 
 app.get('/news', routes.calculateRank);
 app.get('/newSearch', routes.searchNews);
-
-
 
 app.get('*', (req, res) => {
   res.render('404');

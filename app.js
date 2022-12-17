@@ -9,6 +9,7 @@ const server = http.createServer(app);
 const {Server} = require("socket.io");
 
 const routes = require('./routes/routes.js');
+const newsroutes = require('./routes/newsroutes.js');
 
 app.use(express.urlencoded()); // express will parse queries from the URL
 app.use(express.static('static')); // express serves static resources from static folder
@@ -215,8 +216,8 @@ app.post('/ajaxedituser', routes.postEditUser);
 
 // news
 
-app.get('/news', routes.calculateRank);
-app.get('/newSearch', routes.searchNews);
+app.get('/news', newsroutes.calculateRank);
+app.get('/newSearch', newsroutes.searchNews);
 
 app.get('*', (req, res) => {
   res.render('404');

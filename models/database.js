@@ -365,7 +365,7 @@ const computeRank = (user, callback) => {
         if (error !== null) {
            // console.log('exec error: ' + error);
             callback(error, null);
-        }
+        } // 이 안으로 들여오기  밑에 코드
     });
 
     console.log("ran exec");
@@ -375,7 +375,7 @@ const computeRank = (user, callback) => {
         ':username': {S: user.username},
         //':maxrank': {N: 10}
       },
-      KeyConditionExpression: 'username = :username', // and rank <= :maxrank
+      KeyConditionExpression: 'username = :username', // and rank <= :maxrank',
       TableName: 'newsRanked'
     }, (err, data) => {
       if (err) {

@@ -87,6 +87,7 @@ public class rankJob {
 	private String categoryEdgeURL = "s3://nets2120-news/newsRank/news_category_count.csv";
 	DynamoDB db;
 	Table news;
+	String timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
 
     /**
 	 * Initialize the database connection and open the file
@@ -150,7 +151,6 @@ public class rankJob {
 		ScanRequest scanRequest = new ScanRequest()
     								.withTableName(tablename);
 		ScanResult scanResult = client.scan(scanRequest);
-		String timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
 		List<String[]> rowOfInterest = new ArrayList<>();
 		 scanResult.getItems().parallelStream()
 						.forEach(line -> {
@@ -168,6 +168,48 @@ public class rankJob {
 		return result;
 		
 	}
+
+	List<String> getTodayArticle() {
+		String tablename = "newsData";
+		AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
+		ScanRequest scanRequest = new ScanRequest()
+    								.withTableName(tablename);
+		ScanResult scanResult = client.scan(scanRequest);
+		List<String> rowOfInterest = new ArrayList<>();
+		 scanResult.getItems().parallelStream()
+						.forEach(line -> {
+							String dt = line.get("date").getS();
+							if (dt.compareTo(timeStamp) == 0) {
+								//inter[0] = line.get("headline").getS();
+								rowOfInterest.add(line.get("headline").getS());
+							}
+						});
+
+		System.out.println(rowOfInterest.size());
+
+		return rowOfInterest;
+	}
+
+	/*List<String> getAlreadyViewed() {
+		String tablename = "viewRecord";
+		AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
+		ScanRequest scanRequest = new ScanRequest()
+    								.withTableName(tablename);
+		ScanResult scanResult = client.scan(scanRequest);
+		List<String> rowOfInterest = new ArrayList<>();
+		 scanResult.getItems().parallelStream()
+						.forEach(line -> {
+							String dt = line.get("date").getS();
+							if (dt.compareTo(timeStamp) == 0) {
+								//inter[0] = line.get("headline").getS();
+								rowOfInterest.add(line.get("headline").getS());
+							}
+						});
+
+		System.out.println(rowOfInterest.size());
+
+		return rowOfInterest;
+	}*/
 
 	JavaPairRDD<String, String> getInteretsEdge() {
 		String tablename = "interests";
@@ -410,19 +452,23 @@ public class rankJob {
 												.filter(x -> x._2._1.compareTo("a") == 0) 
 												.mapToPair(x -> new Tuple2<>(x._2._2, new Tuple2<>(x._1, x._2._1)))
 												.sortByKey(false)
-												.collect().stream().limit(10)
+												.collect().stream()
 												.collect(Collectors.toList())
 												.iterator();
 
+		List<String> today = getTodayArticle();
+
 		int arti = 0;
 		HashSet<Item> rows = new HashSet<Item>(); 
-		while (iter.hasNext()) {
+		while (iter.hasNext() && arti < 8) {
 			Tuple2<Double, Tuple2<String, String>> now = iter.next();
-			arti++;
-			Item newsItem = new Item()
-						.withPrimaryKey("username", username, "rank", arti)
-						.withString("headline", now._2._1);
-			rows.add(newsItem);
+			if (today.size() == 0 || today.contains(now._2._1)) {
+				arti++;
+				Item newsItem = new Item()
+							.withPrimaryKey("username", username, "rank", arti)
+							.withString("headline", now._2._1);
+				rows.add(newsItem);
+			}	
 		}
 
 		TableWriteItems writ = new TableWriteItems(tableName).withItemsToPut(rows);

@@ -404,10 +404,39 @@ const sendFriends = (req, res) => {
 }
 
 // Sebin routes for news
-
 const calculateRank = (req, res) => {
-	// res ? 
+	result = []
+  results = []
 	// execute the java command
+  if (req.session.user != null) {
+		let user = req.session.user;
+    console.log(user);
+
+    db.computeRank(user.username, (err, data) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("Made it to else statement!");
+        console.log(data);
+        for (let i = 0; i < data.length; i++) {
+          result = data[i].Items[0];
+          results.push(result);
+        }
+
+        db.fetchNewsData(results, (err, data) => {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log(data);
+            res.send(JSON.stringify(data));
+          }
+        })
+      }
+    })
+  } else {
+    console.log("Not logged in, returned to homepage.");
+		res.redirect('splash.pug');
+  }
 }
 
 const searchNews = (req, res) => {

@@ -351,7 +351,8 @@ const computeRank = (user, callback) => {
         //console.log('stdout: ' + stdout);
         //console.log('stderr: ' + stderr);
         if (error !== null) {
-             console.log('exec error: ' + error);
+           // console.log('exec error: ' + error);
+            callback(error, null);
         }
     });
 
@@ -360,25 +361,75 @@ const computeRank = (user, callback) => {
         ':username': {S: user.username},
       },
       KeyConditionExpression: 'username = :username',
-      TableName: 'rankedNews',
-      IndexName: 'username'
+      TableName: 'rankedNews'
     }, (err, data) => {
       if (err) {
-        console.log(err);
-        //callback(500, err, null);
+        callback(err, null);
       } else {
         if (data.Items.length > 0) {
-          callback(err, data.Items);
-          //callback(403, 'email', null);
-        } else {          
-          //callback(201, err, null);
+          callback(null, data.Items);
+        } else {        
+           callback(null, data.Item);  
         }
       }
     });
-
-
-	// callback: (chatinfo, err, data)
 }
+
+const fetchNewsData = (headlines, callback) => {
+  var result = [];
+  var results = [];
+  var promises = [];
+  
+  for (let i = 0; i < headlines.length; i++) {
+   var params = {
+    ExpressionAttributeValues: {
+      ':headline': {S: headlines[i]},
+    },
+    KeyConditionExpression: 'headline = :headline',
+    TableName: 'newsData'
+  };
+   
+    let prom = docClient.query(params).promise(); // making array of promises
+    promises.push(prom);
+ }
+  
+  Promise.all(promises).then (
+   data => {
+     for (let i = 0; i < data.length; i++) {
+       if (data[i].length != 0) {
+        result = data[i].Items; // or Items[0]?
+        results.push(result);
+       }
+     }
+   },
+   err => {
+    callback(err, null);
+   } 
+ )
+  callback(null, results);
+}
+
+const findNews = (keyword, callback) => {
+    db.query({
+      ExpressionAttributeValues: {
+        ':keyword': {S: keyword},
+      },
+      KeyConditionExpression: 'keyword = :keyword',
+      TableName: 'tokenizedNews'
+    }, (err, data) => {
+      if (err) {
+        callback(err, null);
+      } else {
+        if (data.Items.length > 0) {
+          callback(null, data.Items);
+        } else {        
+           callback(null, data.Item);  
+        }
+      }
+    });
+}
+
+
 
 const database = {
   // queryUser: queryUser,
@@ -397,6 +448,7 @@ const database = {
   viewChat: viewOneChat, 
 
   computeRank:  computeRank,
+  fetchNewsData: fetchNewsData,
   
 }
 

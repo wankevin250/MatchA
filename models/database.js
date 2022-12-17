@@ -547,6 +547,8 @@ var displayFriends = function (username, chatid, callback) {
 	// display list of friends: req.session.friendslist
 	// extract list of friends in user; then extract list of users in chat
 	// compare two, send list of friends of user
+	console.log("reached query");
+	
 	var listoffriends = [];
 	var listofuserschat = [];
 	
@@ -568,33 +570,115 @@ var displayFriends = function (username, chatid, callback) {
 	
 	db.query(paramsUsers, function (err, data) {
 		if (err) {
+			console.log(err);
 			callback(500, err, null);
 		} else {
 			if (data.Items[0].friends != null) {
+				console.log(data.Items[0].friends);
+				
 				if (data.Items[0].friends.S != '') {
 					listoffriends = JSON.parse(data.Items[0].friends.S);
+					
+					db.query(paramsChatrooms, function (err, data) {
+						if (err) {
+							console.log(err);
+							callback(500, err, null);
+						} else {
+							if (data.Items[0].users != null) {
+								console.log(data.Items[0].users);
+								if (data.Items[0].users.S != '') {
+									listofuserschat = JSON.parse(data.Items[0].users.S);
+									
+									// console.log(compareLists(listoffriends, listofuserschat));
+									callback(200, null, compareLists(listoffriends, listofuserschat));
+								} else {
+									// console.log(compareLists(listoffriends, listofuserschat));
+									callback(200, null, compareLists(listoffriends, listofuserschat));
+								}
+							} else {
+								console.log("No users in this chat!");
+								
+								// console.log(compareLists(listoffriends, listofuserschat));
+								callback(200, null, compareLists(listoffriends, listofuserschat));
+							}
+						}
+					});
+					
+				} else {
+					db.query(paramsChatrooms, function (err, data) {
+						if (err) {
+							console.log(err);
+							callback(500, err, null);
+						} else {
+							if (data.Items[0].users != null) {
+								console.log(data.Items[0].users);
+								if (data.Items[0].users.S != '') {
+									listofuserschat = JSON.parse(data.Items[0].users.S);
+									
+									// console.log(compareLists(listoffriends, listofuserschat));
+									callback(200, null, compareLists(listoffriends, listofuserschat));
+								} else {
+									// console.log(compareLists(listoffriends, listofuserschat));
+									callback(200, null, compareLists(listoffriends, listofuserschat));
+								}
+							} else {
+								console.log("No users in this chat!");
+								
+								// console.log(compareLists(listoffriends, listofuserschat));
+								callback(200, null, compareLists(listoffriends, listofuserschat));
+							}
+						}
+					});
 				}
+			} else {
+				db.query(paramsChatrooms, function (err, data) {
+					if (err) {
+						console.log(err);
+						callback(500, err, null);
+					} else {
+						if (data.Items[0].users != null) {
+							console.log(data.Items[0].users);
+							if (data.Items[0].users.S != '') {
+								listofuserschat = JSON.parse(data.Items[0].users.S);
+								var answer = [];
+								// console.log(compareLists(listoffriends, listofuserschat));
+								callback(200, null, compareLists(listoffriends, listofuserschat));
+							} else {
+								// console.log(compareLists(listoffriends, listofuserschat));
+								callback(200, null, compareLists(listoffriends, listofuserschat));
+							}
+						} else {
+							console.log("No users in this chat!");
+							
+							// console.log(compareLists(listoffriends, listofuserschat));
+							callback(200, null, compareLists(listoffriends, listofuserschat));
+						}
+					}
+				});
 			}
 		}
 	});
-	
-	db.query(paramsChatrooms, function (err, data) {
-		if (err) {
-			callback(500, err, null);
-		} else {
-			if (data.Items[0].users != null) {
-				if (data.Items[0].users.S != '') {
-					listofuserschat = JSON.parse(data.Items[0].users.S);
-				}
-			}
-		}
-	});
-	
-	console.log(listoffriends);
-	console.log(listofuserschat);
 }
 
-const addFriendToChat = (friend, callback) => {
+/*** 
+ * returns array of items in Array A but not B
+ * @params input: (Array A, Array B, callback function)
+ */
+function compareLists (arrayA, arrayB) {
+	var ans = [];
+	for (let i = 0; i < arrayA.length; i++) {
+		let curr = arrayA[i];
+		if (! arrayB.includes(curr)) {
+			ans.push(curr);
+		}
+	}
+	console.log(ans);
+	return ans;
+}
+/***
+ * @params (friend id, chat id, callback (status, err, data))
+ */
+const addFriendToChat = (friend, chatid, callback) => {
 	// add given friend 
 }
 

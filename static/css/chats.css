@@ -165,3 +165,9 @@
   width: 50%;
   z-index: 9;
 }
+
+.friendListing {
+	border:none;
+	background-color: none;
+	display:block;
+}

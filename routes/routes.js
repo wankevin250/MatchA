@@ -340,15 +340,20 @@ const viewFriends = (req, res) => {
 	// otherwise, display No friends 
 	
 	if (req.session.user != null && req.session.user.username != '') {
+		let username = req.session.user.username;
+		let chatid = req.body.roomid;
+		
 		db.getFriendsList(username, chatid, (status, err, data) => {
 			if (status != 200) {
 				if (err) {
 					console.log(err)
+					res.status(status).send(new Error(err));
 				} else {
 					res.sendStatus(status);
 				}
 			} else {
-				
+				console.log("query success");
+				res.json(data);
 			}
 		});
 	} else {

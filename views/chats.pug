@@ -126,8 +126,17 @@ block head
       $('#addFriends').on('click', function(event) {
           openFriendList();
           
-          $.post('/addfriend', {roomid : roomuuid}, function (data) {
+          $.post('/friendstoadd', {roomid : roomuuid}, function (data) {
               
+              for (let i = 0; i < data.length; i++) {
+                  var friendbutton = document.createElement("a");
+                  friendbutton.setAttribute("class", "friendListing");
+                  friendbutton.setAttribute('id', data[i]);
+                  friendbutton.appendChild(document.createTextNode(data[i]));
+                  
+                  $('#friendList').append(friendbutton);
+                  
+              }
           });
       });
       
@@ -250,7 +259,7 @@ block content
   // need to show chatbox iff req.session.currentroom != null
   div(class="rightHalf" id="chatbox")
     a.btnAceLeave(id="leaveChatBtn") Leave
-    a.btnAceBasic(id="addFriends") Invite Friends
+    button#addFriends.btnAceBasic Invite Friends
     #friendPopup.friendspopup
         ul#friendList
         button.btnAceBasic(type='button', onclick='closeFriendList()') Close

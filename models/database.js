@@ -89,7 +89,7 @@ const addFriend = (asker, accepter, callback) => {
     Item: {
       accepter: {S: accepter},
       asker: {S: asker},
-      status: {S: 'true'},
+      status: {S: 'false'},
       timestamp: {S: (new Date()).toUTCString()}
     }
   }, (err, data) => {

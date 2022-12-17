@@ -360,13 +360,15 @@ const computeRank = (user, callback) => {
   
   exec('mvn exec:java@ranker' + ' -Dexec.args=' + user.username,
     function (error, stdout, stderr) {
-        //console.log('stdout: ' + stdout);
+        console.log('stdout: ' + user.username);
         //console.log('stderr: ' + stderr);
         if (error !== null) {
            // console.log('exec error: ' + error);
             callback(error, null);
         }
     });
+
+    console.log("ran exec");
 
     db.query({
       ExpressionAttributeValues: {

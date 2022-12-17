@@ -460,11 +460,7 @@ const calculateRank = (req, res) => {
     })
   } else {
     console.log("Not logged in, returned to homepage.");
-<<<<<<< HEAD
 		res.redirect('/');
-=======
-		res.redirect('/login');
->>>>>>> b7bce3e8a6987e2643b42b3c2ce0c4c385bd1193
   }
 }
 

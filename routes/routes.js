@@ -460,7 +460,7 @@ const calculateRank = (req, res) => {
     })
   } else {
     console.log("Not logged in, returned to homepage.");
-		res.redirect('splash.pug');
+		res.redirect('/login');
   }
 }
 

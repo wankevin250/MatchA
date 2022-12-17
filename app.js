@@ -218,8 +218,6 @@ app.post('/ajaxedituser', routes.postEditUser);
 app.get('/news', routes.calculateRank);
 app.get('/newSearch', routes.searchNews);
 
-
-
 app.get('*', (req, res) => {
   res.render('404');
 })

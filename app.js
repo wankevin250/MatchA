@@ -180,7 +180,7 @@ app.get('/getFriends/:user', routes.postGetFriend); //routes.sendFriends?
 app.get('/chat', routes.loadChatPage);
 app.post('/chatlist', routes.postChatList);
 /** adds new chat to list, opens up chatroom, button to add friend, text input box + button to send text */
-app.get('/createroom', routes.addChat);
+app.post('/createroom', routes.addChat);
 /** opens up chatroom chosen from list; loads and outputs list of previous messages */
 app.post('/openroom', routes.openChat);
 app.post('/leaveroom', routes.leaveChat);
@@ -211,9 +211,10 @@ app.post('/ajaxpostsignup', routes.postCreateUser);
 app.post('/ajaxpostlogin', routes.postLoginUser);
 app.post('/ajaxgetwall', routes.postWallRefresh);
 app.post('/ajaxsearchuser', routes.postScanUsers);
-app.post('/ajaxaddfriend', routes.postAddFriend);
+app.post('/ajaxsendfriendrequest', routes.postSendFriendRequest);
 app.post('/ajaxgetfriends', routes.postGetFriend);
 app.post('/ajaxedituser', routes.postEditUser);
+app.post('/ajaxviewfriendinvites', routes.viewFriendInvites);
 
 // news
 

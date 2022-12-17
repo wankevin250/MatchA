@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
 const req = require('express/lib/request.js');
 const usr = require('./user.js');
+const {v4 : uuidv4} = require('uuid')
 
 AWS.config.update({
   region: 'us-east-1',
@@ -34,6 +35,27 @@ const scanUsers = (searchQuery, callback) => {
     })
   }
 
+}
+
+const queryFriendInvites = (accepter, status, callback) => {
+  db.query({
+    TableName: 'friends',
+    KeyConditionExpression: 'accepter = :accepter',
+    ExpressionAttributeValues: {
+      ':accepter': {S: accepter},
+      ':status': {S: status},
+    },
+    ExpressionAttributeNames: {
+      '#status': {S: 'status'}
+    },
+    FilterExpression: '#status = :status',
+  }, (err, data) => {
+    if (err) {
+      callback(500, err, null);
+    } else {
+      callback(500, err, data.Items);
+    }
+  });
 }
 
 const getFriends = (username, callback) => {
@@ -83,23 +105,73 @@ const queryPosts = (userwall, callback) => {
   });
 }
 
-const addFriend = (asker, accepter, callback) => {
-  db.putItem({
-    TableName: 'friends',
-    Item: {
-      accepter: {S: accepter},
-      asker: {S: asker},
-      status: {S: 'false'},
-      timestamp: {S: (new Date()).toUTCString()}
+const sendFriendRequest = (asker, accepter, callback) => {
+  db.query({
+    TableName: 'users',
+    KeyConditionExpression: 'username = :username',
+    ExpressionAttributeValues: {
+      ':username': {S: asker}
     }
   }, (err, data) => {
     if (err) {
       callback(500, err, null);
     } else {
-      callback(201, err, data);
+      let askerUser = data.Items[0];
+      let rPrev = askerUser.sentRequests;
+      let item = {};
+      askerUser.sentRequests = rPrev ? JSON.stringify(JSON.parse(rPrev).append(accepter)) 
+        : JSON.stringify([].append(accepter));
+
+      Object.entries(askerUser).forEach(entry => {
+        let [key, val] = entry;
+        item[key] = {S: val};
+      });
+      db.putItem({
+        TableName: 'users',
+        Item: item,
+      }, (err, data) => {
+        if (err) {
+          callback(500, err, null);
+        } else {
+          db.putItem({
+            TableName: 'friends',
+            Item: {
+              accepter: {S: accepter},
+              asker: {S: asker},
+              status: {S: 'false'},
+              timestamp: {S: (new Date()).toUTCString()}
+            }
+          }, (err, data) => {
+            if (err) {
+              callback(500, err, null);
+            } else {
+              callback(201, err, data);
+            }
+          });
+        }
+      });
     }
-  });
+  })
 }
+
+// const addFriend = (asker, accepter, callback) => {
+
+//   db.putItem({
+//     TableName: 'friends',
+//     Item: {
+//       accepter: {S: accepter},
+//       asker: {S: asker},
+//       status: {S: 'false'},
+//       timestamp: {S: (new Date()).toUTCString()}
+//     }
+//   }, (err, data) => {
+//     if (err) {
+//       callback(500, err, null);
+//     } else {
+//       callback(201, err, data);
+//     }
+//   });
+// }
 
 const loginUser = (username, password, callback) => {
   db.query({
@@ -332,67 +404,134 @@ var findChats = function (username, callback) {
     });
 }
 
-const addChatToTable = (username, chatdata, callback) => {
+const addChatToTable = (chatdata, callback) => {
 	// using username, query user data from table: users, get stringified list of chatrooms, return in array form to routes.js
 	// callback: (status, err, data)
-	if (user != null && chatdata != null) {
-		let item = { 'creator': username, 'roomid': chatdata.roomid, 'users': username, 'chatname': chatdata.chatname};
+	if (chatdata != null) {
+		let userlist = [chatdata.creator];
+		let item = { 
+			'roomid': {S: chatdata.roomid}, 
+			'creator': {S: chatdata.creator},
+			'users': {S: JSON.stringify(userlist)}, 
+			'chatname': {S: chatdata.chatname}
+			};
 		
 		// db.query to check if already existing using this id, if so generate new id
-	} else {
+		var params = {
+		    ExpressionAttributeValues: {
+		      ':roomid': {S: chatdata.roomid},
+		    },
+		    KeyConditionExpression: 'roomid = :roomid',
+		    TableName: 'chatrooms'
+		};
 		
+		db.query(params, function(err, data) {
+			if (err) {
+				callback(500, err, null);
+			} else if (data.Items.length == 0) {
+				db.putItem( {'TableName': "chatrooms", 'Item': item}, function(err, data) {
+					if (err) {
+						callback(500, err, null);
+					} else {
+						console.log(addChatHelper(chatdata.creator, chatdata.roomid, chatdata.chatname));
+						let itemret = { roomid: chatdata.roomid, chatname: chatdata.chatname};
+						callback(200, err, itemret);
+						/** 
+						if (addChatHelper(chatdata.creator, chatdata.roomid, chatdata.chatname) == 0) {
+							let itemret = { roomid: chatdata.roomid, chatname: chatdata.chatname};
+							callback(200, err, itemret);
+						} else {
+							callback(500, err, null);
+						} */
+					}
+				});
+			} else {
+				// generate uuid
+				let newid = uuidv4();
+				let refresheditem = {
+					'roomid': {S: newid},
+					'creator': {S: chatdata.creator},
+					'users': {S: JSON.stringify(userlist)}, 
+					'chatname': {S: chatdata.chatname}
+				};
+				
+				db.putItem( {'TableName': "chatrooms", 'Item': refresheditem}, function(err, data) {
+					if (err) {
+						callback(500, err, null);
+					} else {
+						console.log(addChatHelper(chatdata.creator, newid, chatdata.chatname));
+						let itemreturn = { roomid: newid, chatname: chatdata.chatname};
+						callback(200, err, itemreturn);
+						/**
+						if (addChatHelper(chatdata.creator, newid, chatdata.chatname) != 0) {
+							let itemreturn = { roomid: newid, chatname: chatdata.chatname};
+							callback(200, err, itemreturn);
+						} else {
+							callback(500, err, null);
+						} */
+					}
+				});
+			}
+		})
+		
+	} else {
+		callback(400, null, null);
 	}
+}
 
-    db.query({
-      ExpressionAttributeValues: {
-        ':username': {S: user.username},
-      },
-      KeyConditionExpression: 'username = :username',
-      TableName: 'users',
-    }, (err, data) => {
-      if (err) {
-        console.log(err);
-        callback(500, err, null);
-      } else {
-        if (data.Items.length > 0) {
-          callback(403, "username", null);
-        } else {
-          db.query({
-            ExpressionAttributeValues: {
-              ':email': {S: user.email},
-            },
-            KeyConditionExpression: 'email = :email',
-            TableName: 'users',
-            IndexName: 'email'
-          }, (err, data) => {
-            if (err) {
-              console.log(err);
-              callback(500, err, null);
-            } else {
-              if (data.Items.length > 0) {
-                callback(403, 'email', null);
-              } else {          
-                // put to database. respond with no data if server error.
-                db.putItem({
-                  Item: item,
-                  TableName: 'users',
-                }, (err, data) => {
-                  if (err) {
-                    console.log("Error", err);
-                    callback(500, err, null);
-                  } else {
-                    callback(201, err, data);
-                  }
-                });
-              }
-            }
-          });
-        }
-      }
-    });
-  } else {
-    callback(401, null, null);
-  }
+var addChatHelper = function (username, chatid, chatname) {
+	console.log(username);
+	
+	var params = {
+	    ExpressionAttributeValues: {
+	      ':username': {S: username},
+	    },
+	    KeyConditionExpression: 'username = :username',
+	    TableName: 'users'
+    };
+	
+	db.query(params, function(err, data) {
+		if (err) {
+			console.log(err);
+			return -1;
+		} else if (data.Items.length == 0) {
+			console.log("no such user");
+			return -1;
+		} else {
+			let newarr = [];
+			
+			if (data.Items[0].chatrooms != null && data.Items[0].chatrooms.S != "") {
+				newarr = JSON.parse(data.Items[0].chatrooms.S);
+			}
+			
+			newarr = newarr.concat({roomid: chatid, chatname: chatname});
+			
+			var newarrstring = JSON.stringify(newarr);
+			
+			let listparams = {
+				TableName: 'users',
+                Key: {
+                    username: {
+                        'S': username
+                    }
+                },
+                UpdateExpression: "SET chatrooms = :newchatrooms",
+                ExpressionAttributeValues: {
+					":newchatrooms": {S: newarrstring},
+				},
+				ReturnValues: "UPDATED_NEW",
+			};
+			
+			db.updateItem(listparams, function(err, data) {
+				if (err) {
+					console.log(err)
+					return -1;
+				} else {
+					return 0; // success!
+				}
+			});
+		}
+	})
 }
 
 const displayFriends = (user, callback) => {
@@ -410,38 +549,45 @@ const viewOneChat = (chatid, callback) => {
 // end of ACE HOUR
 
 
+
 // start of Sebin News
 const computeRank = (user, callback) => {
 	// using username as an input for run, execute the whole rankJob.class
 	var exec = require('child_process').exec;
+  var cmnd = 'mvn exec:java@ranker' + ' -Dexec.args=' + user.username;
   
-  exec('mvn exec:java@ranker' + ' -Dexec.args=' + user.username,
+  exec(cmnd,  { encoding: 'utf-8' },
     function (error, stdout, stderr) {
-        console.log('stdout: ' + user.username);
-        //console.log('stderr: ' + stderr);
+        console.log('stdout: ' + "adsorption complete");
+        console.log('stderr: ' + stderr);
         if (error !== null) {
            // console.log('exec error: ' + error);
             callback(error, null);
         } // 이 안으로 들여오기  밑에 코드
     });
 
-    console.log("ran exec");
+    //console.log("ran exec");
 
     db.query({
       ExpressionAttributeValues: {
         ':username': {S: user.username},
-        //':maxrank': {N: 10}
+        ':maxrank': {N: '5'}
       },
-      KeyConditionExpression: 'username = :username', // and rank <= :maxrank',
+      ExpressionAttributeNames: {
+        '#rank' : 'rank'
+      },
+      KeyConditionExpression: 'username = :username and #rank <= :maxrank',
       TableName: 'newsRanked'
     }, (err, data) => {
       if (err) {
         callback(err, null);
       } else {
         if (data.Items.length > 0) {
+          //console.log(data);
           callback(null, data.Items);
-        } else {        
-           callback(null, data.Item);  
+        } else {     
+          //console.log( data.Items);   
+          callback(null, data.Items);  
         }
       }
     });
@@ -453,6 +599,7 @@ const fetchNewsData = (headlines, callback) => {
   var promises = [];
   
   for (let i = 0; i < headlines.length; i++) {
+    console.log(headlines[i]);
    var params = {
     ExpressionAttributeValues: {
       ':headline': {S: headlines[i]},
@@ -468,18 +615,87 @@ const fetchNewsData = (headlines, callback) => {
   Promise.all(promises).then (
    data => {
      for (let i = 0; i < data.length; i++) {
+       //console.log(data);
        if (data[i].length != 0) {
         result = data[i].Items; // or Items[0]?
+        console.log(result);
         results.push(result);
        }
      }
+     //console.log(results);
+     callback(null, results);
    },
    err => {
     callback(err, null);
    } 
  )
-  callback(null, results);
 }
+
+const addViewHistory = (user, articles, callback) => {
+    let displayed = "";
+    console.log(articles);
+    for (let i = 0; i < articles.length; i++) {
+      displayed = displayed.concat(articles[i]);
+      displayed = displayed.concat("*");
+    }
+    // let displayed = articles;
+    console.log(displayed);
+    
+
+    db.query({
+      ExpressionAttributeValues: {
+        ':username': {S: user.username},
+      },
+      KeyConditionExpression: 'username = :username',
+      TableName: 'newsViewed',
+    }, (err, data) => {
+      console.log(data);
+      if (err) {
+        callback(err, null);
+      } else if (data.Items.length > 0) {
+        console.log(data.Items[0].viewed.S);
+        let prev = data.Items[0].viewed.S;
+        params = {
+          TableName: 'newsViewed',
+                  Key: {
+                      username: {
+                          'S': user.username
+                      }
+                  },
+                  UpdateExpression: "SET viewed = :viewed",
+                  ExpressionAttributeValues: {
+            ":viewed": {S: prev.concat(displayed)},
+          },
+          ReturnValues: "UPDATED_NEW",
+        };
+        
+        db.updateItem(params, function(err, data) {
+          if (err) {
+            console.log(err)
+            callback(err, null);
+          } else {
+            callback(null, "updated"); // success!
+          }
+        });
+      } else {
+        db.putItem({
+          TableName: 'newsViewed',
+          Item: {
+            username: {S: user.username},
+            viewed : {S: displayed}
+          }
+        },(err, data) => {
+          if (err) {
+            callback(err, null);
+          } else {
+            callback(null, "first");
+          }
+          });
+      }
+    });
+}
+
+
 
 const findNews = (keyword, callback) => {
   //var docClient = new AWS.DynamoDB.DocumentClient();
@@ -524,9 +740,6 @@ const findNews = (keyword, callback) => {
     });
 }
 
-
-
-
 const database = {
   // queryUser: queryUser,
   createUser: createUser,
@@ -534,8 +747,9 @@ const database = {
   loginUser: loginUser,
   scanUsers: scanUsers,
   
-  addFriend, addFriend,
+  sendFriendRequest: sendFriendRequest,
   getFriends: getFriends,
+  queryFriendInvites: queryFriendInvites,
 
   queryPosts: queryPosts,
   
@@ -547,6 +761,7 @@ const database = {
 
   computeRank:  computeRank,
   fetchNewsData: fetchNewsData,
+  addViewHistory: addViewHistory,
   
 }
 

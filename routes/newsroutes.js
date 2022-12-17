@@ -9,19 +9,22 @@ const e = require('express');
 const calculateRank = (req, res) => {
 	result = []
   results = []
+  newsdata = []
 	// execute the java command
   if (req.session.user != null) {
 		let user = req.session.user;
-    console.log(user);
+    //console.log(user);
 
     db.computeRank(user, (err, data) => {
       if (err) {
         console.log(err);
       } else {
-        console.log("Made it to else statement!");
+        console.log("Made it to else statement! at computeRank");
         console.log(data);
+       // console.log("0's headline:" + data[0].headline.S);
+
         for (let i = 0; i < data.length; i++) {
-          result = data[i].Items;
+          result = data[i].headline.S;
           results.push(result);
         }
 
@@ -29,8 +32,19 @@ const calculateRank = (req, res) => {
           if (err) {
             console.log(err);
           } else {
-            console.log(data);
-            res.send(JSON.stringify(data));
+            data.forEach(function(element, index, array) {
+              //console.log(element);
+              newsdata.push(element)});
+              //res.render('news.pug', {results: newsdata});
+              res.send(JSON.stringify(newsdata));
+
+              db.addViewHistory(user, results, (err,data) => {
+                if (err) {
+                  console.log(err);
+                } else {
+                  console.log("successfully" + data);
+                }
+              })
           }
         })
       }

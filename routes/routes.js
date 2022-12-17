@@ -3,6 +3,7 @@ const usr = require('../models/user');
 const db = require('../models/database');
 const user = require('../models/user');
 const e = require('express');
+const {v4 : uuidv4} = require('uuid')
 
 /**
  * Checks if HTTP Status code is successful (between 200-299)
@@ -91,6 +92,20 @@ const getNotifications = (req, res) => {
   }
 }
 
+const viewFriendInvites = (req, res) => {
+  if (req.session && req.session.user) {
+    db.queryFriendInvites(req.session.user.username, false, (status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+        res.send(JSON.stringify(data));
+      } else {
+        res.status(status).send(new Error(err));
+      }
+    })
+  } else {
+    res.status(401).send(new Error("No user"))
+  }
+}
+
 const postScanUsers = (req, res) => {
   let query = req.body.query;
   console.log(query);
@@ -125,12 +140,12 @@ const postGetFriend = (req, res) => {
   }
 }
 
-const postAddFriend = (req, res) => {
+const postSendFriendRequest = (req, res) => {
   let accepter = req.body.accepter;
   console.log(accepter);
 
   if (accepter && accepter.match(/^\w{3,25}$/)) {
-    db.addFriend(req.session.user.username, accepter, (status, err, data) => {
+    db.sendFriendRequest(req.session.user.username, accepter, (status, err, data) => {
       if (isSuccessfulStatus(status)) {
         res.sendStatus(201);
       } else {
@@ -267,9 +282,13 @@ const sendChatList = (req, res) => {
   let username = req.session.user.username;
   db.findChats(username, (err, data) => {
 	if(data != null) {
-		console.log(JSON.parse(JSON.parse(data)[0].users)[0]);
-		var obj = {'clist' : JSON.parse(data), 'username': username};
-		res.send(obj);
+		if (data.length == 0 || data === "[]") {
+			var obj = {'clist' : [], 'username': username};
+			res.send(obj);
+		} else {
+			var obj = {'clist' : JSON.parse(data), 'username': username};
+			res.send(obj);
+		}
 	} else {
 		console.log(err);
 	}
@@ -285,29 +304,36 @@ const addChat = (req, res) => {
 	// if user is logged in, continue
 	// generate a new chatroom item (using db), save to req.session.currentroom
 	// also send data to frontend
-	if (req.session.user != null) {
+	if (req.session.user.username != null) {
 		let user = req.session.user;
 		// generate uuid
-		let roomid = 0;
+		let roomid = uuidv4();
+		console.log(roomid);
 		
 		let chatinfo = {
 			creator : user.username,
-			chatname : req.body.chatname,
+			chatname : req.body.chatnameinput,
 			roomid : roomid,
-			
 		};
+		
 		// call newChat function
 		db.newChat(chatinfo, (status, err, data) => {
 			// return chatinfo = {roomid: value, chatname: chat name, }
-			if (err) {
+			if (status != 200) {
+				console.log(status);
 				console.log(err);
+				if (status == 500) {
+					return res.status(status).send(new Error(err));
+				} else {
+					return res.sendStatus(status);
+				}
 			} else {
 				// set req.session.currentroom = { id: room-uuid, name: chatname, creator: req.session.user }
-				
+				req.session.currentroom = data.roomid;
+				return res.send(data);
 			}
 		});
 		// KEVIN: on frontend we need to call reloadData on the chatlist div after addChat 
-		
 	} else {
 		// not logged in, return to homepage & log reason on console
 		console.log("Not logged in, returned to homepage.");
@@ -363,6 +389,9 @@ const openChat = (req, res) => {
 		success: true
 	});
 	*/
+	
+	// return data.userlist
+	// return all messages
 	
 	res.send({
 		success: true
@@ -484,8 +513,9 @@ const routes = {
   postWallRefresh: postWallRefresh,
   postScanUsers: postScanUsers,
 
-  postAddFriend: postAddFriend,
+  postSendFriendRequest: postSendFriendRequest,
   postGetFriend: postGetFriend,
+  viewFriendInvites: viewFriendInvites,
 
   // Kevin's visualizer routes
   getVisualizer: getVisualizer,

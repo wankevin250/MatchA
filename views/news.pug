@@ -1,43 +1,20 @@
 extends layouts/standard.pug
 
-    block head 
-    
-		<h1 style = "font-size:25"> Article Recommendation </h1>
-		each result in results
-			<h3 style = "font-size:20; margin:5px; padding: 15px; background-color:lightblue;"> 
-				<div style = "display: inline-block; width: 40%; text-transform:uppercase; text-align:left; "> #{result.speaker_1} </div>	
-				<div style = "display: inline-block; text-align:right;"> 
-					ul
-						a(href = result.url) #{result.title} </div>
-			</h3>
-			<hr>
-			<h4 style = "font-size:16; margin:5px; justify-content:center;"> </h4>
-				<div style = "display: inline-block; width: 30%; text-align: left"> Duration: #{result.duration} minutes </div>
-				<div style = "display: inline-block; width: 30%; text-align: center"> View: #{result.views} views </div>
-				<div style = "display: inline-block; width: 30%; text-align: right"> Social node : #{result.social_id} </div>
-			<hr>
-			<h5 style = "display:flex; font-size:17; margin:5px; padding: 5px;"> 
-				<div style = "width: 60%; float:left">
-					<iframe id = "talk" width = 95% height = 250 src = "#{result.url}".replace("www","embed")> </iframe>
-				</div>
-				<div style = "width:75%; float:right"> #{result.description} </div>
-			</h5>
-			<hr>
-			<h6 style = "display: flex; margin: 5; justify-content:center"> 
-				<div style = "width: 50%; float:left;"> 
-					<div> <br> Topics </div>
-					ul
-						each topic in result.topics
-							li
-								a(href = "http://localhost:8081/talks?keyword="+ topic) #{topic}
-					</div>
-	
-				<div style = "width: 50%; float: right;">
-					<div> <br> See also:  </div>
-					ul
-						each val, key in result.related_talks
-							li
-								a(href = "http://localhost:8081/talk?id="+ key) #{val}
-								br
-					</div>
-			</h6>
+block head
+	title Article Recommendation
+
+block content
+
+each result in results
+	h3(style='font-size:20; margin:5px; padding: 15px; background-color:lightblue;')
+	div(style='display: inline-block; width: 40%; text-transform:uppercase; text-align:left; ')  #{result.short_description} 
+	div(style='display: inline-block; text-align:right;')
+		| ul
+		| a(href = result.link) #{result.headline}
+	hr
+	h4(style='font-size:16; margin:5px; justify-content:center;')  
+	div(style='display: inline-block; width: 30%; text-align: left')  Headline: #{result.headline} 
+	div(style='display: inline-block; width: 30%; text-align: right')  Author: #{result.authors}  
+	hr
+	h6(style='display: flex; margin: 5; justify-content:center')
+		Link: #{result.link}

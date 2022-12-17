@@ -35,7 +35,7 @@ function searchUser(query) {
                         }
                     });
                     userAddFriendButton.disabled = true;
-                    userAddFriendButton.innerText = 'Friend Added';
+                    userAddFriendButton.innerText = 'Request Sent';
                     console.log(userAddFriendButton.disabled);
                 };
 

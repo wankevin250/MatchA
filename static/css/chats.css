@@ -20,6 +20,7 @@
   border: none;
   color: white;
   padding: 10px 10px;
+  margin: 10px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
@@ -36,9 +37,12 @@
     border: none;
     color: white;
     padding: 10px 10px;
+    margin: 10px;
+    overflow-wrap: normal;
+    
     text-align: center;
     text-decoration: none;
-    display: inline-block;
+    display: block;
     font-size: 20px;
     font-family: Helvetica, Sans-Serif;
 }
@@ -68,6 +72,7 @@
 	list-style: none;
 	padding: 20px 20px;
 	margin: 10px;
+	
 	
 	overflow:hidden;
 	overflow-y:scroll;

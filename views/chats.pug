@@ -6,6 +6,8 @@ block head
   script.
     var myID = -1;
     var roomuuid = null;
+    var room = null;
+    var currentchatusers = [];
     const socket = io();
     var chatlist = [];
     
@@ -18,6 +20,7 @@ block head
         let roomid = this.id;
         $.post('/openroom', { room : roomid }, function(data) {
           if (data.success) {
+          
             room = roomid;
             roomuuid = roomid;
             
@@ -37,14 +40,23 @@ block head
       $(".btnAceLeave").on("click", function() {
         $.post('/leaveroom', function(data) {
           if (data.success) {
+            
+            socket.emit('leave room', {
+                user: myID,
+                room: roomuuid,
+            });
+            
+            roomuuid = null;
             room = null;
+            
+            const myNode = document.getElementById("messages");
+            myNode.textContent = '';
             
             $(".leftHalf").css('display', 'block');
             $(".rightHalf").css('display', 'none');
           }
         });
       });
-      
       
     });
     
@@ -55,7 +67,6 @@ block head
           // scrub text?
           
           socket.emit('chat message', {
-          
               text: $('#message').val().trim(),
               sender: myID,
               room: room,
@@ -64,7 +75,7 @@ block head
           $.post('/sendmessage', { 
               text: $('#message').val().trim(),
               sender: myID,
-              room: room,}, 
+              room: room,},
               
               function (data){
                 // something with returned data?
@@ -78,7 +89,7 @@ block head
     $(document).ready(function() {
       socket.on('chat message', function (msg) {
           var message_temp = document.createElement("li");
-
+          
           if (myID === msg.sender) {
             message_temp.setAttribute("class", "me");
           } else {
@@ -103,17 +114,37 @@ block head
     	  type: 'POST',
     	  url: '/chatlist',
     	  success: function(response) {
-    	    alert(response.clist[0].roomid);
-    	    chatlist = response.clist;
-    	    myID = response.username;
+          chatlist = response.clist;
+          myID = response.username;
     	    
     	    for (let i = 0; i < chatlist.length; i++) {
                 var chatbutton_temp = document.createElement("a");
                 chatbutton_temp.setAttribute("class", "chatBtnClass");
-                chatbutton_temp.setAttribute('id', myID);
-                chatbutton_temp.appendChild(document.createTextNode(i));
+                chatbutton_temp.setAttribute('id', chatlist[i].roomid);
+                chatbutton_temp.appendChild(document.createTextNode(chatlist[i].chatname));
               
                 $('#listbox').append(chatbutton_temp);
+                
+                $("#" + chatlist[i].roomid).on("click", function() {
+                    let roomid = chatlist[i].roomid;
+                    
+                    $.post('/openroom', { room : roomid }, function(data) {
+                        if (data.success) {
+                            room = roomid;
+                            roomuuid = roomid;
+                            socket.emit('join room', {
+                                user: myID,
+                                room: roomid,
+                            });
+                        // load all prev. messages to #messages using loop
+                        
+                            $(".leftHalf").css('display', 'none');
+                            $(".rightHalf").css('display', 'block');
+                        }
+                    });
+                    
+                });
+                
             }
     	  }
     	})

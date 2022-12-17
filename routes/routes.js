@@ -3,6 +3,7 @@ const usr = require('../models/user');
 const db = require('../models/database');
 const user = require('../models/user');
 const e = require('express');
+const {v4 : uuidv4} = require('uuid')
 
 /**
  * Checks if HTTP Status code is successful (between 200-299)
@@ -288,7 +289,7 @@ const addChat = (req, res) => {
 	if (req.session.user.username != null) {
 		let user = req.session.user;
 		// generate uuid
-		let roomid = 0;
+		let roomid = uuidv4();
 		
 		let chatinfo = {
 			creator : user.username,

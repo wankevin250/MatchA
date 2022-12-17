@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
 const req = require('express/lib/request.js');
 const usr = require('./user.js');
+const {v4 : uuidv4} = require('uuid')
 
 AWS.config.update({
   region: 'us-east-1',
@@ -357,16 +358,35 @@ const addChatToTable = (chatdata, callback) => {
 			if (err) {
 				callback(500, err, null);
 			} else if (data.Items.length == 0) {
-				db.putItem( {'TableName': "chatrooms", 'Item': item}, function(result) {
-					
+				db.putItem( {'TableName': "chatrooms", 'Item': item}, function(err, data) {
+					if (err) {
+						callback(500, err, null);
+					} else {
+						callback(200, err, data);
+					}
 				});
 			} else {
+				// generate uuid
+				let newid = uuidv4();
+				let refresheditem = {
+					'creator': {S: chatdata.creator},
+					'roomid': {S: newid}, 
+					'users': {S: JSON.stringify(userlist)}, 
+					'chatname': {S: chatdata.chatname}
+				};
 				
+				db.putItem( {'TableName': "chatrooms", 'Item': refresheditem}, function(err, data) {
+					if (err) {
+						callback(500, err, null);
+					} else {
+						callback(200, err, data);
+					}
+				});
 			}
 		})
 		
 	} else {
-		callback(401, null, null);
+		callback(400, null, null);
 	}
 }
 

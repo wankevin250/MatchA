@@ -67,8 +67,20 @@ const getFriends = (username, callback) => {
   });
 }
 
-const scanPosts = (username, callback) => {
-
+const queryPosts = (userwall, callback) => {
+  db.query({
+    TableName: 'posts',
+    KeyConditionExpression: "userwall = :userwall",
+    ExpressionAttributeValues: {
+      ':userwall': {S: userwall}
+    }
+  }, (err, data) => {
+    if (err) {
+      callback(500, err, null);
+    } else {
+      callback(201, err, data);
+    }
+  });
 }
 
 const addFriend = (asker, accepter, callback) => {
@@ -465,6 +477,8 @@ const database = {
   
   addFriend, addFriend,
   getFriends: getFriends,
+
+  queryPosts: queryPosts,
   
   findChats: findChats,
   newChat: addChatToTable,

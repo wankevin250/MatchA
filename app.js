@@ -36,6 +36,7 @@ app.get('/searchuser', routes.getSearchUser);
 // app.get('/profile', null);
 app.get('/settings', routes.getSettings);
 app.get('/friends', routes.getFriends);
+app.get('/mywall/:username', routes.getMyWall);
 
 //kevin: visualizer routes call
 app.get('/visualizer', routes.getVisualizer);

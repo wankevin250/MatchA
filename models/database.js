@@ -346,7 +346,7 @@ const computeRank = (user, callback) => {
 	// using username as an input for run, execute the whole rankJob.class
 	var exec = require('child_process').exec;
   
-  exec('mvn exec:@java ranker' + ' -Dexec.args=' + user,
+  exec('mvn exec:java@ranker' + ' -Dexec.args=' + user.username,
     function (error, stdout, stderr) {
         //console.log('stdout: ' + stdout);
         //console.log('stderr: ' + stderr);
@@ -359,10 +359,10 @@ const computeRank = (user, callback) => {
     db.query({
       ExpressionAttributeValues: {
         ':username': {S: user.username},
-        ':maxrank': 10
+        //':maxrank': {N: 10}
       },
-      KeyConditionExpression: 'username = :username and rank <= :maxrank',
-      TableName: 'rankedNews'
+      KeyConditionExpression: 'username = :username', // and rank <= :maxrank
+      TableName: 'newsRanked'
     }, (err, data) => {
       if (err) {
         callback(err, null);

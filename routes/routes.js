@@ -412,7 +412,7 @@ const calculateRank = (req, res) => {
 		let user = req.session.user;
     console.log(user);
 
-    db.computeRank(user.username, (err, data) => {
+    db.computeRank(user, (err, data) => {
       if (err) {
         console.log(err);
       } else {
@@ -435,7 +435,7 @@ const calculateRank = (req, res) => {
     })
   } else {
     console.log("Not logged in, returned to homepage.");
-		res.redirect('splash.pug');
+		res.redirect('/');
   }
 }
 

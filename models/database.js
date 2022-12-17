@@ -404,7 +404,7 @@ const fetchNewsData = (headlines, callback) => {
     TableName: 'newsData'
   };
    
-    let prom = docClient.query(params).promise(); // making array of promises
+    let prom = db.query(params).promise(); // making array of promises
     promises.push(prom);
  }
   
@@ -425,7 +425,7 @@ const fetchNewsData = (headlines, callback) => {
 }
 
 const findNews = (keyword, callback) => {
-  var docClient = new AWS.DynamoDB.DocumentClient();
+  //var docClient = new AWS.DynamoDB.DocumentClient();
   var result =[];
   var promises = [];
 
@@ -443,7 +443,7 @@ const findNews = (keyword, callback) => {
         KeyConditionExpression : 'keyword = :k',
         };
         
-        let prom = docClient.query(params).promise(); //create promise for each talk id
+        let prom = db.query(params).promise(); //create promise for each talk id
         promises.push(prom);
       }
     } 

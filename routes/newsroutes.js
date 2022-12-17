@@ -21,7 +21,7 @@ const calculateRank = (req, res) => {
         console.log("Made it to else statement!");
         console.log(data);
         for (let i = 0; i < data.length; i++) {
-          result = data[i].Items[0];
+          result = data[i].Items;
           results.push(result);
         }
 

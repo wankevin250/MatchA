@@ -332,67 +332,42 @@ var findChats = function (username, callback) {
     });
 }
 
-const addChatToTable = (username, chatdata, callback) => {
+const addChatToTable = (chatdata, callback) => {
 	// using username, query user data from table: users, get stringified list of chatrooms, return in array form to routes.js
 	// callback: (status, err, data)
-	if (user != null && chatdata != null) {
-		let item = { 'creator': username, 'roomid': chatdata.roomid, 'users': username, 'chatname': chatdata.chatname};
+	if (chatdata != null) {
+		let userlist = [username];
+		let item = { 
+			'creator': {S: chatdata.creator},
+			'roomid': {S: chatdata.roomid}, 
+			'users': {S: JSON.stringify(userlist)}, 
+			'chatname': {S: chatdata.chatname}
+			};
 		
 		// db.query to check if already existing using this id, if so generate new id
-	} else {
+		var params = {
+		    ExpressionAttributeValues: {
+		      ':roomid': {S: chatdata.roomid},
+		    },
+		    KeyConditionExpression: 'roomid = :roomid',
+		    TableName: 'chatrooms'
+		};
 		
+		db.query(params, function(err, data) {
+			if (err) {
+				callback(500, err, null);
+			} else if (data.Items.length == 0) {
+				db.putItem( {'TableName': "chatrooms", 'Item': item}, function(result) {
+					
+				});
+			} else {
+				
+			}
+		})
+		
+	} else {
+		callback(401, null, null);
 	}
-
-    db.query({
-      ExpressionAttributeValues: {
-        ':username': {S: user.username},
-      },
-      KeyConditionExpression: 'username = :username',
-      TableName: 'users',
-    }, (err, data) => {
-      if (err) {
-        console.log(err);
-        callback(500, err, null);
-      } else {
-        if (data.Items.length > 0) {
-          callback(403, "username", null);
-        } else {
-          db.query({
-            ExpressionAttributeValues: {
-              ':email': {S: user.email},
-            },
-            KeyConditionExpression: 'email = :email',
-            TableName: 'users',
-            IndexName: 'email'
-          }, (err, data) => {
-            if (err) {
-              console.log(err);
-              callback(500, err, null);
-            } else {
-              if (data.Items.length > 0) {
-                callback(403, 'email', null);
-              } else {          
-                // put to database. respond with no data if server error.
-                db.putItem({
-                  Item: item,
-                  TableName: 'users',
-                }, (err, data) => {
-                  if (err) {
-                    console.log("Error", err);
-                    callback(500, err, null);
-                  } else {
-                    callback(201, err, data);
-                  }
-                });
-              }
-            }
-          });
-        }
-      }
-    });
-  } else {
-    callback(401, null, null);
-  }
 }
 
 const displayFriends = (user, callback) => {

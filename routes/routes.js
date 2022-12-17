@@ -75,8 +75,17 @@ const getSettings = (req, res) => {
 const getMyWall = (req, res) => {
   let homeUser = req.params.username;
 
-  if (req.session && req.session.username) {
+  if (req.session && req.session.user) {
     res.render('mywall', {homeuser: homeUser});
+  } else {
+    res.redirect('/login');
+  }
+}
+
+const getNotifications = (req, res) => {
+  console.log(req.session.user);
+  if (req.session && req.session.user) {
+    res.render('notifications');
   } else {
     res.redirect('/login');
   }
@@ -441,6 +450,7 @@ const routes = {
   getFriends: getFriends,
   getSettings: getSettings,
   getMyWall: getMyWall,
+  getNotifications: getNotifications,
   
   // ace: To Commit
   loadChatPage: getChat,

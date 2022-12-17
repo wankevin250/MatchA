@@ -278,13 +278,23 @@ const addChat = (req, res) => {
 	// also send data to frontend
 	if (req.session.user != null) {
 		let user = req.session.user;
+		// generate uuid
+		let roomid = 0;
+		
+		let chatinfo = {
+			creator : user.username,
+			chatname : req.body.chatname,
+			roomid : roomid,
+			
+		};
 		// call newChat function
-		db.newChat(user, (chatinfo, err, data) => {
-			// return chatinfo = {room-uuid: value, chatname: chat name}
+		db.newChat(chatinfo, (status, err, data) => {
+			// return chatinfo = {roomid: value, chatname: chat name, }
 			if (err) {
 				console.log(err);
 			} else {
 				// set req.session.currentroom = { id: room-uuid, name: chatname, creator: req.session.user }
+				
 			}
 		});
 		// KEVIN: on frontend we need to call reloadData on the chatlist div after addChat 

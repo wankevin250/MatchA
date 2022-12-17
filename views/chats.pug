@@ -151,10 +151,15 @@ block head
                 
             }
     	  }
-    	})
+    	});
     }
     
-  
+    async function createChat(chatname) {
+    	$.post('/createroom', { chatname : roomuuid }, function(data) {
+    	    
+    	});
+    }
+    
   title Chats 
 
 block content

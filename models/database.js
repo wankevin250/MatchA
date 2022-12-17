@@ -332,10 +332,67 @@ var findChats = function (username, callback) {
     });
 }
 
-const addChatToTable = (user, callback) => {
+const addChatToTable = (username, chatdata, callback) => {
 	// using username, query user data from table: users, get stringified list of chatrooms, return in array form to routes.js
-	
-	// callback: (chatinfo, err, data)
+	// callback: (status, err, data)
+	if (user != null && chatdata != null) {
+		let item = { 'creator': username, 'roomid': chatdata.roomid, 'users': username, 'chatname': chatdata.chatname};
+		
+		// db.query to check if already existing using this id, if so generate new id
+	} else {
+		
+	}
+
+    db.query({
+      ExpressionAttributeValues: {
+        ':username': {S: user.username},
+      },
+      KeyConditionExpression: 'username = :username',
+      TableName: 'users',
+    }, (err, data) => {
+      if (err) {
+        console.log(err);
+        callback(500, err, null);
+      } else {
+        if (data.Items.length > 0) {
+          callback(403, "username", null);
+        } else {
+          db.query({
+            ExpressionAttributeValues: {
+              ':email': {S: user.email},
+            },
+            KeyConditionExpression: 'email = :email',
+            TableName: 'users',
+            IndexName: 'email'
+          }, (err, data) => {
+            if (err) {
+              console.log(err);
+              callback(500, err, null);
+            } else {
+              if (data.Items.length > 0) {
+                callback(403, 'email', null);
+              } else {          
+                // put to database. respond with no data if server error.
+                db.putItem({
+                  Item: item,
+                  TableName: 'users',
+                }, (err, data) => {
+                  if (err) {
+                    console.log("Error", err);
+                    callback(500, err, null);
+                  } else {
+                    callback(201, err, data);
+                  }
+                });
+              }
+            }
+          });
+        }
+      }
+    });
+  } else {
+    callback(401, null, null);
+  }
 }
 
 const displayFriends = (user, callback) => {

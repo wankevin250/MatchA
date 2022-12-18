@@ -2,19 +2,15 @@ extends layouts/standard.pug
 
 block head
 	title Article Recommendation
+	link(rel='stylesheet', href='https://stackpath.bootstrapcdn.com/bootstrap/5.2.3/css/bootstrap.min.css')
+	link(rel='stylesheet', href='/css/news.css')
+	
 
 block content
-
-each result in results
-	h3(style='font-size:20; margin:5px; padding: 15px; background-color:lightblue;')
-	div(style='display: inline-block; width: 40%; text-transform:uppercase; text-align:left; ')  #{result.short_description} 
-	div(style='display: inline-block; text-align:right;')
-		| ul
-		| a(href = result.link) #{result.headline}
-	hr
-	h4(style='font-size:16; margin:5px; justify-content:center;')  
-	div(style='display: inline-block; width: 30%; text-align: left')  Headline: #{result.headline} 
-	div(style='display: inline-block; width: 30%; text-align: right')  Author: #{result.authors}  
-	hr
-	h6(style='display: flex; margin: 5; justify-content:center')
-		Link: #{result.link}
+	div(class='news-head')
+		h1 Articles that matches your Interests..
+	div(class='divider')
+	div(class='news-body')
+		ul
+			each result in results
+				#{result.headline.S}

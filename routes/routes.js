@@ -455,7 +455,6 @@ const openChat = (req, res) => {
 			console.log(err);
 			res.sendStatus(status);
 		} else {
-			console.log("Should succeed...");
 			const ansr = data.pastmessages.map( rawmessage => {
 					return { sender: rawmessage.sender.S, 
 								text: rawmessage.text.S,
@@ -549,6 +548,7 @@ const extractUserInfo = (req, res) => {
 	// output from db: {userid: username, displayname: userdisplay, fullname: userfullname}
 	// iff displayname == '', display = fullname, otherwise = displayname
 	let usr = req.body.username;
+	console.log("extracting user info");
 	
 	db.extractOneUserDisplayInfo(usr, (status, err, data) => {
 		if (status != 200) {

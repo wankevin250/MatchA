@@ -62,7 +62,6 @@ block head
             
             $(".leftHalf").css('display', 'block');
             $(".rightHalf").css('display', 'none');
-            
             document.getElementById("chatTitle").innerText = '';
             $('#chatmembers').empty();
           }
@@ -103,6 +102,19 @@ block head
                                     room: roomid,
                                 });
                                 
+                                d.chatmembers.forEach(function(member) {
+                                    $.post('/extractuser', { username: member}, function(response) {
+                                        if (response.status == 200) {
+                                            var memberlisting = document.createElement("p");
+                                            memberlisting.setAttribute("class", "memberlisting");
+                                            memberlisting.setAttribute("id", response.username);
+                                            memberlisting.innerText = response.display;
+                                            
+                                            $('#chatmembers').append(memberlisting);
+                                        }
+                                    });
+                                });
+                                
                                 // load all prev. messages to #messages using loop
                                 // d.pastmessages
                                 
@@ -135,20 +147,7 @@ block head
                                     
                                     $('#messages').append(message_outline);
                                 });
-                                updateScroll();
                                 
-                                d.chatmembers.forEach(function(member) {
-                                    $.post('/extractuser', { username: member}, function(response) {
-                                        if (response.status == 200) {
-                                            var memberlisting = document.createElement("p");
-                                            memberlisting.setAttribute("class", "memberlisting");
-                                            memberlisting.setAttribute("id", response.username);
-                                            memberlisting.innerText = response.display;
-                                            
-                                            $('#chatmembers').append(memberlisting);
-                                        }
-                                    });
-                                });
                                 
                                 // load all current users to #chatmembers
                                 // TODO: (when a user accepts an invite, socket.emit from requests page, 
@@ -159,6 +158,7 @@ block head
                                 $(".leftHalf").css('display', 'none');
                                 $(".rightHalf").css('display', 'block');
                                 document.getElementById("chatTitle").innerText = chatroomtitle;
+                                updateScroll();
                             } else {
                                 alert("Something went wrong!");
                             }
@@ -256,6 +256,7 @@ block head
           
           $('#messages').append(message_outline);
           updateScroll();
+          
       });
     });
     
@@ -294,6 +295,19 @@ block head
                                 room: roomid,
                             });
                             
+                            data.chatmembers.forEach(function(member) {
+                                $.post('/extractuser', { username: member}, function(response) {
+                                    if (response.status == 200) {
+                                        var memberlisting = document.createElement("p");
+                                        memberlisting.setAttribute("class", "memberlisting");
+                                        memberlisting.setAttribute("id", response.username);
+                                        memberlisting.innerText = response.display;
+                                       
+                                        $('#chatmembers').append(memberlisting);
+                                    }
+                                });
+                            });
+                            
                             // load all prev. messages to #messages using loop
                             // data.pastmessages
                             // data.chatmembers
@@ -326,12 +340,12 @@ block head
                                 
                                 $('#messages').append(message_outline);
                             });
-                            updateScroll();
+                            
                             
                             $(".leftHalf").css('display', 'none');
                             $(".rightHalf").css('display', 'block');
                             document.getElementById("chatTitle").innerText = chatroomtitle;
-                            
+                            updateScroll();
                         }
                     });
                     

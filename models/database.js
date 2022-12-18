@@ -866,8 +866,6 @@ function compareLists (arrayA, arrayB) {
  function extractUserNames (userlist, callback) {
 	var ans = [];
 	
-	console.log("At ExtractUserNames");
-	
 	if (userlist == null) {
 		userlist = [];
 	}
@@ -899,7 +897,6 @@ function compareLists (arrayA, arrayB) {
 				ans.push(userobj);
 				
 				if (ans.length == userlist.length) {
-					console.log(ans);
 					callback(200, null, ans);
 				}
 			}

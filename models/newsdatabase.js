@@ -18,8 +18,8 @@ const runSpark = (user, callback) => {
     
     exec(cmnd,  { encoding: 'utf-8' },
       function (error, stdout, stderr) {
-          console.log('stdout: ' + "adsorption complete");
-          console.log('stderr: ' + stderr);
+          console.log('stdout: ' + stdout);
+          console.log('stderr: ' );
           if (error) {
              // console.log('exec error: ' + error);
               callback(error, null);

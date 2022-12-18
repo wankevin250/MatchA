@@ -28,7 +28,7 @@ const calculateRank = (req, res) => {
         console.log("Made it to else statement! at computeRank");
        // console.log(data);
        // console.log("0's headline:" + data[0].headline.S);
-        data = data.slice(0,5);
+        data = data.slice(0,8);
 
         for (let i = 0; i < data.length; i++) {
           result = data[i].headline.S;
@@ -44,6 +44,12 @@ const calculateRank = (req, res) => {
               newsdata.push(element)});*/
               //console.log("newsdata"+element);
               for (let i = 0; i < data.length; i++) {
+                if (data[i].authors.S.length == 0) {
+                  data[i].authors.S = "Cannot find";
+                }
+                if (data[i].short_description.S.length == 0) {
+                  data[i].short_description.S = "Cannot find";
+                }
                 console.log(data[i].headline.S);
               }
               res.render('news.pug', {results: data});
@@ -68,6 +74,7 @@ const calculateRank = (req, res) => {
 
 const addLike = (req, res) => {
   let news = req.body.headline; // should input the string
+  console.log(news);
   //let news = "Christian Nationalism On The Rise In Some GOP Campaigns";
   let user = req.session.user;
 

@@ -4,16 +4,42 @@ block head
 	title Article Recommendation
 	link(rel='stylesheet', href='https://stackpath.bootstrapcdn.com/bootstrap/5.2.3/css/bootstrap.min.css')
 	link(rel='stylesheet', href='/css/news.css')
+	script(src='/socket.io/socket.io.js')
+	script.
+
+		$(function() {
+			console.log("hey");
+			$("#likeclick").on("click", function(e) {
+				e.preventDefault();
+				console.log(document.getElementById("title").value);
+				$.ajax({
+					type : "POST",
+					url: "/likeNews",
+					data : { 
+							headline : document.getElementById("title").value ,
+					},
+					success : function(result) {
+						// add marker when success
+						alert('You just liked our recommended article :-D');
+					},
+					error : function(result) {
+						alert('error');
+					}
+				})
+			})
+		});
+	
 	
 
 block content
 	div(class='news-head')
-		p <span style = 'font-weight: bold; font-size: 35px;'> Articles that matches your Interests..</span>
+		h1(class="text-center italics bold") Articles that matches your Interests..
 	div(class='divider')
-	<form align="center" name="searchForm" action="/searchNews"  onsubmit="document.searchForm.keyword">
-	<label for="keyword">Search for Articles with the following words:</label><br/>
-	<input type="text" id="keyword" name="keyword" />
-		<input type="submit" value="Search">
+	div(class='search-body')
+		<form align="center" name="searchForm" action="/searchNews"  onsubmit="document.searchForm.keyword">
+		<label for="keyword">Search for Articles with the following words:</label><br/>
+		<input type="text" id="keyword" name="keyword" />
+			<input type="submit" value="Search">
 	</form>
 	div(class='news-body')
 		ul
@@ -21,7 +47,7 @@ block content
 				div(class='news-Class')
 					div(class = 'news-box')
 						div(class = 'row') 
-							p <span style = 'font-weight: bold; font-size: 25px'> #{result.headline.S}</span> 
+							<p id = 'title'> <span style = 'font-weight: bold; font-size: 25px'> #{result.headline.S}</span> </p>
 							div(class = 'col') 
 								p <span style = 'font-size: 14px'>#{result.authors.S}</span> 
 							div(class = 'col') 
@@ -30,4 +56,4 @@ block content
 								p #{result.category.S}
 							a(href = result.link.S) <span style = 'font-size: 15px'> #{result.link.S} </span> 
 							p <span style = 'font-size: 15px'> Short description : #{result.short_description.S} </span>
-						button.btn.btn-primary(type='submit', onclick='likeNews()', name='loginButton') Like
+						button.btn.btn-primary(type='button', name='loginButton', id = 'likeclick') Like

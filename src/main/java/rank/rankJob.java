@@ -40,6 +40,7 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructType;
 
 import com.amazonaws.services.applicationdiscovery.model.ResourceNotFoundException;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughputExceededException;
 import com.amazonaws.services.dynamodbv2.document.BatchWriteItemOutcome;
@@ -253,31 +254,39 @@ public class rankJob {
 	}
 
 	JavaPairRDD<String, String> getFriendsEdge() {
-		String tablename = "friends";
+		String tablename = "users";
 		AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
-		DynamoDB dynamoDB = new DynamoDB(client);
 
-		Table table = dynamoDB.getTable(tablename);
-		Index index = table.getIndex("status-index");
-		Map<String, String> nm = new HashMap<String, String>();
-		nm.put("#v_name", "status");
-
-		QuerySpec spec = new QuerySpec()
-			.withKeyConditionExpression("#v_name = :v_status")
-			.withNameMap(nm)
-			.withValueMap(new ValueMap()
-				.withString(":v_status", "true"));
-
-		ItemCollection<QueryOutcome> items = index.query(spec);
+		ScanRequest scanRequest = new ScanRequest()
+    								.withTableName(tablename);
+		ScanResult scanResult = client.scan(scanRequest);
+		Iterator<Map<String,AttributeValue>> iter = scanResult.getItems().stream()
+												.collect(Collectors.toList())
+												.iterator();
 		List<String[]> friends = new ArrayList<>();
-		Iterator<Item> iter = items.iterator();
 		while (iter.hasNext()) {
-			Item f = iter.next();
-			String[] row = new String[2];
-			row[0] = f.get("accepter").toString();
-			row[1] = f.get("asker").toString();
-			friends.add(row);
+			Map<String,AttributeValue> line = iter.next();
+			String user = line.get("username").getS();
+			String fnd; 
+			try{
+				fnd = line.get("friends").getS();
+				String cl = fnd.substring(1, fnd.length() - 1);
+				String[] arr = cl.split(",");
+				for (int i = 0; i < arr.length; i++) {
+					String x = arr[i];
+					String xx = x.substring(1, x.length() - 1);
+					String[] row = new String[2];
+					row[0] = user;
+					row[1] = xx;
+					friends.add(row);
+				}
+			} catch (Exception e){
+				System.out.println("no friends"+user);
+			} finally {
+				continue;
+			}
 		}
+		
 		JavaRDD<String[]> inArr = context.parallelize(friends);
 		JavaPairRDD<String, String> result = inArr
 											.mapToPair(x -> new Tuple2<String, String>(x[0], x[1]));
@@ -440,12 +449,13 @@ public class rankJob {
 												.iterator();
 
 		List<String> today = getTodayArticle();
+		System.out.println("todya"+today.size());
 
 		int arti = 0;
 		HashSet<Item> rows = new HashSet<Item>(); 
-		while (iter.hasNext() && arti < 300) {
+		while (iter.hasNext() && arti < 500) {
 			Tuple2<Double, Tuple2<String, String>> now = iter.next();
-			if (today.size() == 0 || today.contains(now._2._1)) {
+			//if (today.size() == 0 || today.contains(now._2._1)) {
 				arti++;
 				Item newsItem = new Item()
 							.withPrimaryKey("username", username, "rank", arti)
@@ -474,7 +484,7 @@ public class rankJob {
 					}
 					rows = new HashSet<Item>();	
 				}
-			}	
+			//}	
 		}
 
 		

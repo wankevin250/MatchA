@@ -113,7 +113,11 @@ app.get('/getFriends/:user', routes.sendFriends); //routes.postGetFriend?
 		
 	
         socket.on('chat message', function(obj){
-			console.log(obj.text);
+			console.log(obj);
+			
+			// call routes.sendMessage, which takes in obj and returns obj with timestamp appended!
+			// input obj: { text: $('#message').val().trim(), sender: myID, room: room }
+			
 			io.to(obj.room).emit('chat message', obj);
 		});
 		

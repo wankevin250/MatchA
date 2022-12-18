@@ -446,8 +446,8 @@ const leaveChat = (req, res) => {
   function: sends message to current chatroom
   if error: 
  */
-const sendMsg = (req, res) => {
-	
+var sendMsg = function (obj, callback) {
+	// save message to database
 }
 
 const reloadMsgs = (req, res) => {

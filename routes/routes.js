@@ -476,6 +476,8 @@ const viewUsers = (req, res) => {
  * @params expected input from body / ajax: { askerid, acceptance } (actually will be chat invite's chat code)
  */
 const acceptChatInvite = (req, res) => {
+	var chatid = req.body.askerid;
+	var acceptance = req.body.acceptance;
 	
 }
 /*** 

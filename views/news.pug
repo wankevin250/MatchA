@@ -10,15 +10,17 @@ block content
 	div(class='news-head')
 		h1 Articles that matches your Interests..
 	div(class='divider')
+	div(class='login-inputarea')
 	div(class='news-body')
 		ul
 			each result in results
 				div(class='news-Class')
 					div(class = 'news-box') 
-						h1 #{result.headline.S}
+						p #{result.headline.S}
 					div(class = 'news-box') 
-						h1 #{result.authors.S}
+						p #{result.authors.S}
 					div(class = 'news-box') 
-						a(href = #{result.link.S}) #{result.link.S}
+						a(href = result.link.S) #{result.link.S}
 					div(class = 'news-box') 
-						h1 #{result.short_description.S}
+						p #{result.short_description.S}
+					button.btn.btn-primary(type='submit', onclick='likeNews()', name='loginButton') Like

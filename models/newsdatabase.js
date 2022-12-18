@@ -21,7 +21,6 @@ const runSpark = (user, callback) => {
           console.log('stdout: ' + stdout);
           console.log('stderr: ' );
           if (error) {
-             // console.log('exec error: ' + error);
               callback(error, null);
           } else {
             callback(null, "success");
@@ -36,12 +35,8 @@ const computeRank = (user, callback) => {
     db.query({
       ExpressionAttributeValues: {
         ':username': {S: user.username},
-       // ':maxrank': {N: '5'}
       },
-      /*ExpressionAttributeNames: {
-        '#rank' : 'rank'
-      },*/
-      KeyConditionExpression: 'username = :username', //and #rank <= :maxrank',
+      KeyConditionExpression: 'username = :username',
       TableName: 'newsRanked'
     }, (err, data) => {
       if (err) {
@@ -54,22 +49,18 @@ const computeRank = (user, callback) => {
           KeyConditionExpression: 'username = :username',
           TableName: 'newsViewed',
         }, (err, history) => {
-          console.log(history);
           if (err) {
             callback(err, null);
           }
           if (history.Count > 0) {
-            console.log("WE ARE HERE");
             let prev = JSON.parse(history.Items[0].viewed.S);
             for (let i = 0; i < data.Items.length; i++) {
               if (!prev.includes(data.Items[i].headline.S)) {
-                console.log("YES");
                 ret.push(data.Items[i]);
               }
             }
             callback(null, ret);
           } else {
-            console.log("WE ARE HERE :-(");
             callback(null, data.Items);
           }
         })
@@ -83,7 +74,6 @@ const fetchNewsDataByName = (headlines, callback) => {
   var promises = [];
   
   for (let i = 0; i < headlines.length; i++) {
-    console.log(headlines[i]);
    var params = {
     ExpressionAttributeValues: {
       ':headline': {S: headlines[i]},
@@ -98,15 +88,12 @@ const fetchNewsDataByName = (headlines, callback) => {
   
   Promise.all(promises).then (
    data => {
-    //console.log("PROMISE"+data);
      for (let i = 0; i < data.length; i++) {
        if (data[i].Count != 0) {
-        result = data[i].Items[0]; // or Items[0]?
-        //console.log("result"+result.headline.S);
+        result = data[i].Items[0]; 
         results.push(result);
        }
      }
-     //console.log(results);
      callback(null, results);
    },
    err => {
@@ -123,11 +110,9 @@ const addViewHistory = (user, articles, callback) => {
       KeyConditionExpression: 'username = :username',
       TableName: 'newsViewed',
     }, (err, data) => {
-      console.log(data);
       if (err) {
         callback(err, null);
       } else if (data.Items.length > 0) {
-        console.log(data.Items[0].viewed.S);
         let prev = JSON.parse(data.Items[0].viewed.S);
         for (let i = 0; i < articles.length; i++) {
           prev.push(articles[i]);
@@ -149,7 +134,6 @@ const addViewHistory = (user, articles, callback) => {
         
         db.updateItem(params, function(err, data) {
           if (err) {
-            console.log(err)
             callback(err, null);
           } else {
             callback(null, "updated"); // success!
@@ -192,8 +176,7 @@ const likeNews = (user, news, callback) => {
 
 
 const findNews = (user, keyword, callback) => {
-  //var docClient = new AWS.DynamoDB.DocumentClient();
-  var headlines =[];
+  var iheadlines =[];
   var promises = [];
 
   for (let i = 0; i < arr.length; i++) {
@@ -216,29 +199,40 @@ const findNews = (user, keyword, callback) => {
       }
     } 
 
+    multiple = []
     Promise.all(promises).then(
       data => {
-        console.log(data[0].Items);
         if (data.length < 1) {
-            callback("empty", null);
+            callback("empty", null, null, null);
         }
         const today = new Date();
-        console.log(today);
+        let count = 0;
 
         for (let i = 0; i < data.length; i++) {
               data[i].Items.forEach(function(item){
                 const newsDate = new Date(item.date.S);
-                console.log(newsDate);
-                console.log(item) //!headlines.includes(item.headline.S) &&
-                if (newsDate <= today) { // add until it reaches 20 talks
-                  headlines.push(item.headline.S);
+                if (newsDate <= today) { 
+                  count = count + 1;
+                  let tle = item.headline.S;
+                  if (iheadlines.includes(tle)) {
+                    if (multiple.include(tle)) {
+                      multiple.unshift(tle);
+                    } else {
+                      multiple.push(tle);
+                    }
+                  } else {
+                    iheadlines.push(tle);
+                  }
                 }
             });
         }
 
+        let overlap = iheadlines.length + multiple.length - count;
+        multiple = multiple.slice(0, multiple.length - overlap);
         results = [];
         noRanks = [];
         promises2 = [];
+        headlines = iheadlines.filter(value => !multiple.includes(value));
 
         for (let i = 0; i < headlines.length; i++) { 
           console.log(headlines[i]);
@@ -258,12 +252,10 @@ const findNews = (user, keyword, callback) => {
 
         Promise.all(promises2).then(
           data => {
-           console.log(data);
               for (let i = 0; i < data.length; i++) {
                 if (data[i].Count > 0) {
                   data[i].Items.forEach(function(item){
                   let result = item.rank.N; // or Items?
-                  console.log(result);
                   results.push(result);
                 });
                 } else {
@@ -272,23 +264,18 @@ const findNews = (user, keyword, callback) => {
                 }
               }
 
-              results.sort((function(a,b){ return a - b})).slice(0,10);
+              results = results.sort((function(a,b){ return a - b})).slice(0,10);
 
-              console.log("noRanks: "+noRanks);
-              console.log("results: "+results);
-
-              callback(null, noRanks, results)
+              callback(null, multiple, noRanks, results)
 
           },
           err => {
-            callback(err, null, null);
-            //console.log("error", err);	
+            callback(err, null, null, null);	
           }  
         )
       }, 
       err => {
-        callback(err, null, null);
-        // console.log("error" , err);
+        callback(err, null, null, null);
       }
       );
 
@@ -320,14 +307,12 @@ const fetchTitleByRank = (user, ranks, callback) => {
   Promise.all(promises).then (
    data => {
      for (let i = 0; i < data.length; i++) {
-       //console.log(data);
        if (data[i].length != 0) {
-        result = data[i].Items[0]; // or Items[0]?
+        result = data[i].Items[0]; 
         console.log(result);
         results.push(result);
        }
      }
-     //console.log(results);
      callback(null, results);
    },
    err => {

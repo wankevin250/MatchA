@@ -62,6 +62,7 @@ const calculateRank = (req, res) => {
 
 const addLike = (req, res) => {
   let news = req.body.headline; // should input the string
+  //let news = "Christian Nationalism On The Rise In Some GOP Campaigns";
   let user = req.session.user;
 
   db.likeNews(user, news, (err, data) => {
@@ -75,12 +76,18 @@ const addLike = (req, res) => {
 
 const searchNews = (req, res) => {
   let user = req.session.user;
-  word = request.query.keyword;
+  //word = request.query.keyword;
+  word = "college";
   arr = word.split(" ");
+  console.log(arr);
 
   db.findNews(arr, (err, noRanks, ranks) => {
     if (err) {
-      console.log(err);
+      if (err != "empty") {
+        console.log(err);
+      } else {
+        res.send("no matched result");
+      }
     } else {
       console.log(ranks);
       db.fetchTitleByRank(user, ranks, (err, data) => {

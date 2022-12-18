@@ -151,7 +151,7 @@ public class rankJob {
     								.withTableName(tablename);
 		ScanResult scanResult = client.scan(scanRequest);
 		List<String[]> rowOfInterest = new ArrayList<>();
-		 scanResult.getItems().parallelStream()
+		scanResult.getItems().parallelStream()
 						.forEach(line -> {
 							String dt = line.get("date").getS();
 							if (dt.compareTo(timeStamp) <= 0) {
@@ -377,11 +377,11 @@ public class rankJob {
 
 		userNode.collect().stream()
 					.forEach(item ->
-				{System.out.println(item._1 + " -> " + item._2._2);
+				{//System.out.println(item._1 + " -> " + item._2._2);
 				});
 		EdgeTransfer.mapToPair(x -> new Tuple2<>(x._2._2, new Tuple2<>(x._1, x._2._1))).sortByKey(false).collect().stream().limit(15)
 					.forEach(item ->
-				{System.out.println(item._1 + " === " + item._2._1 + "to<-from" + item._2._2);
+				{//System.out.println(item._1 + " === " + item._2._1 + "to<-from" + item._2._2);
 				});
 
 
@@ -452,7 +452,8 @@ public class rankJob {
 							.withString("headline", now._2._1);
 				rows.add(newsItem);
 
-				if (rows.size() == 25 && !iter.hasNext()) {
+				if (rows.size() == 25 || !iter.hasNext()) {
+					System.out.println(arti);
 					TableWriteItems writ = new TableWriteItems(tableName).withItemsToPut(rows);
 					try {
 						Thread.sleep((long) 0.5);

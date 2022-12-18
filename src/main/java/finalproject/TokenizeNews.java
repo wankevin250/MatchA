@@ -10,7 +10,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Serializable;
-//import java.io.NotSerializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,6 +18,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.lang.Long;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -93,7 +100,8 @@ public class TokenizeNews implements Serializable {
 
     //
 
-    List<Row>  getNews(String filePath) throws IOException {
+    List<Row> getNews(String filePath) throws IOException {
+		
 		BufferedReader reader = null;
 		JsonParser mapper = new JsonParser();
 		reader = new BufferedReader(new FileReader(new File(filePath)));
@@ -124,6 +132,28 @@ public class TokenizeNews implements Serializable {
 							return new GenericRowWithSchema(row, schema);// Make Row with Schema
 						})
 						.collect(Collectors.toList());
+		/*Iterator<JsonObject> iter = lines.stream().collect(Collectors.toList()).iterator();
+		List<Row> rowOfNews = new ArrayList<>();
+
+		while (iter.hasNext()) {
+			JsonObject line = iter.next();
+			String dt = line.get("date").toString();
+			String xdt = dt.substring(1, dt.length() - 1);;
+			LocalDate ldt = LocalDate.parse(xdt).plusYears(5);
+			dt = ldt.toString();
+			System.out.println(dt);
+			if (dt.compareTo(timeStamp) <= 0) {
+				Object[] row = new Object[3]; // assign appropriate values for each Schema
+				String ct = line.get("category").toString();
+				String hl = line.get("headline").toString();
+				row[0] = ct.substring(1, ct.length() - 1);
+				row[1] = hl.substring(1, hl.length() - 1);
+				row[2] = dt; 
+				rowOfNews.add(new GenericRowWithSchema(row, schema));
+			}
+
+		}*/
+
 		//JavaRDD<Row> newsRDD = context.parallelize(rowOfNews);
 
 		return rowOfNews;
@@ -131,18 +161,22 @@ public class TokenizeNews implements Serializable {
 
     //
     public void uploadTokenized() throws IOException, DynamoDbException, InterruptedException {
+	   
 	   System.out.println("RUNNING");
-       List<Row> newsData = this.getNews("newsTestData.txt");
+       List<Row> newsData = this.getNews("NewsCategoryData.txt");
 	   System.out.println("TOKENIZING");
 
        newsData.forEach(news -> { 
+			String timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
 			String tableName = this.tbName;
 			System.out.println("ENTER");
 			HashSet<Item> words = new HashSet<Item>(); 
 			DynamoDB conn = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
 			HashSet<String> dupli = new HashSet<String>();
 			String title = (String) news.getAs(1);
-			if (title.length() != 0) {
+			LocalDate ldate = LocalDate.parse((String) news.getAs(2)).plusYears(5);
+			String dt = ldate.toString();
+			if (dt.compareTo(timeStamp) <= 0) {
 				System.out.println("TOKENED");
 				String[] tokens =title.split(" ");
 				System.out.println(tokens[0]);
@@ -171,7 +205,7 @@ public class TokenizeNews implements Serializable {
 								Item word = new Item()
 												.withPrimaryKey("keyword", tokens[j], "headline", title)
 												.withString("category", (String) news.getAs(0))
-												.withString("date", (String) news.getAs(2));
+												.withString("date", dt);
 								words.add(word);
 							}
 						}

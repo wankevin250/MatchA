@@ -39,12 +39,15 @@ const calculateRank = (req, res) => {
           if (err) {
             console.log(err);
           } else {
-            data.forEach(function(element, index, array) {
-              console.log("Element"+element);
-              newsdata.push(element)});
+            /*data.forEach(function(element, index, array) {
+              console.log("Element"+element.headline.S);
+              newsdata.push(element)});*/
               //console.log("newsdata"+element);
+              for (let i = 0; i < data.length; i++) {
+                console.log(data[i].headline.S);
+              }
               res.render('news.pug', {results: data});
-              //res.send(newsdata);
+              //res.send(data);
 
               db.addViewHistory(user, results, (err,data) => {
                 if (err) {

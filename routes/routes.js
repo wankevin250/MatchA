@@ -23,7 +23,13 @@ const getSplash = (req, res) => {
 }
 
 const getSignUp = (req, res) => {
-  res.render('signup');
+  db.scanNewsCategories((status, err, data) => {
+    if (isSuccessfulStatus(status)) {
+      res.render('signup', {newsCategories: data});
+    } else {
+      res.redirect('/error');
+    }
+  });
 }
 
 const getLogin = (req, res) => {

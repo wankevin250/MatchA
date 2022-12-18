@@ -1,5 +1,4 @@
 const AWS = require('aws-sdk');
-const req = require('express/lib/request.js');
 const usr = require('./user.js');
 const {v4 : uuidv4} = require('uuid')
 
@@ -12,6 +11,32 @@ const db = new AWS.DynamoDB();
 const parseJSONwithS = (jsonstring) => {
   return jsonstring && jsonstring.length > 0
    ? JSON.parse(jsonstring.S) : [];
+}
+
+const cleanDataItems = (dataItems) => {
+  let itemArr = [];
+  dataItems.forEach(item => {
+    let newitem = {};
+    Object.entries(item).forEach(entry => {
+      let [key, val] = entry;
+      newitem[key] = Object.values(val)[0];
+    });
+    itemArr.push(newitem);
+  });
+  return itemArr;
+}
+
+const scanNewsCategories = (callback) => {
+  db.scan({
+    TableName: 'newsCount',
+  }, (err, data) => {
+    if (err) {
+      console.log(err);
+      callback(500, err, null);
+    } else {
+      callback(201, err, cleanDataItems(data.Items));
+    }
+  });
 }
 
 const scanUsers = (searchQuery, callback) => {
@@ -1072,6 +1097,8 @@ const database = {
   editUser: editUser,
   loginUser: loginUser,
   scanUsers: scanUsers,
+
+  scanNewsCategories: scanNewsCategories,
   
   sendFriendRequest: sendFriendRequest,
   getFriends: getFriends,

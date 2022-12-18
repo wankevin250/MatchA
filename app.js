@@ -188,9 +188,9 @@ app.post('/openroom', routes.openChat);
 app.post('/leaveroom', routes.leaveChat);
 // open CHATBOX should REFRESH every 1 second. Chatbox should leave button
 /** popup list of friends user can add to chat */
-app.get('/friendstoadd', routes.popupFriends);
+app.post('/friendstoadd', routes.popupFriends);
 /** in chatroom box, button that allows adding a friend */
-app.get('/addfriend', routes.addFriend);
+app.post('/addfriend', routes.addFriend);
 /** send msg to database, refreshes page */
 app.post('/sendmessage', routes.sendMessage);
 

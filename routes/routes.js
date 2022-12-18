@@ -264,20 +264,6 @@ const getChat = (req, res) => {
 	}
 }
 
-/**
-var sendChatList = function (req, res) {
-	// call user from req.session.user
-	let user = req.session.user;
-	
-	db.findChats(user, (err, data) => {
-		if (err != null) {
-			console.log(err);
-		} else {
-			return res.json({clist: JSON.parse(data)}); //{currentuser: user.username, clist: data}));
-		}
-	});
-} */
-
 const sendChatList = (req, res) => {
   let username = req.session.user.username;
   db.findChats(username, (err, data) => {
@@ -341,15 +327,41 @@ const addChat = (req, res) => {
 	}
 }
 
-/**
-	function: pops up list of friends that (on frontend) you can click on to add a user's friend to the chat
-	if error: console error
+/***
+ * function: pops up list of friends that (on frontend) you can click on to add a user's friend to the chat
+ * if error: console error
+ * @params input: send current username (check session), 
+ * @params output: res.json();
  */
 const viewFriends = (req, res) => {
 	// if user exists
+	// display list of friends, called when click on invite friend button
+	// on frontend, if req.session.friendslist != null then display a popup / container
+	// otherwise, display No friends 
 	
-	// display list of friends: req.session.friendslist
-	// to KEVIN: on frontend, if req.session.friendslist != null then display a popup / container
+	if (req.session.user != null && req.session.user.username != '') {
+		let username = req.session.user.username;
+		let chatid = req.body.roomid;
+		
+		db.getFriendsList(username, chatid, (status, err, data) => {
+			if (status != 200) {
+				if (err) {
+					console.log(err)
+					res.status(status).send(new Error(err));
+				} else {
+					res.sendStatus(status);
+				}
+			} else {
+				console.log("query success");
+				res.json(data);
+			}
+		});
+	} else {
+		// not logged in, return to homepage & log reason on console
+		console.log("Not logged in, returned to homepage.");
+		res.redirect('/');
+	}
+	
 }
 
 /**

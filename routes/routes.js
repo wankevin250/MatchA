@@ -560,6 +560,9 @@ const getVisualizer = (req, res) => {
   res.render('visualizer.pug')
 }
 
+// constant holding the friends of the session user
+const affiliation = null;
+
 const sendInitialVisualization = (req, res) => {
   console.log("Made it to sendInitialVisualization!");
   if (req.session.user != null) {
@@ -580,6 +583,8 @@ const sendInitialVisualization = (req, res) => {
             console.log(data);
 
             console.log("User: " + user[0].displayname);
+
+            affiliation = user[0].affiliation;
 
             const datajson = {
               "id": user[0].username,
@@ -614,8 +619,10 @@ const sendInitialVisualization = (req, res) => {
 const sendVisualizerUser = (req, res) => {
   if (req.session.user != null) {
     console.log("sendVisualizerUser: " + req.session.user.username);
+    affiliation = null;
     res.send({user: req.session.user});
   } else {
+    affiliation = null;
     res.redirect('/');
   }
 }
@@ -623,6 +630,52 @@ const sendVisualizerUser = (req, res) => {
 const sendFriends = (req, res) => {
   console.log("Made it to sendFriends!");
   console.log("Req.params.user: " + req.params.user);
+
+  if (req.session.user != null) {
+    db.scanUsers(req.params.user, (status, err, user) => {
+      if (!isSuccessfulStatus(status)) {
+        res.send({}); //status(500).send(new Error(err));
+
+      } else {
+        console.log('Else statement user: ' + user[0].username);
+        db.getFriends(user[0].username, (statuscode, err, data) => {
+          if (err) {
+            console.log("Status code: " + statuscode);
+            console.log(err);
+          } else {
+            console.log("Made it to else statement!");
+            console.log(data);
+
+            console.log("User: " + user[0].displayname);
+
+            const datajson = {
+              "id": user[0].username,
+              "name": user[0].displayname,
+              "data": {},
+              "children": [],
+            };
+
+            for (const friend of data) {
+              console.log("Friend: " + friend.status.S);
+              if (friend.status.S && (friend.affiliation.S == affiliation)) {
+                datajson.children.push({
+                  "id": friend.accepter.S, //should be username.S
+                  "name": friend.accepter.S, //should be displayname.S
+                  "data": {},
+                  "children": []
+                });
+              }
+            }
+            res.send(JSON.stringify(datajson));
+          }
+        })
+
+      }
+    });
+  } else {
+    console.log("Not logged in, returned to homepage.");
+		res.redirect('splash.pug');
+  }
 }
 
 

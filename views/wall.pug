@@ -11,18 +11,19 @@ block content
         div(class="wall-header")
             h1(color=red) MatchA
             div(class="wall-buttons")
-                a(href="/visualizer")
-                    button(id='wall-visualizer', class="btn btn-primary btn-rounded margin-left")
-                        span See your web of friends!
-                a(href="/chat")
-                    button(id='wall-chats', class="btn btn-primary btn-rounded margin-right")
-                        span See your chats!
-                a(href="/notifications")
-                    button(id="wall-notif", class="btn btn-primary btn-rounded margin-right")
-                        span Notifications
-                a(href="/news")
-                    button(id='wall-news', class="btn btn-primary btn-rounded margin-right")
-                        span See recommended articles!
+                div(class="btn-toolbar", style="justify-content: center; display: flex;")
+                    a(href="/visualizer")
+                        button(type='button', id='wall-visualizer', class="btn btn-primary btn-rounded m-1")
+                            span See your web of friends!
+                    a(href="/chat")
+                        button(type='button', id='wall-chats', class="btn btn-primary btn-rounded m-1")
+                            span See your chats!
+                    a(href="/notifications")
+                        button(type='button', id="wall-notif", class="btn btn-primary btn-rounded m-1")
+                            span Notifications
+                    a(href="/news")
+                        button(type='button', id='wall-news', class="btn btn-primary btn-rounded m-1")
+                            span See recommended articles!
             div(class="wall-divider")
         div(class="wall-content")
             div(class="wall-searchuser")

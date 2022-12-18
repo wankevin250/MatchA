@@ -98,11 +98,11 @@ const fetchNewsDataByName = (headlines, callback) => {
   
   Promise.all(promises).then (
    data => {
-    console.log("PROMISE"+data);
+    //console.log("PROMISE"+data);
      for (let i = 0; i < data.length; i++) {
        if (data[i].Count != 0) {
         result = data[i].Items[0]; // or Items[0]?
-        console.log("result"+result.headline.S);
+        //console.log("result"+result.headline.S);
         results.push(result);
        }
      }

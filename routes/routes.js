@@ -447,7 +447,31 @@ const leaveChat = (req, res) => {
   if error: 
  */
 var sendMsg = function (obj, callback) {
-	// save message to database
+	// input obj: { text: $('#message').val().trim(), sender: myID, room: room}
+	// save message to database: 
+	// generate timestamp
+	// create new obj
+	// send new messageobj to db
+	const gmtTimeStamp = new Date().toUTCString();
+	const msgid = uuidv4();
+	
+	var messageobj = {
+		room: obj.room,
+		messageid: msgid,
+		text: obj.text,
+		sender: obj.sender,
+		timestamp: gmtTimeStamp
+	}
+	
+	db.saveMessage(messageobj, (status, err, data) => {
+		if (status != 200) {
+			console.log(err);
+			callback(err, null);
+		} else {
+			callback(err, messageobj);
+		}
+	});
+	
 }
 
 const reloadMsgs = (req, res) => {

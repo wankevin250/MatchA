@@ -102,7 +102,7 @@
     margin: 10px;
     margin-left: 40%;
     
-    overflow-wrap: normal;
+    overflow-wrap: anywhere;
 	
 	font-size: 14px;
 	font-family: Helvetica, Sans-Serif;
@@ -117,7 +117,7 @@
     margin: 10px;
     margin-right: 40%;
     
-    overflow-wrap: normal;
+    overflow-wrap: anywhere;
 	
 	font-size: 14px;
 	font-family: Helvetica, Sans-Serif;
@@ -185,5 +185,13 @@
 	margin: 6px;
 	
 	font-size: 20px;
+	font-family: Helvetica, Sans-Serif;
+}
+
+.messageTags {
+	padding: 2px 4px;
+	margin: 6px;
+	
+	font-size: 12px;
 	font-family: Helvetica, Sans-Serif;
 }

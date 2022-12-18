@@ -847,6 +847,25 @@ const declineChatInvite = (chatid, userid, callback) => {
 	});
 }
 
+const saveMessage = (messageobj, callback) => {
+	var messageitem = {
+		'roomid' : {S: messageobj.room},
+		'messageid' : {S:messageobj.messageid},
+		'text' : {S:messageobj.text},
+		'sender' : {S:messageobj.sender},
+		'timestamp' : {S:messageobj.timestamp},
+	}
+	
+	db.putItem({TableName: 'chatmessages', Item: messageitem}, (err, data) => {
+		if (err) {
+			callback(500, err, null);
+		} else {
+			console.log("Save message success!");
+			callback(200, null, data);
+		}
+	});
+}
+
 // end of ACE HOUR
 
 
@@ -866,14 +885,18 @@ const database = {
 
   queryPosts: queryPosts,
   
+  // ACE
   findChats: findChats,
   newChat: addChatToTable,
   getFriendsList: displayFriends,
   addFriendToChat: addFriendToChat,
   viewChat: viewOneChat, 
+  saveMessage: saveMessage,
   
   acceptChatInvite: acceptChatInvite,
   declineChatInvite: declineChatInvite,
+  
+  // ACE
   
   
 }

@@ -168,16 +168,7 @@ block head
               sender: myID,
               room: room,
           });
-        
-          $.post('/sendmessage', { 
-              text: $('#message').val().trim(),
-              sender: myID,
-              room: room,},
-              
-              function (data){
-                // something with returned data?
-              }
-          });
+          
             
           $('#message').val('');
           $('#message').focus();
@@ -187,18 +178,38 @@ block head
     $(document).ready(function() {
       socket.on('chat message', function (msg) {
           var message_temp = document.createElement("li");
+          var message_outline = document.createElement("p"); 
           
-          if (myID === msg.sender) {
-            message_temp.setAttribute("class", "me");
-          } else {
-            message_temp.setAttribute("class", "other");
-          }
           
           // somehow add the name of the person who sent the message
+          // add timestamp
+          var senderviz = document.createElement("p");
+          var timestampviz = document.createElement("p");
           
-          message_temp.appendChild(document.createTextNode(msg.text));
-
-          $('#messages').append(message_temp);
+          senderviz.setAttribute("class", "messageTags");
+          timestampviz.setAttribute("class", "messageTags");
+          
+          message_temp.innerText = msg.text;
+          senderviz.innerText = msg.sender;
+          timestampviz.innerText = msg.timestamp;
+          
+          // message_temp.appendChild(document.createTextNode(msg.text));
+          
+          message_outline.append(senderviz);
+          message_outline.append(message_temp);
+          message_outline.append(timestampviz);
+          
+          if (myID === msg.sender) {
+            message_outline.setAttribute("class", "me");
+            senderviz.style.color = 'white';
+            timestampviz.style.color = 'white';
+          } else {
+            message_outline.setAttribute("class", "other");
+            senderviz.style.color = '#D4CB8C';
+            timestampviz.style.color = '#D4CB8C';
+          }
+          
+          $('#messages').append(message_outline);
           
       });
     });

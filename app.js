@@ -120,6 +120,7 @@ app.get('/getFriends/:user', routes.sendFriends); //routes.postGetFriend?
 				if (newobj != null) {
 					io.to(obj.room).emit('chat message', newobj);
 				} else {
+					console.log(error);
 					io.to(obj.room).emit('chat message', obj);
 				}
 			})

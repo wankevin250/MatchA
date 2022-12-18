@@ -473,14 +473,28 @@ const viewUsers = (req, res) => {
 }
 
 /***
- * @params expected input from body / ajax: { askerid } (actually will be chat invite's chat code)
+ * @params expected input from body / ajax: { askerid, acceptance } (actually will be chat invite's chat code)
  */
 const acceptChatInvite = (req, res) => {
 	
 }
-
+/*** 
+ * if req.body.type === "chat", call acceptChatInvite. if === "friend" call acceptFriendInvite
+ */
 const requestFilter = (req, res) => {
+	var type = req.body.type;
 	
+	if (type == null) {
+		res.sendStatus(400);
+	} else {
+		if (type === "chat") {
+			acceptChatInvite(req, res);
+		} else if (type === "friend") {
+			acceptFriendInvite(req, res);
+		} else {
+			res.sendStatus(400);
+		}
+	}
 }
 
 // end of Ace

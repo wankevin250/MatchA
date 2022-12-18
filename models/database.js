@@ -1087,6 +1087,11 @@ const saveMessage = (messageobj, callback) => {
 	});
 }
 
+const extractOneUserDisplayInfo = (username, callback) => {
+	let uli = [username];
+	extractUserNames(uli, callback);
+}
+
 // end of ACE HOUR
 
 
@@ -1115,6 +1120,7 @@ const database = {
   addFriendToChat: addFriendToChat,
   viewChat: viewOneChat, 
   saveMessage: saveMessage,
+  extractOneUserDisplayInfo: extractOneUserDisplayInfo,
   
   acceptChatInvite: acceptChatInvite,
   declineChatInvite: declineChatInvite,

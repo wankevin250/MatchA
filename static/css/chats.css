@@ -168,9 +168,14 @@
 }
 
 .friendListing {
+	padding: 2px 4px;
+	margin: 6px;
+	
 	border:none;
 	background-color: none;
 	display:block;
+	font-size: 16px;
+    font-family: Helvetica, Sans-Serif;
 }
 .listTemplate{
 	list-style: none;
@@ -208,4 +213,15 @@
   transform: translate(-50%, -50%);
   width: 50%;
   z-index: 9;
+}
+
+.memberlisting {
+	padding: 2px 4px;
+	margin: 6px;
+	
+	border:none;
+	background-color: none;
+	display:block;
+	font-size: 16px;
+    font-family: Helvetica, Sans-Serif;
 }

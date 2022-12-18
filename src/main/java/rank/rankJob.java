@@ -124,7 +124,6 @@ public class rankJob {
 							String[] inter = new String[2];
 							inter[0] = line.get("category").getS();
 							inter[1] = line.get("count").getN().toString();
-							//System.out.println("cateogory count:"+inter[0]+1/Double.parseDouble(inter[1]));
 							return inter;
 						})
 						.collect(Collectors.toList());
@@ -222,8 +221,7 @@ public class rankJob {
 							String[] inter = new String[2];
 							inter[0] = line.get("username").getS();
 							inter[1] = line.get("interest").getS();
-							//System.out.println("interest:"+inter[0]+inter[1]);
-							return inter;// Make Row with Schema
+							return inter;
 						})
 						.collect(Collectors.toList());
 		JavaRDD<String[]> inArr = context.parallelize(rowOfInterest);
@@ -244,8 +242,7 @@ public class rankJob {
 							String[] news = new String[2];
 							news[0] = line.get("username").getS();
 							news[1] = line.get("headline").getS();
-							//System.out.println("newslike:"+news[0]+news[1]);
-							return news;// Make Row with Schema
+							return news;
 						})
 						.collect(Collectors.toList());
 		JavaRDD<String[]> inArr = context.parallelize(rowOfInterest);
@@ -276,11 +273,9 @@ public class rankJob {
 		Iterator<Item> iter = items.iterator();
 		while (iter.hasNext()) {
 			Item f = iter.next();
-			//System.out.println(f);
 			String[] row = new String[2];
 			row[0] = f.get("accepter").toString();
 			row[1] = f.get("asker").toString();
-			//System.out.println("freinds"+row[0] + "and" + row[1]);
 			friends.add(row);
 		}
 		JavaRDD<String[]> inArr = context.parallelize(friends);
@@ -316,7 +311,6 @@ public class rankJob {
 				.join(
 					allNewsEdge
 					.mapToPair(x -> new Tuple2<String, Integer>(x._1, 1))
-				    //.union(CategoryNewsEdge.mapToPair(x -> new Tuple2<String, Integer>(x._1, 1)) 
 					.reduceByKey((x, y) -> x + y)
 					.mapToPair(x -> new Tuple2<String, Double>(x._1, (1.0/x._2))));
 
@@ -343,12 +337,10 @@ public class rankJob {
 		JavaPairRDD<String, Tuple2<String, Double>> userEdgeTransfer = userNewsEdgeTransfer
 					.union(userFriendEdgeTransfer)
 					.union(userInterestEdgeTransfer);
-					//.distinct();
 
 		JavaPairRDD<String, Tuple2<String, Double>> EdgeTransfer = catEdgeTransfer
 					.union(newsEdgeTransfer)
 					.union(userEdgeTransfer)
-					//.distinct()
 					.mapToPair(x -> new Tuple2<String, Tuple2<String, Double>>(x._2._1, new Tuple2<String, Double>(x._1, x._2._2)));	
 					
 		JavaPairRDD<String, String> network = allNewsEdge
@@ -387,7 +379,6 @@ public class rankJob {
 					.forEach(item ->
 				{System.out.println(item._1 + " -> " + item._2._2);
 				});
-					//.forEach(x->System.out.println(x._1 + "," + x._2._2));
 		EdgeTransfer.mapToPair(x -> new Tuple2<>(x._2._2, new Tuple2<>(x._1, x._2._1))).sortByKey(false).collect().stream().limit(15)
 					.forEach(item ->
 				{System.out.println(item._1 + " === " + item._2._1 + "to<-from" + item._2._2);
@@ -402,7 +393,7 @@ public class rankJob {
 		while (delta > dMax && count < iMax) {
 			JavaPairRDD<String, Tuple2<Tuple2<String,Double>, Tuple2<String,Double>>> propagateRank = EdgeTransfer// to->from, transfer.join(EdgeTransfer
 					.mapToPair(x -> new Tuple2<>(x._2._1, new Tuple2<>(x._1, x._2._2))) 
-					.join(rank) // self, flag(x._2._2._1), rank
+					.join(rank) 
 					.mapToPair(x -> new Tuple2<>(x._2._1._1, new Tuple2<>(new Tuple2<>(x._1, x._2._1._2), x._2._2)))
 					.join(rank.mapToPair(x-> new Tuple2<>(x._1, x._2._1)))
 					.mapToPair(x -> new Tuple2<>(x._2._1._1._1, 
@@ -440,14 +431,6 @@ public class rankJob {
 		DynamoDB conn = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
 		String tableName = "newsRanked";
 
-		/*rank 
-		.mapToPair(x -> new Tuple2<>(x._2._2, new Tuple2<>(x._1, x._2._1)))
-		.sortByKey(false)
-		.collect().stream()
-		.limit(10).forEach(item ->{
-			System.out.println(item._2._1 + " -> " + item._1 + "type:" + item._2._2 + (item._2._2.compareTo("a") == 0));
-		});*/
-
 		Iterator<Tuple2<Double, Tuple2<String, String>>> iter = rank
 												.filter(x -> x._2._1.compareTo("a") == 0) 
 												.mapToPair(x -> new Tuple2<>(x._2._2, new Tuple2<>(x._1, x._2._1)))
@@ -460,7 +443,7 @@ public class rankJob {
 
 		int arti = 0;
 		HashSet<Item> rows = new HashSet<Item>(); 
-		while (iter.hasNext() && arti < 25) {
+		while (iter.hasNext() && arti < 300) {
 			Tuple2<Double, Tuple2<String, String>> now = iter.next();
 			if (today.size() == 0 || today.contains(now._2._1)) {
 				arti++;
@@ -468,15 +451,32 @@ public class rankJob {
 							.withPrimaryKey("username", username, "rank", arti)
 							.withString("headline", now._2._1);
 				rows.add(newsItem);
+
+				if (rows.size() == 25 && !iter.hasNext()) {
+					TableWriteItems writ = new TableWriteItems(tableName).withItemsToPut(rows);
+					try {
+						Thread.sleep((long) 0.5);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					BatchWriteItemOutcome ret = conn.batchWriteItem(writ);
+					Map<String, List<WriteRequest>> leftover = ret.getUnprocessedItems();
+					if (leftover != null && leftover.size() != 0) {
+						try {
+							Thread.sleep((long) 0.5);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						conn.batchWriteItemUnprocessed(leftover);
+					}
+					rows = new HashSet<Item>();	
+				}
 			}	
 		}
 
-		TableWriteItems writ = new TableWriteItems(tableName).withItemsToPut(rows);
-		BatchWriteItemOutcome ret = conn.batchWriteItem(writ);
-		Map<String, List<WriteRequest>> leftover = ret.getUnprocessedItems();
-		if (leftover != null && leftover.size() != 0) {
-			conn.batchWriteItemUnprocessed(leftover);
-		}	
+		
 	}
 
 	public void shutdown() {

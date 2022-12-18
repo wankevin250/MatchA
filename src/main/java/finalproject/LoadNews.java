@@ -138,7 +138,6 @@ public class LoadNews {
 							row[3] = lk.substring(1, lk.length() - 1);
 							row[4] = sd.substring(1, sd.length() - 1);
 							row[5] = dt.substring(1, dt.length() - 1);
-							//System.out.println(hl.substring(1, hl.length() - 1));
 							return new GenericRowWithSchema(row, schema);// Make Row with Schema
 						})
 						.collect(Collectors.toList());
@@ -155,7 +154,6 @@ public class LoadNews {
 	 * @throws InterruptedException User presses Ctrl-C
 	 */
 	public void run() throws IOException, DynamoDbException, InterruptedException {
-		//initialize();
 		logger.info("Running");
 
 		// Load + store the news data
@@ -210,11 +208,14 @@ public class LoadNews {
 					}	
 				}
 			});
-			
-		//} catch (Exception e) {
-		//	System.out.println("error occurred");
-	//	} 
-		/*finally {
+
+		// for updating the count of news per category
+
+		/*	
+		} catch (Exception e) {
+			System.out.println("error occurred");
+		} 
+		finally {
 			//System.out.println(count + " lines read");
 			JavaPairRDD<String, Integer> categoryNodeWeight = newsData
 					.mapToPair(x -> new Tuple2<String, String>((String) x.getAs(0), (String) x.getAs(1)))
@@ -252,97 +253,8 @@ public class LoadNews {
 
 
 		}*/
-		
-		/*newsData.foreachPartition(iter -> { 
-			Thread.sleep(2);
-			HashSet<Item> rows = new HashSet<Item>(); 
-			DynamoDB conn = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
-			String tableName = "news";
-			while (iter.hasNext()) {
-				Row news = iter.next();
-				// Create Item
-				Item newsItem = new Item()
-						.withPrimaryKey("headline", (String) news.getAs(1), "date", (String) news.getAs(5))
-						.withString("category", (String) news.getAs(0))
-						.withString("authors", (String) news.getAs(2))
-						.withString("link", (String) news.getAs(3))
-						.withString("short_description", (String) news.getAs(4));
-						//.withString("date", (String) news.getAs(5));
-				rows.add(newsItem);
-				
-				if (rows.size() == 25 || !iter.hasNext()) {
-					TableWriteItems writ = new TableWriteItems(tableName).withItemsToPut(rows);
-					Thread.sleep(2);
-					BatchWriteItemOutcome ret = conn.batchWriteItem(writ);
-					Map<String, List<WriteRequest>> leftover = ret.getUnprocessedItems();
-					if (leftover != null && leftover.size() != 0) {
-						conn.batchWriteItemUnprocessed(leftover);	
-					}
-					rows = new HashSet<Item>();
-				}	
-			}
-		});
-
-		JavaPairRDD<String, Integer> categoryNodeWeight = newsData
-				.mapToPair(x -> new Tuple2<String, String>((String) x.getAs(0), (String) x.getAs(1)))
-				.mapToPair(x -> new Tuple2<String, Integer>(x._1, 1)) // c->a adjacent node weight should sum up to 1
-				.reduceByKey((x, y) -> x + y);
-		
-		//int count = 0;
-		JavaRDD<Tuple2<String, Integer>> rdd = JavaPairRDD.toRDD(categoryNodeWeight).toJavaRDD();
-		rdd.foreachPartition(iter -> { 
-			HashSet<Item> categories = new HashSet<Item>(); 
-			DynamoDB conn = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
-			String tableName = "newsCount";
-
-			while (iter.hasNext()) {
-				Tuple2<String, Integer> x = iter.next();
-				Item newsItem = new Item()
-						.withPrimaryKey("category", x._1)
-						.withInt("count", x._2);
-				categories.add(newsItem);
-					
-				if (categories.size() == 25 || !iter.hasNext()) {
-					TableWriteItems writ = new TableWriteItems(tableName).withItemsToPut(categories);
-					BatchWriteItemOutcome ret = conn.batchWriteItem(writ);
-					Map<String, List<WriteRequest>> leftover = ret.getUnprocessedItems();
-					if (leftover != null && leftover.size() != 0) {
-						conn.batchWriteItemUnprocessed(leftover);	
-					}
-					categories = new HashSet<Item>();
-				}	
-			}
-				
-		});*/
 	}
-
-	/*public void computeRanks() {
-		JavaRDD<Row> newsData = this.getNews("NewsCategoryData.txt");
-
-		JavaPairRDD <String, String> CtoA = newsData
-				.mapToPair(x -> new Tuple2<String, String>((String) x.getAs(0), (String) x.getAs(1)));
-
-		JavaPairRDD <String, String> newsPair = CtoA
-				.union(CtoA.mapToPair(x -> new Tuple2<String, String>(x._2, x._1)))
-				.distinct();
-
-		JavaPairRDD<String, Double> categoryNodeWeight = CtoA
-				.mapToPair(x -> new Tuple2<String, Integer>(x._1, 1)) // c->a adjacent node weight should sum up to 1
-				.reduceByKey((x, y) -> x + y) // find the degree of the node
-				.mapToPair(x -> new Tuple2<String, Double>(x._1, (1.0 /x._2)));
-
-		JavaPairRDD<String, Tuple2<String, Double>> catArtEdgeTransfer = CtoA
-				.join(categoryNodeWeight);
-
-		// JavaPairRDD <String, String> interests = getInterests("");
-
-
-		int iMax = 15;
-		int count = 0;
-
-	}*/
 	
-
 	public void shutdown() {
 		logger.info("Shutting down");
 		

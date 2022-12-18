@@ -33,7 +33,7 @@ block head
 
 block content
 	div(class='news-head')
-		h1(class="text-center italics bold") Articles that matches your Interests..
+		h1 Articles that Match your Interests..
 	div(class='divider')
 	div(class='search-body')
 		<form align="center" name="searchForm" action="/searchNews"  onsubmit="document.searchForm.keyword">
@@ -55,5 +55,5 @@ block content
 							div(class = 'col') 
 								p #{result.category.S}
 							a(href = result.link.S) <span style = 'font-size: 15px'> #{result.link.S} </span> 
-							p <span style = 'font-size: 15px'> Short description : #{result.short_description.S} </span>
+							p <span style = 'font-weight: italic; font-size: 15px'> Short description : #{result.short_description.S} </span>
 						button.btn.btn-primary(type='button', name='loginButton', id = 'likeclick') Like

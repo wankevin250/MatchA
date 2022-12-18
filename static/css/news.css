@@ -51,8 +51,10 @@
 .news-box {
     border-radius: 25px;
     background: rgb(255, 255, 255);
+    display: inline-block;
+    text-align: center;
     padding: 20px; 
-    margin: 10px;
+    margin: auto;
     width: 700px;
     height: 400px;
     font-family: Helvetica, Sans-Serif;

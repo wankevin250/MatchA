@@ -43,7 +43,9 @@ app.get('/notifications', routes.getNotifications);
 //kevin: visualizer routes call
 app.get('/visualizer', routes.getVisualizer);
 
-app.get('/friendvisualization', routes.postGetFriend);
+app.get('/sendvisualizeruser', routes.sendVisualizerUser);
+
+app.get('/friendvisualization', routes.sendFriends); //postGetFriend?
 // function(req, res) {
 // 	var json = {"id": "alice","name": "Alice","children": [{
 //         "id": "bob",
@@ -93,7 +95,7 @@ app.get('/friendvisualization', routes.postGetFriend);
 //     res.send(json);
 // });
 
-app.get('/getFriends/:user', routes.postGetFriend); //routes.sendFriends?
+app.get('/getFriends/:user', routes.sendFriends); //routes.postGetFriend?
 // function(req, res) {
 //   console.log(req.params.user);
 //   var newFriends = {"id": "alice","name": "Alice","children": [{

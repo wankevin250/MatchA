@@ -457,22 +457,58 @@ const getVisualizer = (req, res) => {
 const sendFriends = (req, res) => {
   console.log("Made it to sendFriends!");
   if (req.session.user != null) {
-		let user = req.session.user;
-    console.log(user);
+    console.log("req.session.user = " + req.session.user.username); //req.query.user or req.session.user???
 
-    db.getFriends(user.username, (statuscode, err, data2) => {
-      if (err) {
-        console.log("Status code: " + statuscode);
-        console.log(err);
+    db.scanUsers(req.session.user.username, (status, err, user) => {
+      if (!isSuccessfulStatus(status)) {
+        res.status(500).send(new Error(err));
+
       } else {
-        console.log("Made it to else statement!");
-        console.log(data2);
-        res.send(JSON.stringify(data2));
+        console.log('Else statement user: ' + user[0].username);
+        db.getFriends(user[0].username, (statuscode, err, data) => {
+          if (err) {
+            console.log("Status code: " + statuscode);
+            console.log(err);
+          } else {
+            console.log("Made it to else statement!");
+            console.log(data);
+
+            const datajson = {
+              "id": user[0].username.S,
+              "name": user[0].displayname.S,
+              "data": {},
+              "children": [],
+            };
+
+            for (const friend of data) {
+              console.log("Friend: " + friend.status.S);
+              if (friend.status.S) {
+                datajson.children.push({
+                  "id": friend.accepter.S, //should be username.S
+                  "name": friend.accepter.S, //should be displayname.S
+                  "data": {},
+                  "children": []
+                });
+              }
+            }
+            res.send(JSON.stringify(datajson));
+          }
+        })
+
       }
-    })
+    });
   } else {
     console.log("Not logged in, returned to homepage.");
 		res.redirect('splash.pug');
+  }
+}
+
+const sendVisualizerUser = (req, res) => {
+  if (req.session.user != null) {
+    console.log("sendVisualizerUser: " + req.session.user.username);
+    res.send({user: req.session.user});
+  } else {
+    res.redirect('/');
   }
 }
 
@@ -520,6 +556,7 @@ const routes = {
   // Kevin's visualizer routes
   getVisualizer: getVisualizer,
   sendFriends: sendFriends,
+  sendVisualizerUser: sendVisualizerUser,
 
 }
 

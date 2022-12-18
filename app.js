@@ -124,7 +124,6 @@ app.get('/getFriends/:user', routes.sendFriends); //routes.postGetFriend?
 					io.to(obj.room).emit('chat message', obj);
 				}
 			})
-			// io.to(obj.room).emit('chat message', obj);
 		});
 		
 		socket.on('join room', obj => {

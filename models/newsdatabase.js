@@ -200,7 +200,8 @@ const findNews = (user, keyword, callback) => {
     searchWord = keyword[i];
     console.log(searchWord);
     searchWord = searchWord.toLowerCase(); // change the search word into lowercase letter
-      if (!(searchWord == ("a") || searchWord == ("all") || searchWord == ("any") || searchWord == ("but") || searchWord == ("the"))) { //filter the words
+      if (!(searchWord == ("a") || searchWord == ("all") || searchWord == ("any") 
+            || searchWord == ("but") || searchWord == ("the"))) { //filter the words
           searchWord = stemmer(searchWord); //stem the word
         var params = {
         TableName : "tokenizedNews",
@@ -239,9 +240,7 @@ const findNews = (user, keyword, callback) => {
         noRanks = [];
         promises2 = [];
 
-        //console.log("findNews: "+headlines);
-
-        for (let i = 0; i < headlines.length; i++) { // 여기 꼬임..
+        for (let i = 0; i < headlines.length; i++) { 
           console.log(headlines[i]);
           var params = {
           ExpressionAttributeValues: {
@@ -253,7 +252,7 @@ const findNews = (user, keyword, callback) => {
           TableName: 'newsRanked'
         };
 
-        let prom = db.query(params).promise(); //create promise for each talk id
+        let prom = db.query(params).promise();
         promises2.push(prom);
         }
 

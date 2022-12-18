@@ -10,17 +10,24 @@ block content
 	div(class='news-head')
 		h1 Articles that Match your Interests..
 	div(class='divider')
-	div(class='login-inputarea')
+	<form align="center" name="searchForm" action="/searchNews"  onsubmit="document.searchForm.keyword">
+	<label for="keyword">Search for Articles with the following words:</label><br/>
+	<input type="text" id="keyword" name="keyword" />
+		<input type="submit" value="Search">
+	</form>
 	div(class='news-body')
 		ul
 			each result in results
 				div(class='news-Class')
-					div(class = 'news-box') 
-						p #{result.headline.S}
-					div(class = 'news-box') 
-						p #{result.authors.S}
-					div(class = 'news-box') 
-						a(href = result.link.S) #{result.link.S}
-					div(class = 'news-box') 
-						p #{result.short_description.S}
-					button.btn.btn-primary(type='submit', onclick='likeNews()', name='loginButton') Like
+					div(class = 'news-box')
+						div(class = 'row') 
+							p <span style = 'font-weight: bold; font-size: 25px'> #{result.headline.S}</span> 
+							div(class = 'col') 
+								p <span style = 'font-size: 14px'>#{result.authors.S}</span> 
+							div(class = 'col') 
+								p #{result.date.S}
+							div(class = 'col') 
+								p #{result.category.S}
+							a(href = result.link.S) <span style = 'font-size: 15px'> #{result.link.S} </span> 
+							p <span style = 'font-size: 15px'> Short description : #{result.short_description.S} </span>
+						button.btn.btn-primary(type='submit', onclick='likeNews()', name='loginButton') Like

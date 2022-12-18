@@ -1,7 +1,7 @@
 
 .news-head{
     display:inline-block;
-    background:lightgreen;
+    background:#707C4F;
     color:skyblue;
     font-size: 10px;
     font-weight: bold;
@@ -18,15 +18,25 @@
 }
 
 .news-body{
-    background:lightgreen;
+    background:#C7D9AB;
     text-align: center;
     width: 100%;
     padding-top: 10%;
     font-size: 20px;
 }
 
+.search-box {
+    border-radius: 25px;
+    background: #707C4F;
+    padding: 20px; 
+    margin: 10px;
+    width: 700px;
+    height: 200px;
+    font-family: Helvetica, Sans-Serif;
+}
+
 .news-Class {
-	background-color: lightgreen;
+	background-color: #C7D9AB;
     border: none;
     color: black;
     padding: 10px 10px;
@@ -46,7 +56,6 @@
     padding: 20px; 
     margin: 10px;
     width: 700px;
-    height: 100px;
-    font-size: 20px;
+    height: 500px;
     font-family: Helvetica, Sans-Serif;
   }

@@ -481,9 +481,28 @@ const acceptChatInvite = (req, res) => {
 	var username = req.session.user.username;
 	
 	if (acceptance === true) {
-		
+		db.acceptChatInvite(chatid, username, (status, err, data) => {
+			if (status != 200) {
+				if (err) {
+					console.log(err);
+				}
+				res.sendStatus(status);
+			} else {
+				res.send(data);
+			}
+		});
+	} else {
+		db.declineChatInvite(chatid, username, (status, err, data) => {
+			if (status != 200) {
+				if (err) {
+					console.log(err);
+				}
+				res.sendStatus(status);
+			} else {
+				res.send(data);
+			}
+		});
 	}
-	
 }
 /*** 
  * if req.body.type === "chat", call acceptChatInvite. if === "friend" call acceptFriendInvite

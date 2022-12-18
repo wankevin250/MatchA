@@ -195,3 +195,16 @@
 	font-size: 12px;
 	font-family: Helvetica, Sans-Serif;
 }
+
+.memberspopup {
+  display: none;
+  background-color: #D4CB8C;
+  border: 3px solid #424106;
+  
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  z-index: 9;
+}

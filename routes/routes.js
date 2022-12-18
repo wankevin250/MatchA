@@ -405,21 +405,27 @@ const openChat = (req, res) => {
 	req.session.currentroom = room;
 	console.log(req.body.room);
 	
-	// KEVIN: on frontend, check session.currentroom to display chatbox, 
-	// also we need functionality so that on click of a chatroom listed it sends openChat request with req.body.chattoopen variable plz 
+	// we need functionality so that on click of a chatroom listed it sends openChat request with req.body.chattoopen variable plz 
 	// PS: we need to refresh chatbox every 1 second
-	
-	// return res.send true?
-	/* if success: return res.send({
-		success: true
-	});
-	*/
-	
-	// return data.userlist
-	// return all messages
-	
-	res.send({
-		success: true
+	db.viewChat(room, (status, err, data) => {
+		if (status != 200) {
+			console.log(err);
+			res.sendStatus(status);
+		} else {
+			console.log("Should succeed...");
+			const ansr = data.pastmessages.map( rawmessage => {
+					return { sender: rawmessage.sender.S, 
+								text: rawmessage.text.S,
+								timestamp: rawmessage.timestamp.S,
+								date: new Date(rawmessage.timestamp.S)};
+				}).sort( function(a, b){ return (a.date - b.date);});
+			
+			res.send({
+				success: true,
+				pastmessages: ansr,
+				chatmembers: data.chatmembers,
+			});
+		}
 	});
 }
 

@@ -27,6 +27,14 @@ block head
         $('#friendList').empty();
     }
     
+    function openMembers() {
+        document.getElementById("membersPopup").style.display = "block";
+    }
+    function closeMembers() {
+        document.getElementById("membersPopup").style.display = "none";
+    }
+    
+    
     // clickables
     $(document).ready( function() {
     
@@ -104,15 +112,44 @@ block head
                             if (d.success) {
                                 room = roomid;
                                 roomuuid = roomid;
-                                currentchatusers = d.userlist;
                                 
                                 socket.emit('join room', {
                                     user: myID,
                                     room: roomid,
                                 });
                                 
-                               // load all prev. messages to #messages using loop
-                               
+                                // load all prev. messages to #messages using loop
+                                // d.pastmessages
+                                d.pastmessages.forEach( function(pmsg) {
+                                    var message_temp = document.createElement("li");
+                                    var message_outline = document.createElement("p");
+                                    var senderviz = document.createElement("p");
+                                    var timestampviz = document.createElement("p");
+                                    
+                                    senderviz.setAttribute("class", "messageTags");
+                                    timestampviz.setAttribute("class", "messageTags");
+                                    
+                                    message_temp.innerText = pmsg.text;
+                                    senderviz.innerText = pmsg.sender;
+                                    timestampviz.innerText = pmsg.timestamp;
+                                    
+                                    if (myID === pmsg.sender) {
+                                        message_outline.setAttribute("class", "me");
+                                        timestampviz.style.color = 'white';
+                                    } else {
+                                        message_outline.setAttribute("class", "other");
+                                        senderviz.style.color = '#D4CB8C';
+                                        timestampviz.style.color = '#D4CB8C';
+                                    }
+                                    $('#messages').append(message_outline);
+                                });
+                                
+                                // load all current users to #chatmembers
+                                // TODO: (when a user accepts an invite, socket.emit from requests page, 
+                                // serverside io.on -> io.emit(), clientside socket.on (later on this script)
+                                // both append a message to #messages and add user to #chatmembers
+                                // TODO: (when user leaves the chat, remove user from #chatmembers (socket.on))
+                                
                                 $(".leftHalf").css('display', 'none');
                                 $(".rightHalf").css('display', 'block');
                                 document.getElementById("chatTitle").innerText = chatroomtitle;
@@ -136,19 +173,19 @@ block head
           $.post('/friendstoadd', {roomid : roomuuid}, function (data) {
               
               for (let i = 0; i < data.length; i++) {
+                  var usid = data[i].userid
                   var friendbutton = document.createElement("a");
                   friendbutton.setAttribute("class", "friendListing");
-                  friendbutton.setAttribute('id', data[i].userid);
+                  friendbutton.setAttribute('id', usid);
                   friendbutton.appendChild(document.createTextNode("(" + data[i].displayname + ") " + data[i].fullname));
                   
                   $('#friendList').append(friendbutton);
                   
-                  $("#" + data[i].userid).on("click", function() {
-                    let friendid = data[i].userid;
+                  $("#" + usid).on("click", function() {
                     
-                    $.post('/addfriend', { friendusername: friendid, roomid: roomuuid }, function(data) {
+                    $.post('/addfriend', { friendusername: usid, roomid: roomuuid }, function(data) {
                         if (data != null) {
-                            alert("Chat invite sent to user " + friendid);
+                            alert("Chat invite sent to user " + usid);
                         }
                     });
                     
@@ -229,8 +266,6 @@ block head
           myID = response.username;
     	    
     	    for (let i = 0; i < chatlist.length; i++) {
-    	        var chatroomtitle = chatlist[i].chatname;
-    	        
                 var chatbutton_temp = document.createElement("a");
                 chatbutton_temp.setAttribute("class", "chatBtnClass");
                 chatbutton_temp.setAttribute('id', chatlist[i].roomid);
@@ -240,6 +275,7 @@ block head
                 
                 $("#" + chatlist[i].roomid).on("click", function() {
                     let roomid = chatlist[i].roomid;
+                    let chatroomtitle = chatlist[i].chatname;
                     
                     $.post('/openroom', { room : roomid }, function(data) {
                         if (data.success) {
@@ -253,10 +289,13 @@ block head
                             });
                             
                             // load all prev. messages to #messages using loop
+                            // d.pastmessages
+                            // d.chatmembers
                         
                             $(".leftHalf").css('display', 'none');
                             $(".rightHalf").css('display', 'block');
                             document.getElementById("chatTitle").innerText = chatroomtitle;
+                            
                         }
                     });
                     
@@ -291,7 +330,14 @@ block content
   // need to show chatbox iff req.session.currentroom != null
   div(class="rightHalf" id="chatbox")
     p#chatTitle.customHeader
-    a.btnAceLeave(id="leaveChatBtn") Leave
+    a.btnAceLeave(id="leaveChatBtn") Close Chatbox
+    
+    button#openMembers.btnAceBasic(onclick = "openMembers()") See Chat Members
+    #membersPopup.memberspopup
+        p(style='font-size: 16px; font-family: Helvetica, Sans-Serif;') Current Chat Members
+        ul#chatmembers.listTemplate
+        button#closeMembers.btnAceBasic(onclick = "closeMembers()") Close
+        
     button#addFriends.btnAceBasic Invite Friends
     #friendPopup.friendspopup
         p(style='font-size: 16px; font-family: Helvetica, Sans-Serif;') Choose a friend's name to invite them to the chat
@@ -303,5 +349,5 @@ block content
     div(id="form-message")
       input(id = 'message', class = 'form-control', autocomplete='off', placeholder='Type a message...')
       button#send-message.btnAceSend(type='button', onclick='return sendMessage();')  Send
-  
+    button#leaveChatPermanently.btnAceBasic Leave Chat
   

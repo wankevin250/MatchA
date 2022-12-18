@@ -668,7 +668,7 @@ function compareLists (arrayA, arrayB) {
 	var ans = [];
 	for (let i = 0; i < arrayA.length; i++) {
 		let curr = arrayA[i];
-		if (!arrayB.includes(curr) && !ans.includes(curr)) {
+		if (!arrayB.includes(curr)) {
 			ans.push(curr);
 		}
 	}
@@ -713,14 +713,12 @@ function compareLists (arrayA, arrayB) {
 					userfullname = data.Items[0].firstname.S + " " + data.Items[0].lastname.S;
 				}
 				
-				var userobj = {userid: username, displayname: userdisplay, fullname: userfullname};
-				console.log(userobj);
-				
+				let userobj = {userid: username, displayname: userdisplay, fullname: userfullname};
 				ans.push(userobj);
 				
-				if (i == (userlist.length-1)) {
+				if (ans.length == userlist.length) {
+					console.log(ans);
 					callback(200, null, ans);
-					return ans;
 				}
 			}
 		});
@@ -754,8 +752,49 @@ const addFriendToChat = (friend, chatid, callback) => {
 	});
 }
 
+/***
+ * @params input chatid, (status, err, data)
+ * @description gets corresponding info from chatrooms, sends to server data including: past chat messages [] and current users []
+ * data format should be { pastmessages: , currentusers: }
+ */
 const viewOneChat = (chatid, callback) => {
 	// return chat info & messages
+	var paramsMessages = {
+		TableName: 'chatmessages',
+		ExpressionAttributeValues: {
+				':cid': {S: chatid},
+		},
+		KeyConditionExpression: 'roomid = :cid',
+	}
+	
+	var paramsUsers = {
+		TableName: 'chatrooms',
+		Key: {
+			'roomid' : {S: chatid}
+		}
+	}
+	
+	// get for users first, table chatrooms
+	
+	db.getItem(paramsUsers, (err, data) => {
+		if (err) {
+			console.log(err);
+			callback(500, err, null);
+		} else {
+			var currusers = JSON.parse(data.Item.users.S);
+			
+			db.query(paramsMessages, (err2, data2) => {
+				if (err2) {
+					console.log(err2);
+					callback(500, err2, null);
+				} else {
+					var messages = data2.Items;
+					callback(200, null, { pastmessages: messages, chatmembers: currusers});
+				}
+			}); 
+		}
+	});
+	
 }
 
 const acceptChatInvite = (chatid, userid, callback) => {
@@ -766,8 +805,8 @@ const acceptChatInvite = (chatid, userid, callback) => {
 	var paramsRequest = {
 		TableName: 'requests',
 		Key: {
-			"accepter" : userid,
-			"asker" : chatid
+			"accepter" : {S: userid},
+			"asker" : {S: chatid}
 		},
 		UpdateExpression: "SET status=:e",
 		ExpressionAttributeValues:{
@@ -806,7 +845,7 @@ const acceptChatInvite = (chatid, userid, callback) => {
 						var paramsChatUpdate = {
 							TableName: 'chatrooms',
 							Key: {
-								'roomid' : chatid
+								'roomid' : {S: chatid}
 							},
 							UpdateExpression: "SET users=:u",
 							ExpressionAttributeValues:{
@@ -833,8 +872,8 @@ const declineChatInvite = (chatid, userid, callback) => {
 	var paramsRequest = {
 		TableName: 'requests',
 		Key: {
-			"accepter" : userid,
-			"asker" : chatid
+			"accepter" : {S: userid},
+			"asker" : {S: chatid}
 		},
 	}
 	
@@ -867,8 +906,6 @@ const saveMessage = (messageobj, callback) => {
 }
 
 // end of ACE HOUR
-
-
 
 
 

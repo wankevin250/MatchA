@@ -591,18 +591,18 @@ var displayFriends = function (username, chatid, callback) {
 									
 									// console.log(compareLists(listoffriends, listofuserschat));
 									var listfriends = extractUserNames(compareLists(listoffriends, listofuserschat));
-									callback(200, null, compareLists(listoffriends, listofuserschat));
+									callback(200, null, listfriends);
 								} else {
 									// console.log(compareLists(listoffriends, listofuserschat));
 									var listfriends = extractUserNames(compareLists(listoffriends, listofuserschat));
-									callback(200, null, compareLists(listoffriends, listofuserschat));
+									callback(200, null, listfriends);
 								}
 							} else {
 								console.log("No users in this chat!");
 								
 								// console.log(compareLists(listoffriends, listofuserschat));
 								var listfriends = extractUserNames(compareLists(listoffriends, listofuserschat));
-								callback(200, null, compareLists(listoffriends, listofuserschat));
+								callback(200, null, listfriends);
 							}
 						}
 					});
@@ -620,18 +620,18 @@ var displayFriends = function (username, chatid, callback) {
 									
 									// console.log(compareLists(listoffriends, listofuserschat));
 									var listfriends = extractUserNames(compareLists(listoffriends, listofuserschat));
-									callback(200, null, compareLists(listoffriends, listofuserschat));
+									callback(200, null, listfriends);
 								} else {
 									// console.log(compareLists(listoffriends, listofuserschat));
 									var listfriends = extractUserNames(compareLists(listoffriends, listofuserschat));
-									callback(200, null, compareLists(listoffriends, listofuserschat));
+									callback(200, null, listfriends);
 								}
 							} else {
 								console.log("No users in this chat!");
 								
 								// console.log(compareLists(listoffriends, listofuserschat));
 								var listfriends = extractUserNames(compareLists(listoffriends, listofuserschat));
-								callback(200, null, compareLists(listoffriends, listofuserschat));
+								callback(200, null, listfriends);
 							}
 						}
 					});
@@ -649,18 +649,18 @@ var displayFriends = function (username, chatid, callback) {
 								
 								// console.log(compareLists(listoffriends, listofuserschat));
 								var listfriends = extractUserNames(compareLists(listoffriends, listofuserschat));
-								callback(200, null, compareLists(listoffriends, listofuserschat));
+								callback(200, null, listfriends);
 							} else {
 								// console.log(compareLists(listoffriends, listofuserschat));
 								var listfriends = extractUserNames(compareLists(listoffriends, listofuserschat));
-								callback(200, null, compareLists(listoffriends, listofuserschat));
+								callback(200, null, listfriends);
 							}
 						} else {
 							console.log("No users in this chat!");
 							
 							// console.log(compareLists(listoffriends, listofuserschat));
 							var listfriends = extractUserNames(compareLists(listoffriends, listofuserschat));
-							callback(200, null, compareLists(listoffriends, listofuserschat));
+							callback(200, null, listfriends);
 						}
 					}
 				});
@@ -677,7 +677,7 @@ function compareLists (arrayA, arrayB) {
 	var ans = [];
 	for (let i = 0; i < arrayA.length; i++) {
 		let curr = arrayA[i];
-		if (! arrayB.includes(curr)) {
+		if (!arrayB.includes(curr) && !ans.includes(curr)) {
 			ans.push(curr);
 		}
 	}
@@ -692,6 +692,8 @@ function compareLists (arrayA, arrayB) {
  
  function extractUserNames (userlist) {
 	var ans = [];
+	
+	console.log("At ExtractUserNames");
 	
 	if (userlist == null) {
 		userlist = [];
@@ -708,7 +710,7 @@ function compareLists (arrayA, arrayB) {
 		}
 		db.query(params, (err, data) => {
 			if (err) {
-				
+				console.log(err)
 			} else {
 				var userdisplay = '';
 				if (data.Items[0].displayname != null && data.Items[0].displayname.S != '') {
@@ -719,16 +721,19 @@ function compareLists (arrayA, arrayB) {
 					userfullname = data.Items[0].firstname.S + " " + data.Items[0].lastname.S;
 				}
 				
-				var userobj = {username: username, displayname: userdisplay, fullname: userfullname};
+				var userobj = {userid: username, displayname: userdisplay, fullname: userfullname};
+				console.log(userobj);
 				
 				ans.push(userobj);
+				
+				if (i == (userlist.length-1)) {
+					console.log(ans);
+					return ans;
+				}
 			}
 		});
-		console.log(ans);
 	}
 	
-	console.log (ans);
-	return ans;
 }
 
 /***

@@ -24,6 +24,7 @@ block head
     }
     function closeFriendList() {
         document.getElementById("friendPopup").style.display = "none";
+        $('#friendList').empty();
     }
     
     // clickables
@@ -70,6 +71,7 @@ block head
             
             $(".leftHalf").css('display', 'block');
             $(".rightHalf").css('display', 'none');
+            document.getElementById("chatTitle").innerText = '';
           }
         });
       });
@@ -86,6 +88,8 @@ block head
                   
                   
                   if (data != null) {
+                    var chatroomtitle = data.chatname;
+                    
                     var chatbutton_temp = document.createElement("a");
                     chatbutton_temp.setAttribute("class", "chatBtnClass");
                     chatbutton_temp.setAttribute('id', data.roomid);
@@ -111,6 +115,7 @@ block head
                                
                                 $(".leftHalf").css('display', 'none');
                                 $(".rightHalf").css('display', 'block');
+                                document.getElementById("chatTitle").innerText = chatroomtitle;
                             }
                         });
                     });
@@ -200,6 +205,8 @@ block head
           myID = response.username;
     	    
     	    for (let i = 0; i < chatlist.length; i++) {
+    	        var chatroomtitle = chatlist[i].chatname;
+    	        
                 var chatbutton_temp = document.createElement("a");
                 chatbutton_temp.setAttribute("class", "chatBtnClass");
                 chatbutton_temp.setAttribute('id', chatlist[i].roomid);
@@ -225,6 +232,7 @@ block head
                         
                             $(".leftHalf").css('display', 'none');
                             $(".rightHalf").css('display', 'block');
+                            document.getElementById("chatTitle").innerText = chatroomtitle;
                         }
                     });
                     
@@ -258,10 +266,12 @@ block content
   
   // need to show chatbox iff req.session.currentroom != null
   div(class="rightHalf" id="chatbox")
+    p#chatTitle.customHeader
     a.btnAceLeave(id="leaveChatBtn") Leave
     button#addFriends.btnAceBasic Invite Friends
     #friendPopup.friendspopup
-        ul#friendList
+        p(style='font-size: 16px; font-family: Helvetica, Sans-Serif;') Choose a friend's name to invite them to the chat
+        ul#friendList.listTemplate
         button.btnAceBasic(type='button', onclick='closeFriendList()') Close
     div()
       ul#messages.messageDisplay

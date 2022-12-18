@@ -171,3 +171,19 @@
 	background-color: none;
 	display:block;
 }
+.listTemplate{
+	list-style: none;
+	padding: 20px 20px;
+	margin: 10px;
+	
+	font-size: 16px;
+	font-family: Helvetica, Sans-Serif;
+}
+
+.customHeader {
+	padding: 10px 10px;
+	margin: 6px;
+	
+	font-size: 20px;
+	font-family: Helvetica, Sans-Serif;
+}

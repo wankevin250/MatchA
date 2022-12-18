@@ -1,7 +1,8 @@
 const AWS = require('aws-sdk');
 const req = require('express/lib/request.js');
 const usr = require('./user.js');
-const {v4 : uuidv4} = require('uuid')
+const {v4 : uuidv4} = require('uuid');
+const stemmer = require("stemmer");
 
 AWS.config.update({
   region: 'us-east-1',
@@ -181,14 +182,15 @@ const findNews = (keyword, callback) => {
 
   for (let i = 0; i < arr.length; i++) {
     searchWord = keyword[i];
+    console.log(searchWord);
     searchWord = searchWord.toLowerCase(); // change the search word into lowercase letter
       if (!(searchWord == ("a") || searchWord == ("all") || searchWord == ("any") || searchWord == ("but") || searchWord == ("the"))) { //filter the words
           searchWord = stemmer(searchWord); //stem the word
         var params = {
         TableName : "tokenizedNews",
-        ExpressionAttributeValues : {
-          ':k' : searchWord
-        },
+        ExpressionAttributeValues: {
+            ':k': {S: searchWord},
+          },
         KeyConditionExpression : 'keyword = :k',
         };
         
@@ -199,10 +201,15 @@ const findNews = (keyword, callback) => {
 
     Promise.all(promises).then(
       data => {
+        console.log(data[0].Items);
+        if (data.length < 1) {
+            callback("empty", null);
+        }
         const today = new Date();
         for (let i = 0; i < data.length; i++) {
               data[i].Items.forEach(function(item){
                 const newsDate = new Date(item.date);
+                console.log(item)
                 if (!headlines.includes(item.headline.S) && newsDate <= today) { // add until it reaches 20 talks
                   headlines.push(item.headline.S);
                 }
@@ -257,7 +264,7 @@ const fetchTitleByRank = (user, ranks, callback) => {
   var results = [];
   var promises = [];
   
-  for (let i = 0; i < headlines.length; i++) {
+  for (let i = 0; i < ranks.length; i++) {
     console.log(ranks[i]);
    var params = {
     ExpressionAttributeValues: {

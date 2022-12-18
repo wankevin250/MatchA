@@ -224,7 +224,7 @@ app.post('/ajaxviewfriendinvites', routes.viewFriendInvites);
 
 app.get('/news', newsroutes.calculateRank);
 app.post('/likeNews', newsroutes.addLike);
-app.get('/newSearch', newsroutes.searchNews);
+app.get('/searchNews', newsroutes.searchNews);
 
 app.get('*', (req, res) => {
   res.render('404');

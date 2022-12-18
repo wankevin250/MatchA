@@ -707,20 +707,24 @@ function compareLists (arrayA, arrayB) {
 			TableName: 'users'
 		}
 		db.query(params, (err, data) => {
-			var userdisplay = '';
-			if (data.Items[0].displayname != null && data.Items[0].displayname.S != '') {
-				userdisplay = data.Items[0].displayname.S;
+			if (err) {
+				
+			} else {
+				var userdisplay = '';
+				if (data.Items[0].displayname != null && data.Items[0].displayname.S != '') {
+					userdisplay = data.Items[0].displayname.S;
+				}
+				var userfullname = '';
+				if (data.Items[0].firstname != null && data.Items[0].lastname != null) {
+					userfullname = data.Items[0].firstname.S + " " + data.Items[0].lastname.S;
+				}
+				
+				var userobj = {username: username, displayname: userdisplay, fullname: userfullname};
+				
+				ans.push(userobj);
 			}
-			var userfullname = '';
-			if (data.Items[0].firstname != null && data.Items[0].lastname != null) {
-				userfullname = data.Items[0].firstname.S + " " + data.Items[0].lastname.S;
-			}
-			
-			var userobj = {username: username, displayname: userdisplay, fullname: userfullname};
-			
-			ans.push(userobj);
 		});
-		
+		console.log(ans);
 	}
 	
 	console.log (ans);

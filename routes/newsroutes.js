@@ -10,6 +10,7 @@ const calculateRank = (req, res) => {
 	result = []
   results = []
   newsdata = []
+  
 	// execute the java command
   if (req.session.user != null) {
 		let user = req.session.user;
@@ -80,8 +81,9 @@ const searchNews = (req, res) => {
   word = "college";
   arr = word.split(" ");
   console.log(arr);
+  newsdata = [];
 
-  db.findNews(arr, (err, noRanks, ranks) => {
+  db.findNews(user, arr, (err, noRanks, ranks) => {
     if (err) {
       if (err != "empty") {
         console.log(err);
@@ -90,6 +92,7 @@ const searchNews = (req, res) => {
       }
     } else {
       console.log(ranks);
+      console.log(noRanks);
       db.fetchTitleByRank(user, ranks, (err, data) => {
         if (err) {
           console.log(err);

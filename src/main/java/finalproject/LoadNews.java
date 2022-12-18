@@ -18,6 +18,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -162,6 +164,7 @@ public class LoadNews {
 		// upload to Dynamo_DB
 	//	try {
 			newsData.foreachPartition(iter -> { 
+				String timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
 				Thread.sleep(3);
 				HashSet<Item> rows = new HashSet<Item>(); 
 				HashSet<String> dupli = new HashSet<String>();
@@ -177,7 +180,7 @@ public class LoadNews {
 						String dt = ldate.toString();
 						System.out.println(dt);
 						String title = (String) news.getAs(1);
-						if (title.length() != 0) {
+						if (title.length() != 0 && dt.compareTo(timeStamp) <= 0) {
 							Item newsItem = new Item()
 											.withPrimaryKey("headline", (String) news.getAs(1), "date", dt)
 											.withString("category", (String) news.getAs(0))

@@ -132,30 +132,6 @@ public class TokenizeNews implements Serializable {
 							return new GenericRowWithSchema(row, schema);// Make Row with Schema
 						})
 						.collect(Collectors.toList());
-		/*Iterator<JsonObject> iter = lines.stream().collect(Collectors.toList()).iterator();
-		List<Row> rowOfNews = new ArrayList<>();
-
-		while (iter.hasNext()) {
-			JsonObject line = iter.next();
-			String dt = line.get("date").toString();
-			String xdt = dt.substring(1, dt.length() - 1);;
-			LocalDate ldt = LocalDate.parse(xdt).plusYears(5);
-			dt = ldt.toString();
-			System.out.println(dt);
-			if (dt.compareTo(timeStamp) <= 0) {
-				Object[] row = new Object[3]; // assign appropriate values for each Schema
-				String ct = line.get("category").toString();
-				String hl = line.get("headline").toString();
-				row[0] = ct.substring(1, ct.length() - 1);
-				row[1] = hl.substring(1, hl.length() - 1);
-				row[2] = dt; 
-				rowOfNews.add(new GenericRowWithSchema(row, schema));
-			}
-
-		}*/
-
-		//JavaRDD<Row> newsRDD = context.parallelize(rowOfNews);
-
 		return rowOfNews;
 	}
 

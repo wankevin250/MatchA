@@ -25,14 +25,12 @@
     font-size: 20px;
 }
 
-.search-box {
-    border-radius: 25px;
+.search-body {
+    text-align: center;
+    width: 100%;
+    padding-top: 10%;
+    font-size: 20px;
     background: #707C4F;
-    padding: 20px; 
-    margin: 10px;
-    width: 700px;
-    height: 200px;
-    font-family: Helvetica, Sans-Serif;
 }
 
 .news-Class {
@@ -58,6 +56,6 @@
     padding: 20px; 
     margin: auto;
     width: 700px;
-    height: 500px;
+    height: 400px;
     font-family: Helvetica, Sans-Serif;
   }

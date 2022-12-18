@@ -353,6 +353,7 @@ const viewFriends = (req, res) => {
 				}
 			} else {
 				console.log("query success");
+				console.log(data);
 				res.json(data);
 			}
 		});
@@ -371,12 +372,24 @@ const viewFriends = (req, res) => {
  */
 const addFriend = (req, res) => {
 	// if user exists
+	var friend = req.body.friendusername;
+	var chatid = req.body.roomid;
 	
+	console.log("Sending invite to: " + friend + " for chat " + chatid);
 	// on click, send request to add friend to db using addFriendToChat
-	
+	db.addFriendToChat(friend, chatid, (status, err, data) => {
+		if (status != 200) {
+			if (err) {
+				console.log(err);
+			}
+			return res.sendStatus(status);
+		} else {
+			console.log(data);
+			return res.send("Success!");
+		}
+	});
 	// set req.session.friendslist == null
 	// to KEVIN: on frontend, is there a way to close the friendslist popup?
-	
 }
 
 /**
@@ -459,7 +472,24 @@ const viewUsers = (req, res) => {
 	
 }
 
+/***
+ * @params expected input from body / ajax: { askerid } (actually will be chat invite's chat code)
+ */
+const acceptChatInvite = (req, res) => {
+	
+}
+
+const requestFilter = (req, res) => {
+	
+}
+
 // end of Ace
+/***
+ * @params expected input from body / ajax: { askerid } (asker user's username)
+ */
+const acceptFriendInvite = (req, res) => {
+	
+}
 
 // Kevin visualizer routes
 const getVisualizer = (req, res) => {
@@ -553,6 +583,9 @@ const routes = {
   
   reloadRoom: reloadMsgs,
   reloadChats: reloadChats,
+  acceptChatInvite: acceptChatInvite,
+  
+  requestFilter: requestFilter,
   // end of ace's routes
 
   postCreateUser: postCreateUser,

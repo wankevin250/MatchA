@@ -141,6 +141,16 @@ block head
                   
                   $('#friendList').append(friendbutton);
                   
+                  $("#" + data[i].userid).on("click", function() {
+                    let friendid = data[i].userid;
+                    
+                    $.post('/addfriend', { friendusername: friendid, roomid: roomuuid }, function(data) {
+                        if (data != null) {
+                            alert("Chat invite sent to user " + friendid);
+                        }
+                    });
+                    
+                });
               }
           });
       });

@@ -206,6 +206,8 @@ app.get('/viewchatdetails', routes.viewUsers);
 
 // end of ace
 
+app.post('/handlerequest', routes.requestFilter);
+
 // app.get('/news', null);
 
 //AJAX Post

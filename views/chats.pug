@@ -136,8 +136,8 @@ block head
               for (let i = 0; i < data.length; i++) {
                   var friendbutton = document.createElement("a");
                   friendbutton.setAttribute("class", "friendListing");
-                  friendbutton.setAttribute('id', data[i]);
-                  friendbutton.appendChild(document.createTextNode(data[i]));
+                  friendbutton.setAttribute('id', data[i].userid);
+                  friendbutton.appendChild(document.createTextNode("(" + data[i].displayname + ") " + data[i].fullname));
                   
                   $('#friendList').append(friendbutton);
                   

@@ -11,8 +11,10 @@ $(document).ready(() => {
     $('#signup-password').tooltip(inputTooltipOptions('Password must be 8-40 characters. At least 1 letter, 1 number, and 1 special character'));
     $('#signup-firstname').tooltip(inputTooltipOptions('Limit 25 characters. Legal first name'));
     $('#signup-lastname').tooltip(inputTooltipOptions('Limit 25 characters. Legal last name'));
+    $('#signup-affiliation').tooltip(inputTooltipOptions('Limit 3-40 characters'));
     $('#signup-email').tooltip(inputTooltipOptions('Valid emails only'));
     $('#signup-dob').tooltip(inputTooltipOptions('Must be at least 13 years of age'));
+    $('#signup-interests').tooltip(inputTooltipOptions('Must select at least two interests'));
 });
 
 function createUser() {
@@ -21,9 +23,11 @@ function createUser() {
         password: $('#signup-password').val(),
         firstname: $('#signup-firstname').val(),
         lastname: $('#signup-lastname').val(),
+        affiliation: $('#signup-affiliation').val(),
         email: $('#signup-email').val(),
         dob: $('#signup-dob').val(),
-        timestamp: (new Date()).toString()
+        timestamp: (new Date()).toString(),
+        interest: JSON.stringify($('#signup-interests').val())
     };
 
     console.log(user.dob);
@@ -44,6 +48,13 @@ function createUser() {
     if (!user.lastname.match(/^[A-Za-z-\s']{1,25}$/)) {
         userErr.innerHTML += "<li>Last Name error. Please enter in legal last name</li>"
     }
+    if (!user.affiliation.match(/^\w{3,40}$/)) {
+        userErr.innerHTML += "<li>Affiliation error. Please input your affiliation. Max 40 characters."
+    }
+    if ($('#signup-interests').val().length < 2) {
+        userErr.innerHTML += "<l1>Interests error. Please select at least two.</li>"
+    }
+
     let dobDate = new Date(user.dob);
     let today = new Date();
     if (!isNaN(dobDate) && dobDate < new Date("01-01-1900") 

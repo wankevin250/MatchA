@@ -12,24 +12,32 @@ block content
     div(class="signup-error")
         div(id="signup-clienterror")
         div(id="signup-servererror")
-    div.form-group(class="w-25")
+    div(class="form-group w-25")
         label(for="signup-username") Username
         input.form-control(type="text", class="", id="signup-username" name="signup-username")
-    div.form-group(class="w-25")
+    div(class="form-group w-25")
         label(for="signup-password") Password
-        input.form-control(type="text", class="", id="signup-password" name="signup-password")
-    div.form-group(class="w-25")
+        input.form-control(type="password", class="", id="signup-password" name="signup-password")
+    div(class="form-group w-25")
         label(for="signup-firstname") First Name
         input.form-control(type="text", class="", id="signup-firstname" name="signup-firstname")
-    div.form-group(class="w-25")
+    div(class="form-group w-25")
         label(for="signup-lastname") Last Name
         input.form-control(type="text", class="", id="signup-lastname" name="signup-lastname")
-    div.form-group(class="w-25")
+    div(class="form-group w-25")
+        label(for="signup-affiliation") Affiliation
+        input.form-control(type="text", class="", id="signup-affiliation" name="signup-affiliation")
+    div(class="form-group w-25")
         label(for="signup-email") Email
         input.form-control(type="text", class="", id="signup-email" name="signup-email")
-    div.form-group(class="w-25")
+    div(class="form-group w-25")
         label(for="signup-dob") Date of Birth
         input.form-control(type="date", class="", id="signup-dob" name="signup-dob")
+    div()
+        label(for="signup-interests") Choose your interests
+        select(name="signup-interests" id="signup-interests" multiple)
+            each item in newsCategories
+                option(value=item.category) #{item.category}
     button(id='signup-submit', class="btn btn-primary", onclick="createUser()")
         span Create your account
     

@@ -43,7 +43,9 @@ app.get('/notifications', routes.getNotifications);
 //kevin: visualizer routes call
 app.get('/visualizer', routes.getVisualizer);
 
-app.get('/friendvisualization', routes.postGetFriend);
+app.get('/sendvisualizeruser', routes.sendVisualizerUser);
+
+app.get('/friendvisualization', routes.sendFriends); //postGetFriend?
 // function(req, res) {
 // 	var json = {"id": "alice","name": "Alice","children": [{
 //         "id": "bob",
@@ -93,7 +95,7 @@ app.get('/friendvisualization', routes.postGetFriend);
 //     res.send(json);
 // });
 
-app.get('/getFriends/:user', routes.postGetFriend); //routes.sendFriends?
+app.get('/getFriends/:user', routes.sendFriends); //routes.postGetFriend?
 // function(req, res) {
 //   console.log(req.params.user);
 //   var newFriends = {"id": "alice","name": "Alice","children": [{
@@ -186,9 +188,9 @@ app.post('/openroom', routes.openChat);
 app.post('/leaveroom', routes.leaveChat);
 // open CHATBOX should REFRESH every 1 second. Chatbox should leave button
 /** popup list of friends user can add to chat */
-app.get('/friendstoadd', routes.popupFriends);
+app.post('/friendstoadd', routes.popupFriends);
 /** in chatroom box, button that allows adding a friend */
-app.get('/addfriend', routes.addFriend);
+app.post('/addfriend', routes.addFriend);
 /** send msg to database, refreshes page */
 app.post('/sendmessage', routes.sendMessage);
 

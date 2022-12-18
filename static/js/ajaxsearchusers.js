@@ -13,32 +13,43 @@ function searchUser(query) {
         },
         success: (response) => {
             console.log(JSON.parse(response));
-            let results = JSON.parse(response);
+            let [results, user] = JSON.parse(response);
+
+            console.log(JSON.parse(response));
+
+            let requests = JSON.parse(user.sentRequests);
+            let friends = JSON.parse(user.friends);
             
             let resultsDiv = document.createElement('div');
             results.forEach(d => {
-                let userWrapper = document.createElement('div');
-
                 let userResult = document.createElement('div');
                 let userDisplayName = document.createElement('h3');
                 let userUserName = document.createElement('p');
 
                 let userAddFriendButton = document.createElement('button');
-                userAddFriendButton.innerText = `Add Friend`;
-                userAddFriendButton.onclick = () => {
-                    console.log(d.username);
-                    addFriend(d.username, (err, response) => {
-                        if (err) {
-                            console.log(err);
-                        } else {
-                            console.log(response);
-                        }
-                    });
+                if (friends && friends.includes(d.username)) {
                     userAddFriendButton.disabled = true;
-                    userAddFriendButton.innerText = 'Request Sent';
-                    console.log(userAddFriendButton.disabled);
-                };
-
+                    userAddFriendButton.innerText = "Friends";
+                } else if (requests && requests.includes(d.username)) {
+                    userAddFriendButton.disabled = true;
+                    userAddFriendButton.innerText = "Request Sent";
+                } else {
+                    userAddFriendButton.innerText = `Add Friend`;
+                    userAddFriendButton.onclick = () => {
+                        console.log(d.username);
+                        addFriend(d.username, (err, response) => {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                console.log(response);
+                            }
+                        });
+                        userAddFriendButton.disabled = true;
+                        userAddFriendButton.innerText = 'Request Sent';
+                        console.log(userAddFriendButton.disabled);
+                    };
+                }
+                
                 userDisplayName.innerText = d.displayname;
                 userUserName.innerText = '@' + d.username;
 

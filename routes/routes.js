@@ -94,7 +94,7 @@ const getNotifications = (req, res) => {
 
 const viewFriendInvites = (req, res) => {
   if (req.session && req.session.user) {
-    db.queryFriendInvites(req.session.user.username, false, (status, err, data) => {
+    db.queryFriendInvites(req.session.user.username, "false", (status, err, data) => {
       if (isSuccessfulStatus(status)) {
         res.send(JSON.stringify(data));
       } else {
@@ -106,14 +106,41 @@ const viewFriendInvites = (req, res) => {
   }
 }
 
+const rejectFriendInvite = (req, res) => {
+  let asker = req.body.asker;
+  if (req.session && req.session.user) {
+    db.rejectFriendInvite(req.session.user.username, asker, (status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+        res.sendStatus(201);
+      } else {
+        res.status(status).send(new Error(err));
+      }
+    });
+  }
+}
+
+const acceptFriendInvite = (req, res) => {
+  let asker = req.body.asker;
+  if (req.session && req.session.user) {
+    db.acceptFriendInvite(req.session.user.username, asker, (status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+        res.send(data);
+      } else {
+        res.status(status).send(new Error(err));
+      }
+    });
+  } else {
+    res.status(401).send(new Error("No user"));
+  }
+}
+
 const postScanUsers = (req, res) => {
   let query = req.body.query;
-  console.log(query);
 
   if (query && query.length > 2) {
     db.scanUsers(query, (status, err, data) => {
       if (isSuccessfulStatus(status)) {
-        res.send(JSON.stringify(data));
+        res.send(JSON.stringify([data, req.session.user]));
       } else {
         res.status(500).send(new Error(err));
       }
@@ -142,11 +169,11 @@ const postGetFriend = (req, res) => {
 
 const postSendFriendRequest = (req, res) => {
   let accepter = req.body.accepter;
-  console.log(accepter);
 
   if (accepter && accepter.match(/^\w{3,25}$/)) {
     db.sendFriendRequest(req.session.user.username, accepter, (status, err, data) => {
       if (isSuccessfulStatus(status)) {
+        req.session.user.sentRequests = data;
         res.sendStatus(201);
       } else {
         res.status(status).send(new Error(err));
@@ -727,6 +754,8 @@ const routes = {
   postSendFriendRequest: postSendFriendRequest,
   postGetFriend: postGetFriend,
   viewFriendInvites: viewFriendInvites,
+  acceptFriendInvite: acceptFriendInvite,
+  rejectFriendInvite: rejectFriendInvite,
 
   // Kevin's visualizer routes
   getVisualizer: getVisualizer,

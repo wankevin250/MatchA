@@ -4,7 +4,8 @@ block head
   title Notifications
   link(rel='stylesheet', href='https://stackpath.bootstrapcdn.com/bootstrap/5.2.3/css/bootstrap.min.css')
   link(rel='stylesheet', href='/css/notifications.css')
-  
+  script(src="js/ajaxgetnotifs.js")
+
 block content
   div(class='notif-head')
 		h1 Your Notifications
@@ -33,4 +34,7 @@ block content
               
             }
 					
-  
+  div(class="notifications-content")
+    div(class="notificiations-friendinvites")
+        h1 Friend Invites
+        div(id="notificiations-friendinvites-target")

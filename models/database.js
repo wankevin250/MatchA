@@ -9,6 +9,11 @@ AWS.config.update({
 
 const db = new AWS.DynamoDB();
 
+const parseJSONwithS = (jsonstring) => {
+  return jsonstring && jsonstring.length > 0
+   ? JSON.parse(jsonstring.S) : [];
+}
+
 const scanUsers = (searchQuery, callback) => {
   if (searchQuery.length < 3) {
     console.log("Error! Search query too small");
@@ -43,17 +48,159 @@ const queryFriendInvites = (accepter, status, callback) => {
     KeyConditionExpression: 'accepter = :accepter',
     ExpressionAttributeValues: {
       ':accepter': {S: accepter},
-      ':status': {S: status},
     },
-    ExpressionAttributeNames: {
-      '#status': {S: 'status'}
-    },
-    FilterExpression: '#status = :status',
   }, (err, data) => {
     if (err) {
+      console.log(err);
       callback(500, err, null);
     } else {
-      callback(500, err, data.Items);
+      console.log(data.Items);
+      let requests = data.Items.filter(d => d.status.S == "false");
+      callback(201, err, requests);
+    }
+  });
+}
+
+const rejectFriendInvite = (accepter, asker, callback) => {
+  db.getItem({
+    TableName: 'users',
+    Key: {
+      username: {
+        S: asker
+      }
+    },
+  }, (err, data) => {
+    if (err) {
+      console.log(err);
+      callback(500, err, null);
+    } else {
+      let askerData = data.Item;
+      let askerRequests = parseJSONwithS(askerData.sentRequests);
+      askerRequests = askerRequests.filter(d => d != accepter);
+
+      db.updateItem({
+        TableName: 'users',
+        Key: {
+          username: {
+            S: asker
+          }
+        },
+        UpdateExpression: 'SET sentRequests = :requests',
+        ExpressionAttributeValues: {
+          ':requests': {S: JSON.stringify(askerRequests)}
+        }
+      }, (err, data) => {
+        if (err) {
+          console.log(err);
+          callback(500, err, null);
+        } else {
+          db.deleteItem({
+            TableName: "friends",
+            Key: {
+              "accepter": {S: accepter},
+              "asker": {S: asker},
+            },
+          }, (err, data) => {
+            if (err) {
+              console.log(err);
+              callback(500, err, )
+            } else {
+              callback(201, err, data);
+            }
+          });
+        }
+      });
+    }
+  });
+}
+
+const acceptFriendInvite = (accepter, asker, callback) => {
+  db.deleteItem({
+    TableName: "friends",
+    Key: {
+      "accepter": {S: accepter},
+      "asker": {S: asker},
+    },
+  }, (err, data) => {
+    if (err) {
+      console.log(err);
+      callback(500, err, null); 
+    } else {
+      db.getItem({
+        TableName: 'users',
+        Key: { 
+          username: {S: accepter}
+        },
+      }, (err, data) => {
+        if (err) {
+          console.log()
+          console.log(err);
+          callback(500, err, null);
+        } else {
+          let accepterData = data.Item;
+          db.getItem({
+            TableName: 'users',
+            Key: {
+              username: {
+                S: asker
+              }
+            },
+          }, (err, data) => {
+            let askerData = data.Item;
+            if (err) {
+              console.log(err);
+              callback(500, err, null);
+            } else {
+              let accepterFriends = parseJSONwithS(accepterData.friends);
+              accepterFriends.push(asker);
+              db.updateItem({
+                TableName: 'users',
+                Key: {
+                  username: {
+                    S: accepter
+                  }
+                },
+                UpdateExpression: 'SET friends = :friends',
+                ExpressionAttributeValues: {
+                  ':friends': {S: JSON.stringify(accepterFriends)}
+                }
+              }, (err, data) => {
+                if (err) {
+                  console.log(err);
+                  callback(500, err, null);
+                } else {
+                  let askerFriends = parseJSONwithS(askerData.friends);
+                  askerFriends.push(accepter);
+
+                  let askerRequests = parseJSONwithS(askerData.sentRequests);
+                  askerRequests = askerRequests.filter(d => d != accepter);
+
+                  db.updateItem({
+                    TableName: 'users',
+                    Key: {
+                      username: {
+                        S: asker
+                      }
+                    },
+                    UpdateExpression: 'SET friends = :friends, sentRequests = :requests',
+                    ExpressionAttributeValues: {
+                      ':friends': {S: JSON.stringify(askerFriends)},
+                      ':requests': {S: JSON.stringify(askerRequests)}
+                    }
+                  }, (err, data) => {
+                    if (err) {
+                      console.log(err);
+                      callback(500, err, null);
+                    } else {
+                      callback(201, err, data);
+                    }
+                  });
+                }
+              });
+            }
+          });
+        }
+      });
     }
   });
 }
@@ -119,18 +266,27 @@ const sendFriendRequest = (asker, accepter, callback) => {
       let askerUser = data.Items[0];
       let rPrev = askerUser.sentRequests;
       let item = {};
-      askerUser.sentRequests = rPrev ? JSON.stringify(JSON.parse(rPrev).append(accepter)) 
-        : JSON.stringify([].append(accepter));
+
+      console.log(rPrev);
+
+      let newSentRequests = rPrev && rPrev.length > 0 
+        ? JSON.stringify(JSON.parse(rPrev).append(accepter)) 
+        : JSON.stringify([accepter]);
+      askerUser.sentRequests = {S: newSentRequests};
 
       Object.entries(askerUser).forEach(entry => {
         let [key, val] = entry;
-        item[key] = {S: val};
+        item[key] = val;
       });
+
+      console.log(item);
+
       db.putItem({
         TableName: 'users',
         Item: item,
       }, (err, data) => {
         if (err) {
+          console.log(err);
           callback(500, err, null);
         } else {
           db.putItem({
@@ -143,9 +299,10 @@ const sendFriendRequest = (asker, accepter, callback) => {
             }
           }, (err, data) => {
             if (err) {
+              console.log(err);
               callback(500, err, null);
             } else {
-              callback(201, err, data);
+              callback(201, err, newSentRequests);
             }
           });
         }
@@ -919,6 +1076,8 @@ const database = {
   sendFriendRequest: sendFriendRequest,
   getFriends: getFriends,
   queryFriendInvites: queryFriendInvites,
+  acceptFriendInvite: acceptFriendInvite,
+  rejectFriendInvite: rejectFriendInvite,
 
   queryPosts: queryPosts,
   

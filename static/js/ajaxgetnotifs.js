@@ -34,7 +34,7 @@ function getFriendInvites() {
                 let reject = document.createElement('button');
                 reject.innerText = 'Reject';
                 reject.onclick = () => {
-                    rejectFriendInvite(d.asker);
+                    rejectFriendInvite(d.asker.S);
                     inviteDiv.style.display = "none";
                 };
                 

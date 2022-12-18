@@ -109,26 +109,36 @@ const viewFriendInvites = (req, res) => {
 const rejectFriendInvite = (req, res) => {
   let asker = req.body.asker;
   if (req.session && req.session.user) {
-    db.rejectFriendInvite(req.session.user.username, asker, (status, err, data) => {
-      if (isSuccessfulStatus(status)) {
-        res.sendStatus(201);
-      } else {
-        res.status(status).send(new Error(err));
-      }
-    });
+    if (typeof asker == 'string') {
+      db.rejectFriendInvite(req.session.user.username, asker, (status, err, data) => {
+        if (isSuccessfulStatus(status)) {
+          res.sendStatus(201);
+        } else {
+          res.status(status).send(new Error(err));
+        }
+      });
+    } else {
+      res.status(403).send(new Error("Not a string"));
+    }
+  } else {
+    res.status(401).send(new Error("No user"));
   }
 }
 
 const acceptFriendInvite = (req, res) => {
   let asker = req.body.asker;
   if (req.session && req.session.user) {
-    db.acceptFriendInvite(req.session.user.username, asker, (status, err, data) => {
-      if (isSuccessfulStatus(status)) {
-        res.send(data);
-      } else {
-        res.status(status).send(new Error(err));
-      }
-    });
+    if (typeof asker == 'string') {
+      db.acceptFriendInvite(req.session.user.username, asker, (status, err, data) => {
+        if (isSuccessfulStatus(status)) {
+          res.send(data);
+        } else {
+          res.status(status).send(new Error(err));
+        }
+      });
+    } else {
+      res.status(403).send(new Error("Not a string"));
+    }
   } else {
     res.status(401).send(new Error("No user"));
   }
@@ -584,9 +594,9 @@ const requestFilter = (req, res) => {
 /***
  * @params expected input from body / ajax: { askerid } (asker user's username)
  */
-const acceptFriendInvite = (req, res) => {
+// const acceptFriendInvite = (req, res) => {
 	
-}
+// }
 
 // Kevin visualizer routes
 const getVisualizer = (req, res) => {

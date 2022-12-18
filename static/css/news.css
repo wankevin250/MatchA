@@ -3,7 +3,7 @@
     display:inline-block;
     background:lightgreen;
     color:skyblue;
-    font-size:large;
+    font-size: 10px;
     font-weight: bold;
     text-align: center;
     width: 100%;
@@ -22,7 +22,7 @@
     text-align: center;
     width: 100%;
     padding-top: 10%;
-    font: 8px;
+    font-size: 20px;
 }
 
 .news-Class {
@@ -36,7 +36,7 @@
     text-align: center;
     text-decoration: none;
     display: block;
-    font: 8px;
+    font-size: 20px;
     font-family: Helvetica, Sans-Serif;
 }
 
@@ -47,6 +47,6 @@
     margin: 10px;
     width: 700px;
     height: 100px;
-    font: 8px;
+    font-size: 20px;
     font-family: Helvetica, Sans-Serif;
   }

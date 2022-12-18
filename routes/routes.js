@@ -478,6 +478,11 @@ const viewUsers = (req, res) => {
 const acceptChatInvite = (req, res) => {
 	var chatid = req.body.askerid;
 	var acceptance = req.body.acceptance;
+	var username = req.session.user.username;
+	
+	if (acceptance === true) {
+		
+	}
 	
 }
 /*** 

@@ -128,8 +128,6 @@ app.get('/getFriends/:user', routes.sendFriends); //routes.postGetFriend?
 		
     });
 
-// server.listen(3000);
-
 /** moves to chat page: should have a list of user's chats, and a new chat room button. REFRESH every 3 seconds */
 app.get('/chat', routes.loadChatPage);
 app.post('/chatlist', routes.postChatList);

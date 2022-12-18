@@ -758,6 +758,14 @@ const viewOneChat = (chatid, callback) => {
 	// return chat info & messages
 }
 
+const acceptChatInvite = (chatid, userid, callback) => {
+	
+}
+
+const declineChatInvite = (chatid, userid, callback) => {
+	
+}
+
 // end of ACE HOUR
 
 
@@ -782,6 +790,10 @@ const database = {
   getFriendsList: displayFriends,
   addFriendToChat: addFriendToChat,
   viewChat: viewOneChat, 
+  
+  acceptChatInvite: acceptChatInvite,
+  declineChatInvite: declineChatInvite,
+  
   
 }
 

@@ -446,7 +446,31 @@ const leaveChat = (req, res) => {
   function: sends message to current chatroom
   if error: 
  */
-const sendMsg = (req, res) => {
+var sendMsg = function (obj, callback) {
+	// input obj: { text: $('#message').val().trim(), sender: myID, room: room}
+	// save message to database: 
+	// generate timestamp
+	// create new obj
+	// send new messageobj to db
+	const gmtTimeStamp = new Date().toUTCString();
+	const msgid = uuidv4();
+	
+	var messageobj = {
+		room: obj.room,
+		messageid: msgid,
+		text: obj.text,
+		sender: obj.sender,
+		timestamp: gmtTimeStamp
+	}
+	
+	db.saveMessage(messageobj, (status, err, data) => {
+		if (status != 200) {
+			console.log(err);
+			callback(err, null);
+		} else {
+			callback(err, messageobj);
+		}
+	});
 	
 }
 
@@ -476,7 +500,33 @@ const viewUsers = (req, res) => {
  * @params expected input from body / ajax: { askerid, acceptance } (actually will be chat invite's chat code)
  */
 const acceptChatInvite = (req, res) => {
+	var chatid = req.body.askerid;
+	var acceptance = req.body.acceptance;
+	var username = req.session.user.username;
 	
+	if (acceptance === true) {
+		db.acceptChatInvite(chatid, username, (status, err, data) => {
+			if (status != 200) {
+				if (err) {
+					console.log(err);
+				}
+				res.sendStatus(status);
+			} else {
+				res.send(data);
+			}
+		});
+	} else {
+		db.declineChatInvite(chatid, username, (status, err, data) => {
+			if (status != 200) {
+				if (err) {
+					console.log(err);
+				}
+				res.sendStatus(status);
+			} else {
+				res.send(data);
+			}
+		});
+	}
 }
 /*** 
  * if req.body.type === "chat", call acceptChatInvite. if === "friend" call acceptFriendInvite

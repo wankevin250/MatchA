@@ -758,6 +758,114 @@ const viewOneChat = (chatid, callback) => {
 	// return chat info & messages
 }
 
+const acceptChatInvite = (chatid, userid, callback) => {
+	// look up invite in requests table, change status to accepted
+	// lookup chat in chatrooms, add user,
+	// lookup user, call addChatHelper
+	
+	var paramsRequest = {
+		TableName: 'requests',
+		Key: {
+			"accepter" : userid,
+			"asker" : chatid
+		},
+		UpdateExpression: "SET status=:e",
+		ExpressionAttributeValues:{
+			":e": true
+		},
+	}
+	
+	var paramsChat = {
+		TableName: 'chatrooms',
+		ExpressionAttributeValues: {
+				':chatid': {S: chatid},
+		},
+		KeyConditionExpression: 'roomid = :chatid',
+	}
+	
+	db.updateItem(paramsRequest, (errRequest, dR) => {
+		if (errRequest) {
+			callback(500, errRequest, null);
+		} else {
+			db.query(paramsChat, (errChatrooms, dC) => {
+				if (errChatrooms) {
+					callback(500, errChatrooms, null);
+				} else {
+					if (dC.Count == 0 || dC.Items[0].users.S == '') {
+						callback(400, null, null);
+					} else {
+						let currentusers = [];
+						console.log("Reached chatrooms update")
+						currentusers = currentusers.concat(JSON.parse(dC.Items[0].users.S));
+						console.log(currentusers);
+						currentusers.push(userid);
+						console.log(currentusers)
+						
+						let chatname = dC.Items[0].chatname.S;
+						
+						var paramsChatUpdate = {
+							TableName: 'chatrooms',
+							Key: {
+								'roomid' : chatid
+							},
+							UpdateExpression: "SET users=:u",
+							ExpressionAttributeValues:{
+								":u": currentusers
+							},
+						}
+						db.updateItem(paramsChatUpdate, (errCU, dCU) => {
+							if (errCU) {
+								callback(500, errCU, null);
+							} else {
+								addChatHelper(userid, chatid, chatname);
+								callback(200, null, dCU);
+							}
+						})
+					}
+				}
+			})
+		}
+	});
+}
+
+const declineChatInvite = (chatid, userid, callback) => {
+	// look up invite in requests table, delete item
+	var paramsRequest = {
+		TableName: 'requests',
+		Key: {
+			"accepter" : userid,
+			"asker" : chatid
+		},
+	}
+	
+	db.deleteItem(paramsRequest, (err, data) => {
+		if (err) {
+			callback(500, err, null);
+		} else {
+			callback(200, err, data);
+		}
+	});
+}
+
+const saveMessage = (messageobj, callback) => {
+	var messageitem = {
+		'roomid' : {S: messageobj.room},
+		'messageid' : {S:messageobj.messageid},
+		'text' : {S:messageobj.text},
+		'sender' : {S:messageobj.sender},
+		'timestamp' : {S:messageobj.timestamp},
+	}
+	
+	db.putItem({TableName: 'chatmessages', Item: messageitem}, (err, data) => {
+		if (err) {
+			callback(500, err, null);
+		} else {
+			console.log("Save message success!");
+			callback(200, null, data);
+		}
+	});
+}
+
 // end of ACE HOUR
 
 
@@ -777,11 +885,19 @@ const database = {
 
   queryPosts: queryPosts,
   
+  // ACE
   findChats: findChats,
   newChat: addChatToTable,
   getFriendsList: displayFriends,
   addFriendToChat: addFriendToChat,
   viewChat: viewOneChat, 
+  saveMessage: saveMessage,
+  
+  acceptChatInvite: acceptChatInvite,
+  declineChatInvite: declineChatInvite,
+  
+  // ACE
+  
   
 }
 

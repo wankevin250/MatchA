@@ -32,27 +32,47 @@ const runSpark = (user, callback) => {
 
 // start of Sebin News
 const computeRank = (user, callback) => {
+    ret = [];
     db.query({
       ExpressionAttributeValues: {
         ':username': {S: user.username},
-        ':maxrank': {N: '5'}
+       // ':maxrank': {N: '5'}
       },
-      ExpressionAttributeNames: {
+      /*ExpressionAttributeNames: {
         '#rank' : 'rank'
-      },
-      KeyConditionExpression: 'username = :username and #rank <= :maxrank',
+      },*/
+      KeyConditionExpression: 'username = :username', //and #rank <= :maxrank',
       TableName: 'newsRanked'
     }, (err, data) => {
       if (err) {
         callback(err, null);
       } else {
-        if (data.Items.length > 0) {
-          //console.log(data);
-          callback(null, data.Items);
-        } else {     
-          //console.log( data.Items);   
-          callback(null, data.Items);  
-        }
+        db.query({
+          ExpressionAttributeValues: {
+            ':username': {S: user.username},
+          },
+          KeyConditionExpression: 'username = :username',
+          TableName: 'newsViewed',
+        }, (err, history) => {
+          console.log(history);
+          if (err) {
+            callback(err, null);
+          }
+          if (history.Count > 0) {
+            console.log("WE ARE HERE");
+            let prev = JSON.parse(history.Items[0].viewed.S);
+            for (let i = 0; i < data.Items.length; i++) {
+              if (!prev.includes(data.Items[i].headline.S)) {
+                console.log("YES");
+                ret.push(data.Items[i]);
+              }
+            }
+            callback(null, ret);
+          } else {
+            console.log("WE ARE HERE :-(");
+            callback(null, data.Items);
+          }
+        })
       }
     });
 }
@@ -78,10 +98,11 @@ const fetchNewsDataByName = (headlines, callback) => {
   
   Promise.all(promises).then (
    data => {
+    //console.log("PROMISE"+data);
      for (let i = 0; i < data.length; i++) {
        if (data[i].Count != 0) {
-        result = data[i].Items; // or Items[0]?
-        // console.log(result);
+        result = data[i].Items[0]; // or Items[0]?
+        //console.log("result"+result.headline.S);
         results.push(result);
        }
      }
@@ -94,16 +115,7 @@ const fetchNewsDataByName = (headlines, callback) => {
  )
 }
 
-const addViewHistory = (user, articles, callback) => {
-    let displayed = "";
-    console.log(articles);
-    for (let i = 0; i < articles.length; i++) {
-      displayed = displayed.concat(articles[i]);
-      displayed = displayed.concat("*");
-    }
-    // let displayed = articles;
-    console.log(displayed);
-    
+const addViewHistory = (user, articles, callback) => {  
     db.query({
       ExpressionAttributeValues: {
         ':username': {S: user.username},
@@ -116,7 +128,11 @@ const addViewHistory = (user, articles, callback) => {
         callback(err, null);
       } else if (data.Items.length > 0) {
         console.log(data.Items[0].viewed.S);
-        let prev = data.Items[0].viewed.S;
+        let prev = JSON.parse(data.Items[0].viewed.S);
+        for (let i = 0; i < articles.length; i++) {
+          prev.push(articles[i]);
+        }
+        let displayed = JSON.stringify(prev);
         params = {
           TableName: 'newsViewed',
                   Key: {
@@ -126,7 +142,7 @@ const addViewHistory = (user, articles, callback) => {
                   },
                   UpdateExpression: "SET viewed = :viewed",
                   ExpressionAttributeValues: {
-            ":viewed": {S: prev.concat(displayed)},
+            ":viewed": {S: displayed},
           },
           ReturnValues: "UPDATED_NEW",
         };
@@ -140,6 +156,7 @@ const addViewHistory = (user, articles, callback) => {
           }
         });
       } else {
+        let displayed = JSON.stringify(articles);
         db.putItem({
           TableName: 'newsViewed',
           Item: {

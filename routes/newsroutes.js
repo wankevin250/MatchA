@@ -26,8 +26,9 @@ const calculateRank = (req, res) => {
         console.log(err);
       } else {
         console.log("Made it to else statement! at computeRank");
-        console.log(data);
+       // console.log(data);
        // console.log("0's headline:" + data[0].headline.S);
+        data = data.slice(0,5);
 
         for (let i = 0; i < data.length; i++) {
           result = data[i].headline.S;
@@ -38,11 +39,15 @@ const calculateRank = (req, res) => {
           if (err) {
             console.log(err);
           } else {
-            data.forEach(function(element, index, array) {
-              //console.log(element);
-              newsdata.push(element)});
-              //res.render('news.pug', {results: newsdata});
-              res.send(JSON.stringify(newsdata));
+            /*data.forEach(function(element, index, array) {
+              console.log("Element"+element.headline.S);
+              newsdata.push(element)});*/
+              //console.log("newsdata"+element);
+              for (let i = 0; i < data.length; i++) {
+                console.log(data[i].headline.S);
+              }
+              res.render('news.pug', {results: data});
+              //res.send(data);
 
               db.addViewHistory(user, results, (err,data) => {
                 if (err) {
@@ -78,7 +83,7 @@ const addLike = (req, res) => {
 const searchNews = (req, res) => {
   let user = req.session.user;
   //word = request.query.keyword;
-  word = "college";
+  word = "college education";
   arr = word.split(" ");
   console.log(arr);
   newsdata = [];

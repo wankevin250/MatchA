@@ -113,8 +113,18 @@ app.get('/getFriends/:user', routes.sendFriends); //routes.postGetFriend?
 		
 	
         socket.on('chat message', function(obj){
-			console.log(obj.text);
-			io.to(obj.room).emit('chat message', obj);
+			console.log(obj);
+			// call routes.sendMessage, which takes in obj and returns obj with timestamp appended!
+			// input obj: { text: $('#message').val().trim(), sender: myID, room: room}
+			routes.sendMessage(obj, (error, newobj) => {
+				if (newobj != null) {
+					io.to(obj.room).emit('chat message', newobj);
+				} else {
+					console.log(error);
+					io.to(obj.room).emit('chat message', obj);
+				}
+			})
+			// io.to(obj.room).emit('chat message', obj);
 		});
 		
 		socket.on('join room', obj => {
@@ -127,8 +137,6 @@ app.get('/getFriends/:user', routes.sendFriends); //routes.postGetFriend?
 		});
 		
     });
-
-// server.listen(3000);
 
 /** moves to chat page: should have a list of user's chats, and a new chat room button. REFRESH every 3 seconds */
 app.get('/chat', routes.loadChatPage);

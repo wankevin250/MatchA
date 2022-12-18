@@ -46,11 +46,15 @@ form {
 }
 
 .wall-content{
-    margin-top: 105px;
+    margin-top: 107px;
     background:lightgreen;
     text-align: center;
     width: 85%;
     margin-left:auto;
     margin-right:auto;
     height: 100vh;
+}
+
+.btn-toolbar{
+    text-align: center;
 }

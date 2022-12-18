@@ -219,6 +219,7 @@ app.post('/ajaxviewfriendinvites', routes.viewFriendInvites);
 // news
 
 app.get('/news', newsroutes.calculateRank);
+app.post('/likeNews', newsroutes.addLike);
 app.get('/newSearch', newsroutes.searchNews);
 
 app.get('*', (req, res) => {

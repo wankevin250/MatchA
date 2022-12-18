@@ -136,66 +136,80 @@ public class TokenizeNews implements Serializable {
 	   System.out.println("TOKENIZING");
 
        newsData.forEach(news -> { 
-			//NotSerializable notSerializable = new NotSerializable();
 			String tableName = this.tbName;
 			System.out.println("ENTER");
 			HashSet<Item> words = new HashSet<Item>(); 
-           // while (iter.hasNext()) {
-				DynamoDB conn = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
-               // Row news = iter.next();
-				HashSet<String> dupli = new HashSet<String>();
-				String title = (String) news.getAs(1);
-				//System.out.println(title);
-				if (title.length() != 0) {
-					System.out.println("TOKENED");
-					String[] tokens =title.split(" ");
-					//String[] tokens = model.tokenize(title);
-					System.out.println(tokens[0]);
-					for (int j = 0; j < tokens.length; j++) {
-						if (tokens[j].matches("^[a-zA-Z]*$")) {
-							tokens[j] = tokens[j].toLowerCase();
-							if (tokens[j].matches("^[a-zA-Z]*$") && !(tokens[j].equals("a") || tokens[j].equals("all") 
-								|| tokens[j].equals("any") || tokens[j].equals("but") || tokens[j].equals("the"))) {
-								tokens[j] = (String) stemmer.stem(tokens[j]);
-								if (!dupli.contains(tokens[j]) || tokens[j] != "") { // check if it is not an empty string
-									dupli.add(tokens[j]);
-									try {
-										Thread.sleep((long) 1.0);
+			DynamoDB conn = DynamoConnector.getConnection("https://dynamodb.us-east-1.amazonaws.com");
+			HashSet<String> dupli = new HashSet<String>();
+			String title = (String) news.getAs(1);
+			if (title.length() != 0) {
+				System.out.println("TOKENED");
+				String[] tokens =title.split(" ");
+				System.out.println(tokens[0]);
+				for (int j = 0; j < tokens.length; j++) {
+					if (tokens[j].matches("^[a-zA-Z]*$")) {
+						tokens[j] = tokens[j].toLowerCase();
+						if (tokens[j].matches("^[a-zA-Z]*$") && !(tokens[j].equals("a") || tokens[j].equals("all") 
+							|| tokens[j].equals("any") || tokens[j].equals("but") || tokens[j].equals("the") 
+							|| tokens[j].equals("or") || tokens[j].equals("for") || tokens[j].equals("on")
+							|| tokens[j].equals("at") || tokens[j].equals("in") || tokens[j].equals("of"))) {
+							tokens[j] = (String) stemmer.stem(tokens[j]);
+							if (!dupli.contains(tokens[j]) && tokens[j].length() > 0 && title != "" ) { // check if it is not an empty string
+								try {
+									Thread.sleep((long) 1.0);
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								dupli.add(tokens[j]);
+								try {
+									Thread.sleep((long) 2.0);
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								Item word = new Item()
+												.withPrimaryKey("keyword", tokens[j], "headline", title)
+												.withString("category", (String) news.getAs(0))
+												.withString("date", (String) news.getAs(2));
+								words.add(word);
+							}
+						}
+					}
+
+					if (words.size() == 25 || j == tokens.length - 1) {
+						try {
+							Thread.sleep((long) 2.0);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						try {
+							TableWriteItems writ = new TableWriteItems(tableName).withItemsToPut(words);
+							BatchWriteItemOutcome ret = conn.batchWriteItem(writ);
+							Map<String, List<WriteRequest>> leftover = ret.getUnprocessedItems();
+							if (leftover != null && leftover.size() != 0) {
+								try {
+										Thread.sleep((long) 2.0);
 									} catch (InterruptedException e) {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
 									}
-									Item word = new Item()
-													.withPrimaryKey("keyword", tokens[j], "headline", (String) news.getAs(1))
-													.withString("category", (String) news.getAs(0))
-													.withString("date", (String) news.getAs(2));
-									words.add(word);
-								}
-							}
-						}
-
-						if (words.size() == 25 || j == tokens.length - 1) {
-							TableWriteItems writ = new TableWriteItems(tableName).withItemsToPut(words);
-							try {
-								Thread.sleep((long) 2.0);
-							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-							BatchWriteItemOutcome ret = conn.batchWriteItem(writ);
-							Map<String, List<WriteRequest>> leftover = ret.getUnprocessedItems();
-							if (leftover != null && leftover.size() != 0) {
 								conn.batchWriteItemUnprocessed(leftover);	
 							}
 							words = new HashSet<Item>();
+						} catch (Exception e) {
+							System.out.println("error occurred");
+						} finally {
+							words = new HashSet<Item>();
+							continue;
 						}
 					}
-					
-				} else {
-					System.out.println(title);
 				}
-               
-            //}
+				
+			} else {
+				System.out.println(title);
+			}
 			
 		});
 

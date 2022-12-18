@@ -11,7 +11,7 @@ block head
 			console.log("hey");
 			$("#likeclick").on("click", function(e) {
 				e.preventDefault();
-				console.log(document.getElementById("title").value);
+				//console.log(document.getElementById("title").value);
 				$.ajax({
 					type : "POST",
 					url: "/likeNews",
@@ -28,19 +28,18 @@ block head
 				})
 			})
 		});
-	
-	
+
 
 block content
 	div(class='news-head')
 		h1 Articles that Match your Interests..
-	div(class='divider')
-	div(class='search-body')
-		<form align="center" name="searchForm" action="/searchNews"  onsubmit="document.searchForm.keyword">
-		<label for="keyword">Search for Articles with the following words:</label><br/>
-		<input type="text" id="keyword" name="keyword" />
-			<input type="submit" value="Search">
-	</form>
+		div(class='divider')
+		div(class='search-body')
+			<form align="center" name="searchForm" action="/searchNews"  onsubmit="document.searchForm.keyword">
+			<label for="keyword">Search for Articles with the following words:</label><br/>
+			<input type="text" id="keyword" name="keyword" />
+				<input type="submit" value="Search">
+		</form>
 	div(class='news-body')
 		ul
 			each result in results

@@ -630,7 +630,7 @@ const getVisualizer = (req, res) => {
 }
 
 // constant holding the friends of the session user
-const affiliation = null;
+var affiliation = null;
 
 const sendInitialVisualization = (req, res) => {
   console.log("Made it to sendInitialVisualization!");

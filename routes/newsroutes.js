@@ -26,8 +26,6 @@ const calculateRank = (req, res) => {
         console.log(err);
       } else {
         console.log("Made it to else statement! at computeRank");
-       // console.log(data);
-       // console.log("0's headline:" + data[0].headline.S);
         data = data.slice(0,8);
 
         for (let i = 0; i < data.length; i++) {
@@ -39,18 +37,16 @@ const calculateRank = (req, res) => {
           if (err) {
             console.log(err);
           } else {
-            /*data.forEach(function(element, index, array) {
-              console.log("Element"+element.headline.S);
-              newsdata.push(element)});*/
-              //console.log("newsdata"+element);
               for (let i = 0; i < data.length; i++) {
                 if (data[i].authors.S.length == 0) {
                   data[i].authors.S = "Cannot find";
                 }
                 if (data[i].short_description.S.length == 0) {
                   data[i].short_description.S = "Cannot find";
+                } 
+                if (data[i].short_description.S.length > 0) {
+                  data[i].short_description.S = data[i].short_description.S.replace(/([[\]\\])/g , "");
                 }
-                console.log(data[i].headline.S);
               }
               res.render('news.pug', {results: data});
               //res.send(data);
@@ -73,9 +69,10 @@ const calculateRank = (req, res) => {
 }
 
 const addLike = (req, res) => {
-  let news = req.body.headline; // should input the string
+  //let news = req.body.headline; // should input the string
+  //console.log(news);
+  let news = "Christian Nationalism On The Rise In Some GOP Campaigns";
   console.log(news);
-  //let news = "Christian Nationalism On The Rise In Some GOP Campaigns";
   let user = req.session.user;
 
   db.likeNews(user, news, (err, data) => {
@@ -89,13 +86,11 @@ const addLike = (req, res) => {
 
 const searchNews = (req, res) => {
   let user = req.session.user;
-  //word = request.query.keyword;
-  word = "college education";
+  word = req.query.keyword;
   arr = word.split(" ");
-  console.log(arr);
   newsdata = [];
 
-  db.findNews(user, arr, (err, noRanks, ranks) => {
+  db.findNews(user, arr, (err, multiple, noRanks, ranks) => {
     if (err) {
       if (err != "empty") {
         console.log(err);
@@ -103,14 +98,20 @@ const searchNews = (req, res) => {
         res.send("no matched result");
       }
     } else {
-      console.log(ranks);
-      console.log(noRanks);
+      results = [];
+      console.log(multiple);
+      for (let i = 0; i < multiple.length; i++) {
+        let result = multiple[i];
+        results.push(result);
+      }
+      //console.log(ranks);
+      //console.log(noRanks);
       db.fetchTitleByRank(user, ranks, (err, data) => {
         if (err) {
           console.log(err);
         } else {
           console.log(data)
-          results = [];
+          
           for (let i = 0; i < data.length; i++) {
             let result = data[i].headline.S;
             results.push(result);
@@ -127,8 +128,8 @@ const searchNews = (req, res) => {
               data.forEach(function(element, index, array) {
                 //console.log(element);
                 newsdata.push(element)});
-                //res.render('news.pug', {results: newsdata});
-                res.send(JSON.stringify(newsdata));
+                res.render('newsresult.pug', {results: newsdata});
+                //res.send(JSON.stringify(newsdata));
             }
           })
         }

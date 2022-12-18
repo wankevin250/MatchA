@@ -33,33 +33,16 @@ block head
     function closeMembers() {
         document.getElementById("membersPopup").style.display = "none";
     }
+    function updateScroll() {
+        var element = document.getElementById("messages");
+        element.scrollTop = element.scrollHeight;
+    }
     
     
     // clickables
     $(document).ready( function() {
     
       $(".leftHalf").addClass("fullWidth");
-      
-      $(".chatBtnClass").on("click", function() {
-        let roomid = this.id;
-        $.post('/openroom', { room : roomid }, function(data) {
-          if (data.success) {
-          
-            room = roomid;
-            roomuuid = roomid;
-            
-            socket.emit('join room', {
-                user: myID,
-                room: roomid,
-            });
-            
-            // load all prev. messages to #messages using loop
-                        
-            $(".leftHalf").css('display', 'none');
-            $(".rightHalf").css('display', 'block');
-          }
-        });
-      });	
       
       $(".btnAceLeave").on("click", function() {
         $.post('/leaveroom', function(data) {
@@ -120,6 +103,7 @@ block head
                                 
                                 // load all prev. messages to #messages using loop
                                 // d.pastmessages
+                                
                                 d.pastmessages.forEach( function(pmsg) {
                                     var message_temp = document.createElement("li");
                                     var message_outline = document.createElement("p");
@@ -136,13 +120,20 @@ block head
                                     if (myID === pmsg.sender) {
                                         message_outline.setAttribute("class", "me");
                                         timestampviz.style.color = 'white';
+                                        senderviz.style.color = 'white';
                                     } else {
                                         message_outline.setAttribute("class", "other");
                                         senderviz.style.color = '#D4CB8C';
                                         timestampviz.style.color = '#D4CB8C';
                                     }
+                                    
+                                    message_outline.append(senderviz);
+                                    message_outline.append(message_temp);
+                                    message_outline.append(timestampviz);
+                                    
                                     $('#messages').append(message_outline);
                                 });
+                                updateScroll();
                                 
                                 // load all current users to #chatmembers
                                 // TODO: (when a user accepts an invite, socket.emit from requests page, 
@@ -249,7 +240,7 @@ block head
           }
           
           $('#messages').append(message_outline);
-          
+          updateScroll();
       });
     });
     
@@ -289,9 +280,39 @@ block head
                             });
                             
                             // load all prev. messages to #messages using loop
-                            // d.pastmessages
-                            // d.chatmembers
-                        
+                            // data.pastmessages
+                            // data.chatmembers
+                            data.pastmessages.forEach( function(pmsg) {
+                                var message_temp = document.createElement("li");
+                                var message_outline = document.createElement("p");
+                                var senderviz = document.createElement("p");
+                                var timestampviz = document.createElement("p");
+                                
+                                senderviz.setAttribute("class", "messageTags");
+                                timestampviz.setAttribute("class", "messageTags");
+                                
+                                message_temp.innerText = pmsg.text;
+                                senderviz.innerText = pmsg.sender;
+                                timestampviz.innerText = pmsg.timestamp;
+                                
+                                if (myID === pmsg.sender) {
+                                    message_outline.setAttribute("class", "me");
+                                    timestampviz.style.color = 'white';
+                                    senderviz.style.color = 'white';
+                                } else {
+                                    message_outline.setAttribute("class", "other");
+                                    senderviz.style.color = '#D4CB8C';
+                                    timestampviz.style.color = '#D4CB8C';
+                                }
+                                
+                                message_outline.append(senderviz);
+                                message_outline.append(message_temp);
+                                message_outline.append(timestampviz);
+                                
+                                $('#messages').append(message_outline);
+                            });
+                            updateScroll();
+                            
                             $(".leftHalf").css('display', 'none');
                             $(".rightHalf").css('display', 'block');
                             document.getElementById("chatTitle").innerText = chatroomtitle;

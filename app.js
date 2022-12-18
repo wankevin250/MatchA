@@ -45,55 +45,7 @@ app.get('/visualizer', routes.getVisualizer);
 
 app.get('/sendvisualizeruser', routes.sendVisualizerUser);
 
-app.get('/friendvisualization', routes.sendFriends); //postGetFriend?
-// function(req, res) {
-// 	var json = {"id": "alice","name": "Alice","children": [{
-//         "id": "bob",
-//             "name": "Bob",
-//             "data": {},
-//             "children": [{
-//             	"id": "dylan",
-//             	"name": "Dylan",
-//             	"data": {},
-//             	"children": []
-//             }, {
-//             	"id": "marley",
-//             	"name": "Marley",
-//             	"data": {},
-//             	"children": []
-//             }]
-//         }, {
-//             "id": "charlie",
-//             "name": "Charlie",
-//             "data": {},
-//             "children": [{
-//                 "id":"bob"
-//             }]
-//         }, {
-//             "id": "david",
-//             "name": "David",
-//             "data": {},
-//             "children": []
-//         }, {
-//             "id": "peter",
-//             "name": "Peter",
-//             "data": {},
-//             "children": []
-//         }, {
-//             "id": "michael",
-//             "name": "Michael",
-//             "data": {},
-//             "children": []
-//         }, {
-//             "id": "sarah",
-//             "name": "Sarah",
-//             "data": {},
-//             "children": []
-//         }],
-//         "data": []
-//     };
-//     res.send(json);
-// });
+app.get('/friendvisualization', routes.sendInitialVisualization); //postGetFriend?
 
 app.get('/getFriends/:user', routes.sendFriends); //routes.postGetFriend?
 // function(req, res) {

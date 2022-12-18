@@ -512,8 +512,8 @@ const getVisualizer = (req, res) => {
   res.render('visualizer.pug')
 }
 
-const sendFriends = (req, res) => {
-  console.log("Made it to sendFriends!");
+const sendInitialVisualization = (req, res) => {
+  console.log("Made it to sendInitialVisualization!");
   if (req.session.user != null) {
     console.log("req.session.user = " + req.session.user.username); //req.query.user or req.session.user???
 
@@ -531,9 +531,11 @@ const sendFriends = (req, res) => {
             console.log("Made it to else statement!");
             console.log(data);
 
+            console.log("User: " + user[0].displayname);
+
             const datajson = {
-              "id": user[0].username.S,
-              "name": user[0].displayname.S,
+              "id": user[0].username,
+              "name": user[0].displayname,
               "data": {},
               "children": [],
             };
@@ -568,6 +570,11 @@ const sendVisualizerUser = (req, res) => {
   } else {
     res.redirect('/');
   }
+}
+
+const sendFriends = (req, res) => {
+  console.log("Made it to sendFriends!");
+  console.log("Req.params.user: " + req.params.user);
 }
 
 
@@ -616,6 +623,7 @@ const routes = {
 
   // Kevin's visualizer routes
   getVisualizer: getVisualizer,
+  sendInitialVisualization: sendInitialVisualization,
   sendFriends: sendFriends,
   sendVisualizerUser: sendVisualizerUser,
 

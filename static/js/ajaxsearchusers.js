@@ -12,13 +12,13 @@ function searchUser(query) {
             query: query
         },
         success: (response) => {
-            console.log(JSON.parse(response));
+            console.log(response);
             let [results, user] = JSON.parse(response);
 
             console.log(JSON.parse(response));
 
-            let requests = JSON.parse(user.sentRequests);
-            let friends = JSON.parse(user.friends);
+            let requests = user.sentRequests ? JSON.parse(user.sentRequests) : [];
+            let friends = user.friends ? JSON.parse(user.friends) : [];
             
             let resultsDiv = document.createElement('div');
             results.forEach(d => {

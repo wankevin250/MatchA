@@ -11,7 +11,7 @@ block head
 			console.log("hey");
 			$("#likeclick").on("click", function(e) {
 				e.preventDefault();
-				console.log(document.getElementById("title").value);
+				//console.log(document.getElementById("title").value);
 				$.ajax({
 					type : "POST",
 					url: "/likeNews",
@@ -28,8 +28,7 @@ block head
 				})
 			})
 		});
-	
-	
+
 
 block content
 	div(class='news-head')

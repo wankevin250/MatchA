@@ -1,3 +1,20 @@
+@import url(https://fonts.googleapis.com/css?family=Jua);
+
+.a{
+  all: unset;
+  font-size: 40px;
+  color:#49592A;
+  font-family: 'Jua';
+  display: block;
+  margin:auto;
+  text-align: center;
+  width: 50%;
+}
+
+.a:hover{
+  color: white;
+}
+
 body{
   background-color: #C7D9AB;
 }
@@ -12,7 +29,7 @@ body{
   margin: 10px;
   
   font-size: 20px;
-  font-family: Helvetica, Sans-Serif;
+  font-family: 'Jua';
 }
 
 .btnAceSend:hover{
@@ -29,7 +46,7 @@ body{
   text-decoration: none;
   display: inline-block;
   font-size: 20px;
-  font-family: Helvetica, Sans-Serif;
+  font-family: 'Jua';
 }
 
 .btnAceLeave:hover{
@@ -48,7 +65,7 @@ body{
     text-decoration: none;
     display: block;
     font-size: 20px;
-    font-family: Helvetica, Sans-Serif;
+    font-family: 'Jua';
 }
 
 .createBtnClass {
@@ -63,7 +80,7 @@ body{
     text-decoration: none;
     display: block;
     font-size: 20px;
-    font-family: Helvetica, Sans-Serif;
+    font-family: 'Jua';
 }
 
 .leftHalf {
@@ -151,7 +168,7 @@ body{
   margin: 10px;
   
   font-size: 16px;
-  font-family: Helvetica, Sans-Serif;
+  font-family: 'Jua';
 }
 
 .btnAceBasic:hover{
@@ -179,7 +196,7 @@ body{
 	background-color: none;
 	display:block;
 	font-size: 16px;
-    font-family: Helvetica, Sans-Serif;
+    font-family: 'Jua';
 }
 .listTemplate{
 	list-style: none;
@@ -187,7 +204,7 @@ body{
 	margin: 10px;
 	
 	font-size: 16px;
-	font-family: Helvetica, Sans-Serif;
+	font-family: 'Jua';
 }
 
 .customHeader {
@@ -195,7 +212,7 @@ body{
 	margin: 6px;
 	
 	font-size: 20px;
-	font-family: Helvetica, Sans-Serif;
+	font-family: 'Jua';
 }
 
 .messageTags {
@@ -227,5 +244,5 @@ body{
 	background-color: none;
 	display:block;
 	font-size: 16px;
-    font-family: Helvetica, Sans-Serif;
+    font-family: 'Jua';
 }

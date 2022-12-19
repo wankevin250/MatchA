@@ -35,10 +35,11 @@ block content
         input.form-control(type="date", class="", id="signup-dob" name="signup-dob")
     div()
         label(class='form-label select-label', for="signup-interests") Choose your interests
+    div()
         select(class='select' name="signup-interests" id="signup-interests" multiple)
             each item in newsCategories
                 option(value=item.category) #{item.category}
 
-    button(id='signup-submit', class="btn btn-primary", onclick="createUser()")
+    button(id='signup-submit', class="btn btn-primary", onclick="createUser()", style='background-color: #49592A')
         span Create your account
     

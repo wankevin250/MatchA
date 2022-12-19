@@ -10,9 +10,9 @@ body {
     width:36%;
     box-sizing: border-box;
     position:fixed;
-    background: white;
+    background-color:#C7D9AB;
     height:69vh;
     top:55px;
-    margin-left: 515px;
+    margin-left: 575px;
     font-family: 'Jua';
 }

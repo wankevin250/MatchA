@@ -181,6 +181,7 @@ public class rankJob {
 							String dt = line.get("date").getS();
 							if (dt.compareTo(timeStamp) == 0) {
 								//inter[0] = line.get("headline").getS();
+								System.out.println(line.get("date").getS());
 								rowOfInterest.add(line.get("headline").getS());
 							}
 						});
@@ -428,21 +429,22 @@ public class rankJob {
 												.iterator();
 
 		List<String> today = getTodayArticle();
-		//System.out.println("todya"+today.size());
+		System.out.println("todya"+today.size());
 
 		int arti = 0;
 		HashSet<Item> rows = new HashSet<Item>(); 
-		while (iter.hasNext() && arti < 500) {
+		while (iter.hasNext()) {
 			Tuple2<Double, Tuple2<String, String>> now = iter.next();
-			if (today.size() == 0 || today.contains(now._2._1)) {
+			if (today.contains(now._2._1)) {
+				System.out.println(arti);
 				arti++;
 				Item newsItem = new Item()
 							.withPrimaryKey("username", username, "rank", arti)
 							.withString("headline", now._2._1);
 				rows.add(newsItem);
 
-				if (rows.size() == 25 || !iter.hasNext()) {
-					System.out.println(arti);
+				if (rows.size() == 15 || !iter.hasNext()) {
+					System.out.println("upload"+arti);
 					TableWriteItems writ = new TableWriteItems(tableName).withItemsToPut(rows);
 					try {
 						Thread.sleep((long) 0.5);
@@ -460,9 +462,10 @@ public class rankJob {
 							e.printStackTrace();
 						}
 						conn.batchWriteItemUnprocessed(leftover);
-					}
+					}	
 					rows = new HashSet<Item>();	
 				}
+				
 			}	
 		}
 

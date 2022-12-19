@@ -1,11 +1,24 @@
-.mywall-postcontent{
+@import url(https://fonts.googleapis.com/css?family=Jua);
 
+.mywall-postcontent{
+    border: 2px;
+    border-color: black;
+    display:inline-block;
+    text-align: center;
+    margin: auto;
+    padding: 5px;
+    font-family: 'Jua';
+    background-color: #C7D9AB;
 }
 
 .mywall-postposter{
-
+    background-color: #C7D9AB;
 }
 
 .mywall-posttext{
+    background-color: #C7D9AB;
+}
+
+.mywall-posttime{
 
 }

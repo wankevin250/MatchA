@@ -143,11 +143,13 @@ const searchNews = (req, res) => {
                   element.short_description.S = "Cannot find";
                 } 
                 if (element.short_description.S.length > 0) {
-                  element.short_description.S = data[i].short_description.S.replace(/([[\]\\])/g , "");
+                  element.short_description.S = element.short_description.S.replace(/([[\]\\])/g , "");
                 }
 
                 newsdata.push(element)});
-                res.render('news.pug', {results: newsdata, which:"Articles that match your search result..."});
+                //let dict = {results: newsdata, which:"Articles that match your search result..."};
+                //res.json(dict);
+                res.render('newsresult.pug', {results: newsdata, which:"Articles that match your search result..."});
                 //res.send(JSON.stringify(newsdata));
             }
           })

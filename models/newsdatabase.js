@@ -56,12 +56,13 @@ const computeRank = (user, callback) => {
           }
           if (history.Count > 0) {
             let firstAccess = new Date(history.Items[0].firstTime.S);
-            const fetchNum = now.getHours() - firstAccess.getHours() + 1;
+            let chint = parseInt(history.Items[0].changedInterest.N);
+            const fetchNum = now.getHours() - firstAccess.getHours() + chint + 1;
             //console.log("num"+ fetchNum +""+ now.getHours()+ ""+firstAccess.getHours());
             let prev = JSON.parse(history.Items[0].viewed.S);
             for (let j = 0; j < fetchNum - prev.length; j++) {
               for (let i = 0; i < data.Items.length; i++) {
-                if (!prev.includes(data.Items[i].headline.S)) {
+                if (!prev.includes(data.Items[i].headline.S) && !ret.includes(data.Items[i].headline.S)) {
                   ret.unshift(data.Items[i].headline.S);
                   break;
                 }
@@ -169,7 +170,8 @@ const addViewHistory = (user, articles, callback) => {
             username: {S: user.username},
             viewdate : {S: today.toString()},
             firstTime : {S: now.toString()},
-            viewed : {S: displayed}
+            viewed : {S: displayed},
+            changedInterest: {N: '0'},
           }
         },(err, data) => {
           if (err) {
@@ -239,7 +241,7 @@ const findNews = (user, keyword, callback) => {
                   count = count + 1;
                   let tle = item.headline.S;
                   if (iheadlines.includes(tle)) {
-                    if (multiple.include(tle)) {
+                    if (multiple.includes(tle)) {
                       multiple.unshift(tle);
                     } else {
                       multiple.push(tle);
@@ -345,6 +347,68 @@ const fetchTitleByRank = (user, ranks, callback) => {
  )
 }
 
+const changeInterest = (user, callback) => {  
+  let now = new Date();
+  let today = now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate();
+    db.query({
+      ExpressionAttributeValues: {
+        ':username': {S: user.username},
+        ':viewdate' : {S: today.toString()},
+      },
+      KeyConditionExpression: 'username = :username and viewdate = :viewdate',
+      TableName: 'newsViewed',
+    }, (err, data) => {
+      if (err) {
+        callback(err, null);
+      } else if (data.Items.length > 0) {
+        let x = parseInt(data.Items[0].changedInterest.N);
+        x = x+1;
+        params = {
+          TableName: 'newsViewed',
+                  Key: {
+                      username: {
+                          'S': user.username
+                      },
+                      viewdate : {
+                          'S': today.toString()
+                    }
+                  },
+                  UpdateExpression: "SET changedInterest = :inc",
+                  ExpressionAttributeValues: {
+            ":inc": {N: x.toString()},
+          },
+          ReturnValues: "UPDATED_NEW",
+        };
+        
+        db.updateItem(params, function(err, data) {
+          if (err) {
+            callback(err, null);
+          } else {
+            callback(null, "updated"); // success!
+          }
+        });
+      } else {
+        let x = 1;
+        db.putItem({
+          TableName: 'newsViewed',
+          Item: {
+            username: {S: user.username},
+            viewdate : {S: today.toString()},
+            firstTime : {S: now.toString()},
+            viewed : {S: displayed},
+            changedInterest: {N:x.toString()}
+          }
+        },(err, data) => {
+          if (err) {
+            callback(err, null);
+          } else {
+            callback(null, "first");
+          }
+          });
+      }
+    });
+}
+
 const database = {
     runSpark: runSpark,
     computeRank:  computeRank,
@@ -353,6 +417,7 @@ const database = {
     likeNews: likeNews,
     findNews: findNews,
     fetchTitleByRank: fetchTitleByRank,
+    changeInterest: changeInterest,
     
   }
 

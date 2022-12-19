@@ -158,7 +158,7 @@ app.get('/reloadchats', routes.reloadChats);
 app.get('/reloadroom', routes.reloadRoom);
 
 /** if request is sent by chat admin, remove user from chat */
-app.get('/removeuser', routes.removeUser);
+app.post('/removeuser', routes.removeUser);
 /** given specific user's info, extract their info */
 app.post('/extractuser', routes.extractUserInfo);
 

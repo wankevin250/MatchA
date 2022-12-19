@@ -15,14 +15,19 @@ function getInvites() {
             let target = $('#notificiations-friendinvites-target');
             invites.forEach(d => {
                 let inviteDiv = document.createElement('div');
+                inviteDiv.className = 'notif-invite';
                 let info = document.createElement('div');
+                info.className = 'notif-info';
                 let actions = document.createElement('div');
+                actions.className = 'notif-actions';
 
                 let username = document.createElement('h1');
                 username.innerText = d.asker;
+                username.className = 'notif-username';
 
                 let typename = document.createElement('p');
                 typename.innerText = `Request ${d.type}`;
+                typename.className = 'notif-typename';
 
                 info.appendChild(username);
                 info.appendChild(typename);
@@ -33,6 +38,7 @@ function getInvites() {
                     processInvite(d.asker, d.type, true);
                     inviteDiv.style.display = "none";
                 };
+                accept.className = 'notif-accept';
 
                 let reject = document.createElement('button');
                 reject.innerText = 'Reject';
@@ -40,6 +46,7 @@ function getInvites() {
                     rejectFriendInvite(d.asker, d.type, false);
                     inviteDiv.style.display = "none";
                 };
+                reject.className = 'notif-reject';
                 
                 actions.appendChild(accept);
                 actions.appendChild(reject); 

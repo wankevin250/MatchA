@@ -135,7 +135,10 @@ block head
                                     senderviz.innerText = pmsg.sender;
                                     timestampviz.innerText = pmsg.timestamp;
                                     
-                                    if (myID === pmsg.sender) {
+                                    if("SYSTEM" == pmsg.sender){
+                                        message_outline.setAttribute("class", "alertmsg");
+                                        timestampviz.style.color = '#D4CB8C';
+                                    } else if (myID === pmsg.sender) {
                                         message_outline.setAttribute("class", "me");
                                         timestampviz.style.color = 'white';
                                         senderviz.style.color = 'white';
@@ -209,14 +212,16 @@ block head
               if (data.success) {
                   let temproomid = roomuuid;
                   socket.emit('leave room', {
-                      sender: myID,
-                      room: roomuuid,
-                      text: "User " + myID + " has left the chat.",
-                  });
-                  
-                  socket.emit('permanent leave', {
                       user: myID,
                       room: roomuuid,
+                      
+                  });
+                  
+                  
+                  socket.emit('permanent leave', {
+                      sender: "SYSTEM",
+                      room: roomuuid,
+                      text: "User " + myID + " has left the chat.",
                   });
                   
                   alert("Permanently left chat.");
@@ -285,7 +290,10 @@ block head
           message_outline.append(message_temp);
           message_outline.append(timestampviz);
           
-          if (myID === msg.sender) {
+          if("SYSTEM" == msg.sender){
+            message_outline.setAttribute("class", "alertmsg");
+            timestampviz.style.color = '#D4CB8C';
+          } else if (myID === msg.sender) {
             message_outline.setAttribute("class", "me");
             senderviz.style.color = 'white';
             timestampviz.style.color = 'white';
@@ -303,17 +311,20 @@ block head
       socket.on('permanent leave', function (msg) {
           let message_outline = document.createElement("p");
           let timestampviz = document.createElement("p");
+          let message_txt = document.createElement("li");
           
           message_outline.setAttribute("class", "alertmsg");
           timestampviz.setAttribute("class", "messageTags");
           timestampviz.style.color = '#D4CB8C';
           
           timestampviz.innerText = msg.timestamp;
-          message_outline.innerText(msg.text);
+          message_txt.innerText = msg.text;
+          
+          message_outline.append(message_txt);
           message_outline.append(timestampviz);
           
           $('#messages').append(message_outline);
-      };
+      });
       
     });
     
@@ -383,7 +394,10 @@ block head
                                 senderviz.innerText = pmsg.sender;
                                 timestampviz.innerText = pmsg.timestamp;
                                 
-                                if (myID === pmsg.sender) {
+                                if("SYSTEM" == pmsg.sender){
+                                    message_outline.setAttribute("class", "alertmsg");
+                                    timestampviz.style.color = '#D4CB8C';
+                                } else if (myID === pmsg.sender) {
                                     message_outline.setAttribute("class", "me");
                                     timestampviz.style.color = 'white';
                                     senderviz.style.color = 'white';

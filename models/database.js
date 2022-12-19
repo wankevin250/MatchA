@@ -14,7 +14,7 @@ const isSuccessfulStatus = (status) => {
 }
 
 const parseJSONwithS = (jsonstring) => {
-  return jsonstring.S && jsonstring.S.length > 0
+  return jsonstring && jsonstring.S.length > 0
    ? JSON.parse(jsonstring.S) : [];
 }
 
@@ -123,6 +123,40 @@ const deleteFriend = (remover, victim, callback) => {
       callback(status, err, data);
     }
   })
+}
+
+const getFriends = async (username, callback) => {
+  let initialPromise = db.getItem({
+    TableName: 'users',
+    Key: {
+      'username': {S: username}
+    }
+  }).promise();
+
+  initialPromise.then(async (data) => {
+    console.log(data);
+    let gottenUser = cleanDataItems([data.Item])[0];
+    let promises = [];
+
+    let gottenFriends = gottenUser.friends && gottenUser.friends.length > 0
+      ? JSON.parse(gottenUser.friends) : [];
+
+    gottenFriends.forEach(friend => {
+      promises.push(db.getItem({
+        TableName: 'users',
+        Key: {
+          'username': {S: friend},
+        }
+      }).promise());
+    });
+
+    let promiseResult = await Promise.allSettled(promises);
+    let cleanresults = promiseResult.filter(d => d.status == 'fulfilled').map(d => d.value.Item).flat();
+    let finalOutput = cleanDataItems(cleanresults);
+    callback(201, null, finalOutput);
+  }).catch((err) => {
+    callback(500, err, null);
+  });
 }
 
 const viewFeed = async (username, friends, callback) => {
@@ -394,54 +428,54 @@ const acceptFriendInvite = (accepter, asker, callback) => {
   });
 }
 
-const getFriends = (username, callback) => {
-  let list = [];
-  let info = [];
+// const getFriends = (username, callback) => {
+//   let list = [];
+//   let info = [];
 
-  db.query({
-    TableName: "users",
-    KeyConditionExpression: "accepter = :username",
-    ExpressionAttributeValues: {
-        ":username": {S: username}
-    }
-  }, (err, data1) => {
-    if (err) {
-      callback(500, err, null);
-    } else {
-      let arr = JSON.parse(data1.Items[0].friends.S);
-      for (let i = 0; i < arr.length; i++) {
-        if (!info.includes(arr[i])) {
-          info.unshift(arr[i]);
-        }
-      }
+//   db.query({
+//     TableName: "users",
+//     KeyConditionExpression: "accepter = :username",
+//     ExpressionAttributeValues: {
+//         ":username": {S: username}
+//     }
+//   }, (err, data1) => {
+//     if (err) {
+//       callback(500, err, null);
+//     } else {
+//       let arr = JSON.parse(data1.Items[0].friends.S);
+//       for (let i = 0; i < arr.length; i++) {
+//         if (!info.includes(arr[i])) {
+//           info.unshift(arr[i]);
+//         }
+//       }
 
-      while (info.length > 0) {
-        let one = info.pop();
-        db.query({
-          TableName: 'users',
-          KeyConditionExpression: 'username = :username',
-          ExpressionAttributeValues: {
-            ":username": {S: one}
-          }
-        }, (err, data2) => {
-          if (err) {
-            callback(500, err, null);
-          } else {
-            let arrs = JSON.parse(data1.Items[0].friends.S);
-            list.push(data1.Items[0]);
-            for (let i = 0; i < arrs.length; i++) {
-              if (!info.includes(arrs[i])) {
-                info.unshift(arrs[i]);
-              }
-            }
-            //callback(201, err, [...data1.Items, ...data2.Items]);
-          }
-        })
-      }
-      callback(201, null, list);
-    }
-  });
-}
+//       while (info.length > 0) {
+//         let one = info.pop();
+//         db.query({
+//           TableName: 'users',
+//           KeyConditionExpression: 'username = :username',
+//           ExpressionAttributeValues: {
+//             ":username": {S: one}
+//           }
+//         }, (err, data2) => {
+//           if (err) {
+//             callback(500, err, null);
+//           } else {
+//             let arrs = JSON.parse(data1.Items[0].friends.S);
+//             list.push(data1.Items[0]);
+//             for (let i = 0; i < arrs.length; i++) {
+//               if (!info.includes(arrs[i])) {
+//                 info.unshift(arrs[i]);
+//               }
+//             }
+//             //callback(201, err, [...data1.Items, ...data2.Items]);
+//           }
+//         })
+//       }
+//       callback(201, null, list);
+//     }
+//   });
+// }
 
 const queryPosts = (userwall, callback) => {
   db.query({

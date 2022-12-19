@@ -6,13 +6,17 @@
 2) Accounts, Walls, and Home Pages: 
    Chat: Full implementation of functionality expected in assignment document.
    News Feeds: 
-   Frontend: 
+   Frontend: Designed the complete functionality of the frontend, including the css, html, bootstrap, pug, etc.
+   Visualizer: Designed a complete visualizer such that if there is a user, like the session's user , then their connections to others
+               can be visualized. If there is a user that's friends and same association with that individual user, then a connection is drawn. 
 
 3) EC: 
    Notifications: Users can view friend invites / chat invites on their notifs page and accept / decline
    Chat Member display: displays chat members' full names / display names and their usernames within chatbox interface
    Permanent Leave Chat alerts: when members leave, alert all other chat members
-   UI / UX: accessibility oriented: UI/UX developed based on ADHD / dyslexia friendly fonts and tonal coloring
+   UI / UX: accessibility oriented: UI/UX developed based on ADHD / dyslexia friendly fonts and tonal coloring, as the color palettes and
+            font choices we implemented were designed so that people with visual problems and handicaps would be able to easily read the site.
+            Furthermore, for our site we custom hand-drew our own logos, and implemented visual styles like parallax styling.
    Real Time chatroom list update & other chat functions: interactive chat interface
    Privacy: only friends can see each others' posts.
    

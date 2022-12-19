@@ -195,6 +195,8 @@ app.post('/ajaxviewuserinfo', routes.postViewUserInfo);
 app.post('/ajaxmakecomment', routes.makeCommentOnPost);
 app.post('/ajaxviewfeed', routes.postViewFeed);
 
+app.post('/ajaxremovefriend', routes.postRemoveFriend);
+
 // news
 app.get('/newsfeed', newsroutes.newsfeed);
 app.get('/news', newsroutes.calculateRank);

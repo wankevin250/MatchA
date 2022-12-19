@@ -8,6 +8,10 @@ AWS.config.update({
 
 const db = new AWS.DynamoDB();
 
+const isSuccessfulStatus = (status) => {
+  return status < 300 && status >=200;
+}
+
 const parseJSONwithS = (jsonstring) => {
   return jsonstring.S && jsonstring.S.length > 0
    ? JSON.parse(jsonstring.S) : [];
@@ -57,13 +61,67 @@ const scanUsers = (searchQuery, callback) => {
         console.log(err);
         callback(500, err, null);
       } else {
-        callback(201, err, data.Items.map(d => {
-          return {username: d.username.S, 
-            displayname: d.displayname ? d.displayname.S : d.username.S};
-        }));
+        callback(201, err, cleanDataItems(data.Items));
       }
     })
   }
+}
+
+const deleteFriend = (remover, victim, callback) => {
+  querySingleUser(remover, (status, err, data) => {
+    if (isSuccessfulStatus(status)) {
+      let removerInfo = data;
+      querySingleUser(victim, (status, err, data) => {
+        if (isSuccessfulStatus(status)) {
+          let victimInfo = data;
+          let removerFriends = removerInfo.friends && removerInfo.friends.length > 0
+            ? JSON.parse(removerInfo.friends) : [];
+          removerFriends = removerFriends.filter(d => d != victim);
+
+          let victimFriends = victimInfo.friends && victimInfo.friends.length > 0
+            ? JSON.parse(victimInfo.friends) : [];
+
+          db.updateUser({
+            TableName: 'users',
+            Key: {
+              'username': remover,
+            },
+            UpdateExpression: 'SET friends = :friends',
+            ExpressionAttributeValues: {
+              ':friends': removerFriends,
+            }
+          }, (err, data) => {
+            if (err) {
+              console.log(err);
+              callback(500, err, null);
+            } else {
+              db.updateUser({
+                TableName: 'users',
+                Key: {
+                  'username': victim,
+                },
+                UpdateExpression: 'SET friends = :friends',
+                ExpressionAttributeValues: {
+                  ':friends': victimFriends,
+                }
+              }, (err, data) => {
+                if (err) {
+                  console.log(err);
+                  callback(500, err, null);
+                } else {
+                  callback(201, err, data);
+                }
+              });
+            }
+          })
+        } else {
+          callback(status, err, data);
+        }
+      });
+    } else {
+      callback(status, err, data);
+    }
+  })
 }
 
 const viewFeed = async (username, friends, callback) => {
@@ -86,8 +144,27 @@ const viewFeed = async (username, friends, callback) => {
 
   collectivePosts.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
   console.log(collectivePosts);
-  
+
   callback(201, null, collectivePosts);
+}
+
+const addInterests = async (username, interests, callback) => {
+  promises = [];
+  interests.forEach(interest => {
+    promises.push(db.putItem({
+      TableName: 'interests',
+      Item: {
+        'username': {S: username},
+        'interest': {S: interest}
+      }
+    }).promise());
+  });
+
+  await Promise.all(promises).then(() => {
+    callback(201, null, "added");
+  }).catch((err) => {
+    callback(500, err, null);
+  });
 }
 
 const addCommentToPost = (userwall, postuuid, commenter, text, callback) => {
@@ -1281,9 +1358,12 @@ const database = {
   editUser: editUser,
   loginUser: loginUser,
   scanUsers: scanUsers,
+  
+  addInterests: addInterests,
 
   scanNewsCategories: scanNewsCategories,
   
+  deleteFriend: deleteFriend,
   sendFriendRequest: sendFriendRequest,
   getFriends: getFriends,
   queryRequests: queryRequests,

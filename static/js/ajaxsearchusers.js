@@ -28,16 +28,40 @@ function searchUser(query) {
                 let userUserName = document.createElement('p');
 
                 let userAddFriendButton = document.createElement('button');
-                if (friends && friends.includes(d.username)) {
+                if (d.username == user.username) {
                     userAddFriendButton.disabled = true;
-                    userAddFriendButton.innerText = "Friends";
+                    userAddFriendButton.innerText = "You";
+                } else if (friends && friends.includes(d.username)) {
+                    userAddFriendButton.innerText = "Remove Friend";
+                    userAddFriendButton.onclick = () => {
+                        console.log(d.username);
+                        removeFriend(d.username, (err, response) => {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                console.log(response);
+                            }
+                        });
+                        userAddFriendButton.innerText = 'Add Friend';
+                        userAddFriendButton.onclick = () => {
+                            addFriend(d.username, (err, response) => {
+                                if (err) {
+                                    console.log(err);
+                                } else {
+                                    console.log(response);
+                                }
+                            });
+                            userAddFriendButton.disabled = true;
+                            userAddFriendButton.innerText = 'Request Sent';
+                            console.log(userAddFriendButton.disabled);
+                        };
+                    };
                 } else if (requests && requests.includes(d.username)) {
                     userAddFriendButton.disabled = true;
                     userAddFriendButton.innerText = "Request Sent";
                 } else {
                     userAddFriendButton.innerText = `Add Friend`;
                     userAddFriendButton.onclick = () => {
-                        console.log(d.username);
                         addFriend(d.username, (err, response) => {
                             if (err) {
                                 console.log(err);
@@ -47,7 +71,6 @@ function searchUser(query) {
                         });
                         userAddFriendButton.disabled = true;
                         userAddFriendButton.innerText = 'Request Sent';
-                        console.log(userAddFriendButton.disabled);
                     };
                 }
                 
@@ -70,4 +93,22 @@ function searchUser(query) {
             // tell error if search
         }
     })
+}
+
+function removeFriend(victim) {
+    $.ajax({
+        url: '/ajaxpostmywall',
+        type: 'POST',
+        async: true,
+        datatype: 'json',
+        data: {
+            victim: victim
+        },
+        success: (response) => {
+            location.reload();
+        },
+        error: (error) => {
+            console.log(error);
+        }
+    });
 }

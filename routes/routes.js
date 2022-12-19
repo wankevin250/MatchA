@@ -4,7 +4,6 @@ const db = require('../models/database');
 const user = require('../models/user');
 const e = require('express');
 const {v4 : uuidv4} = require('uuid');
-const session = require('express-session');
 
 /**
  * Checks if HTTP Status code is successful (between 200-299)
@@ -183,6 +182,23 @@ const makeCommentOnPost = (req, res) => {
   }
 }
 
+const postRemoveFriend = (req, res) => {
+  let remover = req.session.user.username;
+  let victim = req.body.victim;
+
+  if (req.session && req.session.user) {
+    db.deleteFriend(remover, victim, (status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+        res.status(201).send(data);
+      } else {
+        res.status(status).send(new Error(err));
+      }
+    })
+  } else {
+    res.status(401).send(new Error("No user"));
+  }
+}
+
 const rejectFriendInvite = (req, res) => {
   let asker = req.body.asker;
   if (req.session && req.session.user) {
@@ -208,7 +224,23 @@ const acceptFriendInvite = (req, res) => {
     if (typeof asker == 'string') {
       db.acceptFriendInvite(req.session.user.username, asker, (status, err, data) => {
         if (isSuccessfulStatus(status)) {
-          res.send(data);
+          db.postMyWall(req.session.user.username, req.session.user.username,
+            `${req.session.user.username} just accepted a friend request from ${asker}`, 
+            (status, err, data) => {
+              if (isSuccessfulStatus(status)) {
+                db.postMyWall(asker, asker,
+                  `${asker} is now friends with ${req.session.user.username}`, 
+                  (status, err, data) => {
+                    if (isSuccessfulStatus(status)) {
+                      res.status(201).send(data);
+                    } else {
+                      res.status(status).send(new Error(err));
+                    }
+                  });
+              } else {
+                res.status(status).send(new Error(err));
+              }
+            });
         } else {
           res.status(status).send(new Error(err));
         }
@@ -367,7 +399,13 @@ const postCreateUser = (req, res) => {
     db.createUser(user, (status, err, data) => {
       if (isSuccessfulStatus(status)) {
         req.session.user = user;
-        res.sendStatus(201);
+        db.addInterests(user.username, user.interests, (status, err, data) => {
+          if (isSuccessfulStatus(status)) {
+            res.status(201).send(data);
+          } else {
+            res.status(status).send(new Error(err));
+          }
+        })
       } else {
         res.status(status).send(new Error(err));
       }
@@ -901,6 +939,7 @@ const routes = {
   viewRequests: viewRequests,
   acceptFriendInvite: acceptFriendInvite,
   rejectFriendInvite: rejectFriendInvite,
+  postRemoveFriend: postRemoveFriend,
 
   postmywall: postmywall,
   postMyWallRefresh: postMyWallRefresh,

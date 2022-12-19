@@ -3,7 +3,7 @@
 .mywall-postcontent{
     border: 2px;
     border-color: black;
-    display:inline-block;
+    display: block;
     text-align: center;
     margin: auto;
     padding: 5px;

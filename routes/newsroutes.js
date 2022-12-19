@@ -77,9 +77,10 @@ const calculateRank = (req, res) => {
 }
 
 const addLike = (req, res) => {
-  //let news = req.body.headline; // should input the string
+  console.log(req.body);
+  let news = req.body.headline; // should input the string
   //console.log(news);
-  let news = "Christian Nationalism On The Rise In Some GOP Campaigns";
+  // let news = "Christian Nationalism On The Rise In Some GOP Campaigns";
   console.log(news);
   let user = req.session.user;
 

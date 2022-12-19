@@ -17,61 +17,68 @@ block head
 				console.log(elements.results);
 				for (var i = 0; i < newsresults.length; i++) {
 					let row = document.createElement("div");
-					row.class = 'row';
+					row.setAttribute('class', 'row');
 
 					let titlecol = document.createElement("div");
 					titlecol.class = 'col';
 					let title = document.createElement("p");
-					title.id = "title"+i;
+					title.setAttribute('id', "title"+i);
 					title.setAttribute('style', 'font-weight: bold; font-size: 25px');
 					title.textContent = newsresults[i].headline.S;
-					console.log(title.textContent);
 					titlecol.appendChild(title);
 					row.appendChild(titlecol);
 
 					let authorcol = document.createElement("div");
-					authorcol.class = 'col';
+					authorcol.setAttribute('class', 'col');
 					let author = document.createElement("p");
 					author.setAttribute('style', 'font-size: 14px');
 					author.textContent = newsresults[i].authors.S;
 					authorcol.appendChild(author);
-					//row.appendChild(authorcol);
+					row.appendChild(authorcol);
 
 					let catcol = document.createElement("div");
-					catcol.class = 'col';
+					catcol.setAttribute('class', 'col');
 					let cat = document.createElement("p");
 					cat.textContent = newsresults[i].category.S;
 					catcol.appendChild(cat);
-					//row.appendChild(catcol);
+					row.appendChild(catcol);
 
 					let datecol = document.createElement("div");
-					datecol.class = 'col';
+					datecol.setAttribute('class', 'col');
 					let date = document.createElement("p");
 					date.textContent = newsresults[i].date.S;
 					datecol.appendChild(date);
-					//row.appendChild(datecol);
+					row.appendChild(datecol);
+
+					let url = document.createElement('a');
+					var createAText = document.createTextNode( newsresults[i].link.S);
+					url.setAttribute('href', newsresults[i].link.S);
+					url.appendChild(createAText);
+					row.appendChild(url);
 
 					let descol = document.createElement("div");
 					descol.class = 'col';
 					let des = document.createElement("p");
 					des.setAttribute('style', 'font-weight: italic; font-size: 15px');
-					title.textContent = newsresults[i].short_description.S;
+					des.textContent = newsresults[i].short_description.S;
 					descol.appendChild(des);
-					//row.appendChild(descol);
+					row.appendChild(descol);
 
 					let like = document.createElement("button");
-					like.id = "like"+i;
-					like.className = "btn.btn-primary";
+					like.setAttribute('id', 'like');
+					like.setAttribute('className', 'btn-primary');
 					like.type = 'button';
 					like.innerHTML = "Like";
-					$("#like"+i).on("click", function(e) {
+					$("#like").on("click", function(e) {
+						//alert('ssibal..');
 						e.preventDefault();
-						console.log(newsresults[i].headline.S);
+						console.log('title'+i);
+						console.log(document.getElementById('title'+i).textContent);
 						$.ajax({
 							type : "POST",
 							url: "/likeNews",
 							data : { 
-									headline : newsresults[i].headline.S ,
+								headline : document.getElementById('title').value,
 							},
 							success : function(result) {
 								// add marker when success
@@ -84,7 +91,7 @@ block head
 					});
 					
 					var box = document.createElement("div");
-					box.class = 'news-box';
+					box.setAttribute('class', 'news-box');
 					box.appendChild(row);
 					box.appendChild(like);
 					
@@ -94,28 +101,6 @@ block head
 			});
 			
 		});
-
-		/*$(function() {
-			console.log("hey");
-			$("#likeclick").on("click", function(e) {
-				e.preventDefault();
-				//console.log(document.getElementById("title").value);
-				$.ajax({
-					type : "POST",
-					url: "/likeNews",
-					data : { 
-							headline : document.getElementById("title").value ,
-					},
-					success : function(result) {
-						// add marker when success
-						alert('You just liked one of our articles :-D');
-					},
-					error : function(result) {
-						alert('error');
-					}
-				})
-			})
-		});*/
 
 
 block content

@@ -1171,10 +1171,60 @@ const removeUser = (username, chatid, callback) => {
 			
 			db.updateItem(updateUser, (er, da) => {
 				if (er) {
-					console.log(e);
-					callback(500, e, null);
+					console.log(er);
+					callback(500, er, null);
 				} else {
-					callback(200, null, da);
+					db.getItem(paramsChatrooms, (err, dat) => {
+						if (err) {
+							console.log(err);
+							callback(500, err, null);
+						} else {
+							let userli = JSON.parse(dat.Item.users.S);
+							userli = userli.filter(word => word != username);
+							let updateChatrooms = {
+								TableName: 'chatrooms',
+								Key: {
+									'roomid' : {S: chatid}
+								},
+								UpdateExpression: "SET #usrs = :nul",
+								ExpressionAttributeValues: {
+									":nul" : {S: JSON.stringify(userli)}
+								},
+								ExpressionAttributeNames: {
+									"#usrs": "users"
+								}
+							}
+							
+							let delChat = {
+								TableName: 'chatrooms',
+								Key: {
+									'roomid' : {S: chatid}
+								}
+							}
+							
+							console.log(userli);
+							
+							if (userli.length > 0) {
+								db.updateItem(updateChatrooms, (errr, data) => {
+									if (errr) {
+										console.log(errr);
+										callback(500, errr, null);
+									} else {
+										callback (200, errr, data);
+									}
+								});
+							} else {
+								db.deleteItem(delChat, (errr, data) => {
+									if (errr) {
+										console.log(errr);
+										callback(500, errr, null);
+									} else {
+										callback (200, errr, data);
+									}
+								});
+							}
+						}
+					});
 				}
 			});
 		}

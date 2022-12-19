@@ -122,7 +122,18 @@ app.get('/getFriends/:user', routes.sendFriends); //routes.postGetFriend?
 					console.log(error);
 					io.to(obj.room).emit('chat message', obj);
 				}
-			})
+			});
+		});
+		
+		socket.on('permanent leave', function(obj){
+			routes.sendMessage(obj, (error, newobj) => {
+				if (newobj != null) {
+					io.to(obj.room).emit('permanent leave', newobj);
+				} else {
+					console.log(error);
+					io.to(obj.room).emit('permanent leave', obj);
+				}
+			});
 		});
 		
 		socket.on('join room', obj => {

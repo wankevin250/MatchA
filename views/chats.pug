@@ -34,7 +34,7 @@ block head
         document.getElementById("membersPopup").style.display = "none";
     }
     function updateScroll() {
-        var element = document.getElementById("messages");
+        let element = document.getElementById("messages");
         element.scrollTop = element.scrollHeight;
     }
     
@@ -69,7 +69,7 @@ block head
       });
       
       $('#submitData').on('click', function(e) {
-          var inputdata = document.getElementById("chatnameinput").value
+          let inputdata = document.getElementById("chatnameinput").value
           
           if (inputdata.trim().length == 0) {
               alert("You MUST input a name!");
@@ -82,7 +82,7 @@ block head
                   if (data != null) {
                     var chatroomtitle = data.chatname;
                     
-                    var chatbutton_temp = document.createElement("a");
+                    let chatbutton_temp = document.createElement("a");
                     chatbutton_temp.setAttribute("class", "chatBtnClass");
                     chatbutton_temp.setAttribute('id', data.roomid);
                     chatbutton_temp.appendChild(document.createTextNode(data.chatname));
@@ -105,7 +105,7 @@ block head
                                 d.chatmembers.forEach(function(member) {
                                     $.post('/extractuser', { username: member}, function(response) {
                                         if (response.status == 200) {
-                                            var memberlisting = document.createElement("p");
+                                            let memberlisting = document.createElement("p");
                                             memberlisting.setAttribute("class", "memberlisting");
                                             memberlisting.setAttribute("id", response.username);
                                             memberlisting.innerText = response.display + " (" + response.username + ")";
@@ -122,10 +122,10 @@ block head
                                 // d.pastmessages
                                 
                                 d.pastmessages.forEach( function(pmsg) {
-                                    var message_temp = document.createElement("li");
-                                    var message_outline = document.createElement("p");
-                                    var senderviz = document.createElement("p");
-                                    var timestampviz = document.createElement("p");
+                                    let message_temp = document.createElement("li");
+                                    let message_outline = document.createElement("p");
+                                    let senderviz = document.createElement("p");
+                                    let timestampviz = document.createElement("p");
                                     
                                     senderviz.setAttribute("class", "messageTags");
                                     timestampviz.setAttribute("class", "messageTags");
@@ -206,8 +206,15 @@ block head
       $('#leaveChatPermanently').on('click', function (event) {
           $.post('/removeuser', { roomid: roomuuid }, function (data) {
               console.log(data);
-              if (success) {
+              if (data.success) {
+                  let temproomid = roomuuid;
                   socket.emit('leave room', {
+                      sender: myID,
+                      room: roomuuid,
+                      text: "User " + myID + " has left the chat.",
+                  });
+                  
+                  socket.emit('permanent leave', {
                       user: myID,
                       room: roomuuid,
                   });
@@ -220,7 +227,9 @@ block head
             
                   const myNode = document.getElementById("messages");
                   myNode.textContent = '';
-            
+                  
+                  let tem = document.getElementById(temproomid);
+                  tem.remove();
                   $(".leftHalf").css('display', 'block');
                   $(".rightHalf").css('display', 'none');
                   document.getElementById("chatTitle").innerText = '';
@@ -252,14 +261,14 @@ block head
     
     $(document).ready(function() {
       socket.on('chat message', function (msg) {
-          var message_temp = document.createElement("li");
-          var message_outline = document.createElement("p"); 
+          let message_temp = document.createElement("li");
+          let message_outline = document.createElement("p"); 
           
           
           // somehow add the name of the person who sent the message
           // add timestamp
-          var senderviz = document.createElement("p");
-          var timestampviz = document.createElement("p");
+          let senderviz = document.createElement("p");
+          let timestampviz = document.createElement("p");
           
           senderviz.setAttribute("class", "messageTags");
           timestampviz.setAttribute("class", "messageTags");
@@ -290,6 +299,22 @@ block head
           updateScroll();
           
       });
+      
+      socket.on('permanent leave', function (msg) {
+          let message_outline = document.createElement("p");
+          let timestampviz = document.createElement("p");
+          
+          message_outline.setAttribute("class", "alertmsg");
+          timestampviz.setAttribute("class", "messageTags");
+          timestampviz.style.color = '#D4CB8C';
+          
+          timestampviz.innerText = msg.timestamp;
+          message_outline.innerText(msg.text);
+          message_outline.append(timestampviz);
+          
+          $('#messages').append(message_outline);
+      };
+      
     });
     
     $(document).ready(function() {
@@ -305,7 +330,7 @@ block head
           myID = response.username;
     	    
     	    for (let i = 0; i < chatlist.length; i++) {
-                var chatbutton_temp = document.createElement("a");
+                let chatbutton_temp = document.createElement("a");
                 chatbutton_temp.setAttribute("class", "chatBtnClass");
                 chatbutton_temp.setAttribute('id', chatlist[i].roomid);
                 chatbutton_temp.appendChild(document.createTextNode(chatlist[i].chatname));
@@ -329,7 +354,7 @@ block head
                             data.chatmembers.forEach(function(member) {
                                 $.post('/extractuser', { username: member}, function(response) {
                                     if (response.status == 200) {
-                                        var memberlisting = document.createElement("p");
+                                        let memberlisting = document.createElement("p");
                                         memberlisting.setAttribute("class", "memberlisting");
                                         memberlisting.setAttribute("id", response.username);
                                         memberlisting.innerText = response.display + " (" + response.username + ")";
@@ -345,10 +370,10 @@ block head
                             // data.pastmessages
                             // data.chatmembers
                             data.pastmessages.forEach( function(pmsg) {
-                                var message_temp = document.createElement("li");
-                                var message_outline = document.createElement("p");
-                                var senderviz = document.createElement("p");
-                                var timestampviz = document.createElement("p");
+                                let message_temp = document.createElement("li");
+                                let message_outline = document.createElement("p");
+                                let senderviz = document.createElement("p");
+                                let timestampviz = document.createElement("p");
                                 
                                 senderviz.setAttribute("class", "messageTags");
                                 timestampviz.setAttribute("class", "messageTags");

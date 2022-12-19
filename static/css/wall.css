@@ -20,7 +20,7 @@ form {
 
 .wall-header{
     display:inline-block;
-    background:lightgreen;
+    background:#74A12E;
     color:skyblue;
     font-size:xx-large;
     font-weight: bold;
@@ -33,7 +33,7 @@ form {
 
 .wall-buttons{
     display:inline-block;
-    background:lightgreen;
+    background:#74A12E;
     width:100%;
     margin-top:0;
 }

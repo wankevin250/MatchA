@@ -1,6 +1,6 @@
 .login-head{
     display:inline-block;
-    background:lightgreen;
+    background:#74A12E;
     color:skyblue;
     font-size:xx-large;
     font-weight: bold;
@@ -17,13 +17,13 @@
 }
 
 .login-body{
-    background:lightgreen;
+    background:#74A12E;
     text-align: center;
     width: 100%;
     padding-top: 10%;
 }
 
 .login-footer{
-    background: lightgreen;
+    background: #74A12E;
     height:100vw;
 }

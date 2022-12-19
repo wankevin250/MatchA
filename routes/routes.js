@@ -797,7 +797,6 @@ const requestFilter = (req, res) => {
   } else {
     res.status(401).send(new Error("no user"));
   }
-	
 }
 
 // end of Ace
@@ -841,26 +840,20 @@ const sendInitialVisualization = (req, res) => {
           } else {
             console.log("Made it to else statement!");
             console.log(data);
-
-            console.log("User: " + user[0].displayname);
-
             const datajson = {
               "id": user[0].username,
-              "name": user[0].displayname,
+              "name": user[0].username,
               "data": {},
               "children": [],
             };
-
+            console.log(data);
             for (const friend of data) {
-              console.log("Friend: " + friend.status.S);
-              if (friend.status.S == 'true') { // if status is boolean delete this
-                datajson.children.push({
-                  "id": friend.username.S, //should be username.S
-                  "name": friend.displayname.S, //should be displayname.S
-                  "data": {},
-                  "children": []
-                });
-              }
+              datajson.children.push({
+                "id": friend.username, //should be username.S
+                "name": friend.username, //should be displayname.S
+                "data": {},
+                "children": []
+              });
             }
             res.send(JSON.stringify(datajson));
           }

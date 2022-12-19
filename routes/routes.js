@@ -399,19 +399,19 @@ const postEditUser = (req, res) => {
         req.session.user = currUser;
         db.addInterests(currUser.username, JSON.parse(currUser.interests), (status, err, data) => {
           if (isSuccessfulStatus(status)) {
-            newsdb.runSpark(currUser, (err, data) => {
-              if (err) {
-                res.status(500).send(new Error(err));
-              } else { 
-                newsdb.changeInterest(currUser, (err, data) => {
-                  if (err) {
-                    res.status(500).send(new Error(err));
-                  } else {
-                    res.status(201).send(data);
-                  }
-                });
-              }
-            });
+            // newsdb.runSpark(currUser, (err, data) => {
+            //   if (err) {
+            //     res.status(500).send(new Error(err));
+            //   } else { 
+            //     newsdb.changeInterest(currUser, (err, data) => {
+            //       if (err) {
+            //         res.status(500).send(new Error(err));
+            //       } else {
+            //         res.status(201).send(data);
+            //       }
+            //     });
+            //   }
+            // });
           } else {
             res.status(status).send(new Error(err));
           }
@@ -435,13 +435,13 @@ const postCreateUser = (req, res) => {
         console.log(user.interests);
         db.addInterests(user.username, JSON.parse(user.interests), (status, err, data) => {
           if (isSuccessfulStatus(status)) {
-            // newsdb.runSpark(user, (err, data) => {
-            //   if (err) {
-            //     res.status(500).send(new Error(err));
-            //   } else { 
-            //     res.status(201).send(data);
-            //   }
-            // });
+            //  newsdb.runSpark(user, (err, data) => {
+            //    if (err) {
+            //      res.status(500).send(new Error(err));
+            //    } else { 
+            //      res.status(201).send(data);
+            //    }
+            //  });
             res.status(201).send(data);
           } else {
             res.status(status).send(new Error(err));

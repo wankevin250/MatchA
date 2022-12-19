@@ -72,7 +72,7 @@ const postMyWall = (userwall, poster, text, callback) => {
     'postuuid': {S: uuidv4()},
     'poster': {S: poster},
     'text': {S: text},
-    'timestampe': {S: (new Date()).toUTCString()}
+    'timestamp': {S: (new Date()).toUTCString()}
   }
   console.log(item);
   db.putItem({
@@ -876,6 +876,22 @@ function compareLists (arrayA, arrayB) {
 	}
 }
 
+const querySingleUser = (username, callback) => {
+  db.getItem({
+    TableName: 'users',
+    Key: {
+      'username': {S: username}
+    }
+  }, (err, data) => {
+    if (err) {
+      console.log(err);
+      callback(500, err, null);
+    } else {
+      callback(201, err, cleanDataItems([data.Item])[0]);
+    }
+  });
+}
+
 /***
  * @params (friend id, chat id, callback (status, err, data))
  */
@@ -1067,10 +1083,8 @@ const extractOneUserDisplayInfo = (username, callback) => {
 
 // end of ACE HOUR
 
-
-
 const database = {
-  // queryUser: queryUser,
+  querySingleUser: querySingleUser,
   createUser: createUser,
   editUser: editUser,
   loginUser: loginUser,

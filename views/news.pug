@@ -15,14 +15,15 @@ block head
 				newsresults= elements.results;
 				user = elements.user;
 				console.log(elements.results);
-				for (var i = 0; i < newsresults.length; i++) {
+				for (let i = 0; i < newsresults.length; i++) {
 					let row = document.createElement("div");
 					row.setAttribute('class', 'row');
 
 					let titlecol = document.createElement("div");
 					titlecol.class = 'col';
 					let title = document.createElement("p");
-					title.setAttribute('id', "title"+i);
+					title.setAttribute('id', 'title'+i);
+					console.log(title.id);
 					title.setAttribute('style', 'font-weight: bold; font-size: 25px');
 					title.textContent = newsresults[i].headline.S;
 					titlecol.appendChild(title);
@@ -64,25 +65,27 @@ block head
 					descol.appendChild(des);
 					row.appendChild(descol);
 
+
 					let like = document.createElement("button");
-					like.setAttribute('id', 'like');
-					like.setAttribute('className', 'btn-primary');
+					like.setAttribute('class', 'likebtn');
+					like.setAttribute('id', 'like'+i);
+					like.setAttribute('myattribute', newsresults[i].headline.S);
+					console.log($("#"+li).attr('myattribute'));
 					like.type = 'button';
 					like.innerHTML = "Like";
-					$("#like").on("click", function(e) {
-						//alert('ssibal..');
+					$('.likebtn').on("click", function(e) {
 						e.preventDefault();
-						console.log('title'+i);
-						console.log(document.getElementById('title'+i).textContent);
+						let x = this.id;
+						let y = x.substring(x.length-1);
 						$.ajax({
 							type : "POST",
 							url: "/likeNews",
 							data : { 
-								headline : document.getElementById('title').value,
+								headline : newsresults[y].headline.S,
 							},
 							success : function(result) {
 								// add marker when success
-								alert('You just liked one of our articles :-D');
+								console.log('like added');
 							},
 							error : function(result) {
 								alert('error');

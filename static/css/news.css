@@ -54,6 +54,10 @@
     font-family: 'Jua';
 }
 
+.likebtn {
+    border: 3px solid white;
+}
+
 .news-box {
     border: 15px solid #C7D9AB;
     border-radius: 25px;

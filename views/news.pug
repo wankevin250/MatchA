@@ -116,4 +116,21 @@ block content
 	div(class='divider')
 	div(class='news-body')
 		ul
+<<<<<<< HEAD
+			each result in results
+				div(class='news-Class')
+					div(class='news-box')
+						div(class = 'row') 
+							<p id = 'title'> <span style = 'font-weight: bold; font-size: 25px'> #{result.headline.S}</span> </p>
+							div(class = 'col') 
+								p <span style = 'font-size: 14px'>#{result.authors.S}</span> 
+							div(class = 'col') 
+								p #{result.date.S}
+							div(class = 'col') 
+								p #{result.category.S}
+							a(href = result.link.S) <span style = 'font-size: 15px'> #{result.link.S} </span> 
+							p <span style = 'font-weight: italic; font-size: 15px'> Short description : #{result.short_description.S} </span>
+						button.btn.btn-primary(type='button', class='form-control', name='loginButton', id = 'likeclick') Like
+=======
 			#articles.newsclass
+>>>>>>> e0078924ea20942f31c3861b68b98aa9313a5e66

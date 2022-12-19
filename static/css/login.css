@@ -1,3 +1,5 @@
+@import url(https://fonts.googleapis.com/css?family=Chewy);
+
 .login-head{
     display:inline-block;
     background:#C7D9AB;
@@ -8,6 +10,7 @@
     width: 100%;
     position:fixed;
     top:0;
+    font-family: 'Chewy';
 }
 
 .divider{
@@ -21,9 +24,15 @@
     text-align: center;
     width: 100%;
     padding-top: 10%;
+    font-family: 'Chewy';
 }
 
 .login-footer{
     background: #C7D9AB;
     height:100vw;
+}
+
+.login-h1{
+    color: #49592A;
+    font-size: 3vw;
 }

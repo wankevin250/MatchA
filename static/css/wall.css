@@ -1,3 +1,5 @@
+@import url(https://fonts.googleapis.com/css?family=Chewy);
+
 form {
     display:inline-block;
     width:50%;
@@ -29,6 +31,7 @@ form {
     position:fixed;
     top:0;
     margin-bottom: 0;
+    font-family: 'Chewy';
 }
 
 .wall-buttons{
@@ -36,6 +39,7 @@ form {
     background:#C7D9AB;
     width:100%;
     margin-top:0;
+    font-family: 'Chewy';
 }
 
 .wall-divider{
@@ -53,8 +57,16 @@ form {
     margin-left:auto;
     margin-right:auto;
     height: 100vh;
+    font-family: 'Chewy';
+    padding-top: 20px;
 }
 
 .btn-toolbar{
     text-align: center;
+}
+
+.form-control{
+    width: 25%;
+    margin:auto;
+    background-color: #C7D9AB;
 }

@@ -899,7 +899,7 @@ const addFriendToChat = (friend, chatid, callback) => {
 	// add given friend 
 	const gmtTimeStamp = new Date().toUTCString();
 	
-	var chatinvite = {
+	let chatinvite = {
 		"accepter" : {"S": friend},
 		"asker" : {"S": chatid},
 		"status" : {"BOOL": false},
@@ -924,7 +924,7 @@ const addFriendToChat = (friend, chatid, callback) => {
  */
 const viewOneChat = (chatid, callback) => {
 	// return chat info & messages
-	var paramsMessages = {
+	let paramsMessages = {
 		TableName: 'chatmessages',
 		ExpressionAttributeValues: {
 				':cid': {S: chatid},
@@ -932,7 +932,7 @@ const viewOneChat = (chatid, callback) => {
 		KeyConditionExpression: 'roomid = :cid',
 	}
 	
-	var paramsUsers = {
+	let paramsUsers = {
 		TableName: 'chatrooms',
 		Key: {
 			'roomid' : {S: chatid}
@@ -946,14 +946,14 @@ const viewOneChat = (chatid, callback) => {
 			console.log(err);
 			callback(500, err, null);
 		} else {
-			var currusers = JSON.parse(data.Item.users.S);
+			let currusers = JSON.parse(data.Item.users.S);
 			
 			db.query(paramsMessages, (err2, data2) => {
 				if (err2) {
 					console.log(err2);
 					callback(500, err2, null);
 				} else {
-					var messages = data2.Items;
+					let messages = data2.Items;
 					callback(200, null, { pastmessages: messages, chatmembers: currusers});
 				}
 			}); 
@@ -967,7 +967,7 @@ const acceptChatInvite = (chatid, userid, callback) => {
 	// lookup chat in chatrooms, add user,
 	// lookup user, call addChatHelper
 	
-	var paramsRequest = {
+	let paramsRequest = {
 		TableName: 'requests',
 		Key: {
 			"accepter" : {S: userid},
@@ -982,7 +982,7 @@ const acceptChatInvite = (chatid, userid, callback) => {
   		}
 	}
 	
-	var paramsChat = {
+	let paramsChat = {
 		TableName: 'chatrooms',
 		ExpressionAttributeValues: {
 				':chatid': {S: chatid},
@@ -1040,7 +1040,7 @@ const acceptChatInvite = (chatid, userid, callback) => {
 
 const declineChatInvite = (chatid, userid, callback) => {
 	// look up invite in requests table, delete item
-	var paramsRequest = {
+	let paramsRequest = {
 		TableName: 'requests',
 		Key: {
 			"accepter" : {S: userid},
@@ -1058,7 +1058,7 @@ const declineChatInvite = (chatid, userid, callback) => {
 }
 
 const saveMessage = (messageobj, callback) => {
-	var messageitem = {
+	let messageitem = {
 		'roomid' : {S: messageobj.room},
 		'messageid' : {S:messageobj.messageid},
 		'text' : {S:messageobj.text},
@@ -1079,6 +1079,35 @@ const saveMessage = (messageobj, callback) => {
 const extractOneUserDisplayInfo = (username, callback) => {
 	let uli = [username];
 	extractUserNames(uli, callback);
+}
+
+const removeUser = (username, chatid, callback) => {
+	let paramsChatrooms = {
+		TableName: 'chatrooms',
+		Key: {
+			'roomid' : {S: chatid}
+		}
+	}
+	
+	let paramsUser = {
+		TableName: 'users',
+		Key: {
+			'username': {S: username}
+		}
+	}
+	
+	// remove chat from list from user
+	// remove user from chatlist. if chat.users = [] (or length == 0) delete item
+	
+	db.getItem(paramsUser, (err, data) => {
+		if (err) {
+			console.log(err);
+			callback(500, err, null);
+		} else {
+			let chatli = JSON.parse(data.Item.chatrooms.S);
+			console.log(chatli);
+		}
+	});
 }
 
 // end of ACE HOUR

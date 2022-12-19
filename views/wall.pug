@@ -24,19 +24,24 @@ block content
                     a(href="/newsfeed")
                         button(type='button', id='wall-news', class="btn btn-primary btn-rounded m-1", style="background-color: #49592A")
                             span News Feed!
+                    a(href=`/mywall/${username}`)
+                        button(type='button', id='wall-yourwall', class="btn btn-primary btn-rounded m-1", style="background-color: #49592A")
+                            span Your Wall
         div(class="wall-content")
-            h1 Your Wall
+            h1 Home
             div(class="wall-searchuser")
                 div(class="wall-searchuser-inputarea")
                     label(for='wall-searchuser-input')
                     input(type='text', id='wall-searchuser-input')
                 div(class='form-control')
                     button(type='button', id='wall-searchbutton', class="btn btn-primary btn-rounded m-1", onclick="searchUser()", style='background-color: #49592A') Search User
-            div(class="wall-inputarea")
-                textarea(class="wall-mainpost")
-            div(class='form-control')
-                button(type='button', id='wall-postbutton', class="btn btn-primary btn-rounded m-1",onclick="", style='background-color: #49592A') Post
+            div(class='wall-feed')
+                div(id='wall-post-target')
+            //- div(class="wall-inputarea")
+            //-     textarea(class="wall-mainpost")
+            //- div(class='form-control')
+            //-     button(type='button', id='wall-postbutton', class="btn btn-primary btn-rounded m-1",onclick="", style='background-color: #49592A') Post to your wall
         div(class="wall-userprofile")
-            a(href="/friends") Your Friends 
+            a(href="/friends", style='color:white; text-align:center') Your Friends 
             a &nbsp &nbsp &nbsp
-            a(href="/settings") Account Settings
+            a(href="/settings", style='color:white; text-align: center') Account Settings

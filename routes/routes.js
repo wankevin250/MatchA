@@ -43,7 +43,7 @@ const getLogin = (req, res) => {
 
 const getWall = (req, res) => {
   if (req.session && req.session.user) {
-    res.render('wall');
+    res.render('wall', {username: req.session.user.username});
   } else {
     res.redirect('/login');
   }
@@ -111,6 +111,29 @@ const getNotifications = (req, res) => {
   }
 }
 
+const postViewFeed = (req, res) => {
+  if (req.session && req.session.user) {
+    db.querySingleUser(req.session.user.username, (status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+        let userFriends = data.friends && data.friends.length > 0
+          ? JSON.parse(data.friends) : [];
+        req.session.user = data;
+        db.viewFeed(req.session.user.username, userFriends, (status, err, data) => {
+          if(isSuccessfulStatus(status)) {
+            res.status(201).send(data);
+          } else {
+            res.status(status).send(new Error(err));
+          }
+        });
+      } else {
+        res.status(status).send(new Error(err));
+      }
+    });
+  } else {
+    res.status(401).send(new Error("No user"));
+  }
+}
+
 const viewUserInfo = (req, res) => {
   let queryuser = req.body.queryuser;
   if (req.session && req.session.user) {
@@ -121,7 +144,7 @@ const viewUserInfo = (req, res) => {
         res.status(status).send(new Error(err));
       }
     })
-  }
+  } 
 }
 
 const viewRequests = (req, res) => {
@@ -882,6 +905,7 @@ const routes = {
   postmywall: postmywall,
   postMyWallRefresh: postMyWallRefresh,
   makeCommentOnPost: makeCommentOnPost,
+  postViewFeed: postViewFeed,
 
   // Kevin's visualizer routes
   getVisualizer: getVisualizer,

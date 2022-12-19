@@ -21,19 +21,12 @@ const calculateRank = (req, res) => {
       }
     })
 
-    db.computeRank(user, (err, data) => {
+    db.computeRank(user, (err, headlines) => {
       if (err) {
         console.log(err);
       } else {
         console.log("Made it to else statement! at computeRank");
-        data = data.slice(0,8);
-
-        for (let i = 0; i < data.length; i++) {
-          result = data[i].headline.S;
-          results.push(result);
-        }
-
-        db.fetchNewsDataByName(results, (err, data) => {
+        db.fetchNewsDataByName(headlines, (err, data) => {
           if (err) {
             console.log(err);
           } else {
@@ -48,7 +41,7 @@ const calculateRank = (req, res) => {
                   data[i].short_description.S = data[i].short_description.S.replace(/([[\]\\])/g , "");
                 }
               }
-              res.render('news.pug', {results: data});
+              res.render('news.pug', {results: data, which:"Articles that Match your Interests.."});
               //res.send(data);
 
               db.addViewHistory(user, results, (err,data) => {
@@ -127,8 +120,18 @@ const searchNews = (req, res) => {
             } else {
               data.forEach(function(element, index, array) {
                 //console.log(element);
+                if (element.authors.S.length == 0) {
+                  element.authors.S = "Cannot find";
+                }
+                if (element.short_description.S.length == 0) {
+                  element.short_description.S = "Cannot find";
+                } 
+                if (element.short_description.S.length > 0) {
+                  element.short_description.S = data[i].short_description.S.replace(/([[\]\\])/g , "");
+                }
+                
                 newsdata.push(element)});
-                res.render('newsresult.pug', {results: newsdata});
+                res.render('news.pug', {results: newsdata, which:"Articles that match your search result..."});
                 //res.send(JSON.stringify(newsdata));
             }
           })

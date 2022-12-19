@@ -20,7 +20,7 @@ block head
 					},
 					success : function(result) {
 						// add marker when success
-						alert('You just liked our recommended article :-D');
+						alert('You just liked one of our articles :-D');
 					},
 					error : function(result) {
 						alert('error');
@@ -32,8 +32,8 @@ block head
 
 block content
 	div(class='news-head')
-		h1 Articles that Match your Interests..
-		div(class='divider')
+		h1 #{message}
+	div(class='divider')
 		div(class='search-body')
 			<form align="center" name="searchForm" action="/searchNews"  onsubmit="document.searchForm.keyword">
 			<label for="keyword">Search for Articles with the following words:</label><br/>

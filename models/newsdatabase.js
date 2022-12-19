@@ -29,9 +29,10 @@ const runSpark = (user, callback) => {
 
 }
 
-// start of Sebin News
 const computeRank = (user, callback) => {
-    ret = [];
+  let now = new Date();
+  let today = now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate();
+  ret = [];
     db.query({
       ExpressionAttributeValues: {
         ':username': {S: user.username},
@@ -45,23 +46,33 @@ const computeRank = (user, callback) => {
         db.query({
           ExpressionAttributeValues: {
             ':username': {S: user.username},
+            ':viewdate' : {S: today.toString()},
           },
-          KeyConditionExpression: 'username = :username',
+          KeyConditionExpression: 'username = :username and viewdate = :viewdate',
           TableName: 'newsViewed',
         }, (err, history) => {
           if (err) {
             callback(err, null);
           }
           if (history.Count > 0) {
+            let firstAccess = new Date(history.Items[0].firstTime.S);
+            const fetchNum = now.getHours() - firstAccess.getHours() + 1;
+            //console.log("num"+ fetchNum +""+ now.getHours()+ ""+firstAccess.getHours());
             let prev = JSON.parse(history.Items[0].viewed.S);
-            for (let i = 0; i < data.Items.length; i++) {
-              if (!prev.includes(data.Items[i].headline.S)) {
-                ret.push(data.Items[i]);
+            for (let j = 0; j < fetchNum - prev.length; j++) {
+              for (let i = 0; i < data.Items.length; i++) {
+                if (!prev.includes(data.Items[i].headline.S)) {
+                  ret.unshift(data.Items[i].headline.S);
+                  break;
+                }
               }
+            }
+            for (let i = 0; i < prev.length; i++) {
+              ret.push(prev[i]);
             }
             callback(null, ret);
           } else {
-            callback(null, data.Items);
+            callback(null, [data.Items[0].headline.S]);
           }
         })
       }
@@ -103,11 +114,14 @@ const fetchNewsDataByName = (headlines, callback) => {
 }
 
 const addViewHistory = (user, articles, callback) => {  
+  let now = new Date();
+  let today = now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate();
     db.query({
       ExpressionAttributeValues: {
         ':username': {S: user.username},
+        ':viewdate' : {S: today.toString()},
       },
-      KeyConditionExpression: 'username = :username',
+      KeyConditionExpression: 'username = :username and viewdate = :viewdate',
       TableName: 'newsViewed',
     }, (err, data) => {
       if (err) {
@@ -115,7 +129,10 @@ const addViewHistory = (user, articles, callback) => {
       } else if (data.Items.length > 0) {
         let prev = JSON.parse(data.Items[0].viewed.S);
         for (let i = 0; i < articles.length; i++) {
-          prev.push(articles[i]);
+          if (!prev.includes(articles[i])) {
+            prev.unshift(articles[i]);
+          }
+          
         }
         let displayed = JSON.stringify(prev);
         params = {
@@ -123,7 +140,10 @@ const addViewHistory = (user, articles, callback) => {
                   Key: {
                       username: {
                           'S': user.username
-                      }
+                      },
+                      viewdate : {
+                          'S': today.toString()
+                    }
                   },
                   UpdateExpression: "SET viewed = :viewed",
                   ExpressionAttributeValues: {
@@ -145,6 +165,8 @@ const addViewHistory = (user, articles, callback) => {
           TableName: 'newsViewed',
           Item: {
             username: {S: user.username},
+            viewdate : {S: today.toString()},
+            firstTime : {S: now.toString()},
             viewed : {S: displayed}
           }
         },(err, data) => {

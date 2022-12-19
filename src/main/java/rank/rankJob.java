@@ -449,13 +449,13 @@ public class rankJob {
 												.iterator();
 
 		List<String> today = getTodayArticle();
-		System.out.println("todya"+today.size());
+		//System.out.println("todya"+today.size());
 
 		int arti = 0;
 		HashSet<Item> rows = new HashSet<Item>(); 
 		while (iter.hasNext() && arti < 500) {
 			Tuple2<Double, Tuple2<String, String>> now = iter.next();
-			//if (today.size() == 0 || today.contains(now._2._1)) {
+			if (today.size() == 0 || today.contains(now._2._1)) {
 				arti++;
 				Item newsItem = new Item()
 							.withPrimaryKey("username", username, "rank", arti)
@@ -484,7 +484,7 @@ public class rankJob {
 					}
 					rows = new HashSet<Item>();	
 				}
-			//}	
+			}	
 		}
 
 		

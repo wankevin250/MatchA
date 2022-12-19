@@ -1,3 +1,5 @@
+@import url(https://fonts.googleapis.com/css?family=Chewy);
+
 body {
     background: #C7D9AB;
     width: 100%;
@@ -8,7 +10,9 @@ body {
     border-width: 2px;
     border-style:solid;
     border-color: black;
-    font-size: x-large;
+    font-size: 5vw;
+    font-family: 'Chewy';
+    color: #49592A;
 }
 
 .container{
@@ -16,6 +20,7 @@ body {
     height:100vh;
     width:100%;
     margin: auto;
+    font-family: 'Chewy';
 }
 
 .divider{

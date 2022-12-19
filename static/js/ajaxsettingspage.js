@@ -14,6 +14,7 @@ $(document).ready(() => {
     $('#settings-lastname').tooltip(inputTooltipOptions('Limit 25 characters. Legal last name'));
     $('#settings-email').tooltip(inputTooltipOptions('Valid emails only'));
     $('#settings-phone').tooltip(inputTooltipOptions('Valid phone numbers only'));
+    $('#settings-interests').tooltip(inputTooltipOptions('Choose at least two news interests'));
     $('#settings-dob').tooltip(inputTooltipOptions('Must be at least 13 years of age'));
 });
 
@@ -27,6 +28,7 @@ function editUser() {
         email: $('#settings-email').val(),
         phone: $('#settings-phone').val(),
         dob: $('#settings-dob').val(),
+        interests: JSON.stringify($('#settings-interests').val()),
     };
 
     console.log(user);
@@ -49,6 +51,9 @@ function editUser() {
     }
     if (user.phone.length > 0 && !user.phone.match(/^[A-Z][a-z0-9_-]{1,25}$/)) {
         userErr.innerHTML += "<li>Phone error. Please enter valid phone number</li>"
+    }
+    if (user.interests.length > 0 && $('#signup-interests').val().length < 2) {
+        userErr.innerHTML += "<l1>Interests error. Please select more than 2 interests.</li>"
     }
     if (user.dob.length > 0) {
         let dobDate = new Date(user.dob);

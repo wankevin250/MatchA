@@ -23,7 +23,8 @@ function searchUser(query) {
             let resultsDiv = document.createElement('div');
             results.forEach(d => {
                 let userResult = document.createElement('div');
-                let userDisplayName = document.createElement('h3');
+                let userDisplayName = document.createElement('a');
+                userDisplayName.href = '/mywall/' + d.username;
                 let userUserName = document.createElement('p');
 
                 let userAddFriendButton = document.createElement('button');
@@ -50,7 +51,7 @@ function searchUser(query) {
                     };
                 }
                 
-                userDisplayName.innerText = d.displayname;
+                userDisplayName.innerHTML = `<h3>${d.displayname}</h3>`;
                 userUserName.innerText = '@' + d.username;
 
                 userResult.appendChild(userDisplayName);

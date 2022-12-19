@@ -66,15 +66,60 @@ const scanUsers = (searchQuery, callback) => {
   }
 }
 
+const addCommentToPost = (userwall, postuuid, commenter, text, callback) => {
+  db.getItem({
+    TableName: 'posts',
+    Key: {
+      'userwall': {S: userwall},
+      'postuuid': {S: postuuid},
+    }
+  }, (err, data) => {
+    if (err) {
+      console.log(err);
+      callback(500, err, null);
+    } else {
+      let post = data.Item;
+      let comments = post.comments.S && post.comments.S.length > 0
+        ? JSON.parse(post.comments.S) : [];
+      let newComment = {
+        'commenter': commenter,
+        'text': text,
+        'timestamp': (new Date()).toUTCString(),
+      };
+      comments.unshift(newComment);
+      comments.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+      db.updateItem({
+        TableName: 'posts',
+        Key: {
+          'userwall': {S: userwall},
+          'postuuid': {S: postuuid}
+        },
+        UpdateExpression: 'SET comments = :comments',
+        ExpressionAttributeValues: {
+          ':comments': {S: JSON.stringify(comments)}
+        }
+      }, (err, data) => {
+        if (err) {
+          console.log(err);
+          callback(500, err, null);
+        } else {
+          callback(201, err, data);
+        }
+      });
+    }
+  })
+}
+
 const postMyWall = (userwall, poster, text, callback) => {
   let item = {
     'userwall': {S: userwall},
     'postuuid': {S: uuidv4()},
     'poster': {S: poster},
     'text': {S: text},
+    'comments': {S: JSON.stringify([])},
     'timestamp': {S: (new Date()).toUTCString()}
   }
-  console.log(item);
   db.putItem({
     TableName: 'posts',
     Item: item
@@ -571,8 +616,8 @@ const addChatToTable = (chatdata, callback) => {
 			'roomid': {S: chatdata.roomid}, 
 			'creator': {S: chatdata.creator},
 			'users': {S: JSON.stringify(userlist)}, 
-			'chatname': {S: chatdata.chatname}
-			};
+			'chatname': {S: chatdata.chatname},
+		};
 		
 		// db.query to check if already existing using this id, if so generate new id
 		var params = {
@@ -1156,6 +1201,7 @@ const database = {
 
   queryPosts: queryPosts,
   postMyWall: postMyWall,
+  addCommentToPost: addCommentToPost,
   
   // ACE
   findChats: findChats,

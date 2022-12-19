@@ -8,10 +8,12 @@ block head
 
 block content
     div(class='notif-head')
+      a(class='a', href='/wall') MatchA
+      div(class='notif-divider')
+      div(class='notif-body')
         h1 Your Notifications
-        div(class='notif-divider')
         div(id="notificiations-friendinvites-target")
-        div(class='notif-body')
+        
             //- ul
             //-     each notification in notifications
             //-         div(class='notif-Class')

@@ -190,27 +190,6 @@ public class rankJob {
 		return rowOfInterest;
 	}
 
-	/*List<String> getAlreadyViewed() {
-		String tablename = "viewRecord";
-		AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
-		ScanRequest scanRequest = new ScanRequest()
-    								.withTableName(tablename);
-		ScanResult scanResult = client.scan(scanRequest);
-		List<String> rowOfInterest = new ArrayList<>();
-		 scanResult.getItems().parallelStream()
-						.forEach(line -> {
-							String dt = line.get("date").getS();
-							if (dt.compareTo(timeStamp) == 0) {
-								//inter[0] = line.get("headline").getS();
-								rowOfInterest.add(line.get("headline").getS());
-							}
-						});
-
-		System.out.println(rowOfInterest.size());
-
-		return rowOfInterest;
-	}*/
-
 	JavaPairRDD<String, String> getInteretsEdge() {
 		String tablename = "interests";
 		AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();

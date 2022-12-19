@@ -105,6 +105,15 @@ block head
 			
 		});
 
+		var refresh = function() {
+			location.reload();
+			setTimeout(refresh, 10000); 
+		};
+
+		$(function () {
+			setTimeout(refresh, 10000); 
+		});
+
 
 block content
 	div(class='news-head')

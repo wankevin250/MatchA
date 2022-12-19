@@ -72,7 +72,7 @@ const postMyWall = (userwall, poster, text, callback) => {
     'postuuid': {S: uuidv4()},
     'poster': {S: poster},
     'text': {S: text},
-    'timestampe': {S: new Date()}
+    'timestampe': {S: (new Date()).toUTCString()}
   }
   console.log(item);
   db.putItem({

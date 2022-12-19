@@ -112,7 +112,6 @@ app.get('/getFriends/:user', routes.sendFriends); //routes.postGetFriend?
     io.on('connection', function(socket) {
 		
         socket.on('chat message', function(obj){
-			console.log(obj);
 			// call routes.sendMessage, which takes in obj and returns obj with timestamp appended!
 			// input obj: { text: $('#message').val().trim(), sender: myID, room: room}
 			routes.sendMessage(obj, (error, newobj) => {
@@ -122,7 +121,18 @@ app.get('/getFriends/:user', routes.sendFriends); //routes.postGetFriend?
 					console.log(error);
 					io.to(obj.room).emit('chat message', obj);
 				}
-			})
+			});
+		});
+		
+		socket.on('permanent leave', function(obj){
+			routes.sendMessage(obj, (error, newobj) => {
+				if (newobj != null) {
+					io.to(obj.room).emit('permanent leave', newobj);
+				} else {
+					console.log(error);
+					io.to(obj.room).emit('permanent leave', obj);
+				}
+			});
 		});
 		
 		socket.on('join room', obj => {
@@ -184,6 +194,8 @@ app.post('/ajaxrefreshmywall', routes.postMyWallRefresh);
 app.post('/ajaxviewuserinfo', routes.postViewUserInfo);
 app.post('/ajaxmakecomment', routes.makeCommentOnPost);
 app.post('/ajaxviewfeed', routes.postViewFeed);
+
+app.post('/ajaxremovefriend', routes.postRemoveFriend);
 
 // news
 app.get('/newsfeed', newsroutes.newsfeed);

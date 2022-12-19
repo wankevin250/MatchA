@@ -214,6 +214,7 @@ const findNews = (user, keyword, callback) => {
           searchWord = stemmer(searchWord); //stem the word
         var params = {
         TableName : "tokenizedNews",
+        Limit : 25,
         ExpressionAttributeValues: {
             ':k': {S: searchWord},
           },

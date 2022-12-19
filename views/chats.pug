@@ -4,12 +4,12 @@ block head
   link(rel='stylesheet', href='/css/chats.css')
   script(src='/socket.io/socket.io.js')
   script.
-    var myID = -1;
-    var roomuuid = null;
-    var room = null;
-    var currentchatusers = [];
+    let myID = -1;
+    let roomuuid = null;
+    let room = null;
+    let currentchatusers = [];
     const socket = io();
-    var chatlist = [];
+    let chatlist = [];
     
     // simpler functions
     function openNewChatForm() {
@@ -111,9 +111,12 @@ block head
                                             memberlisting.innerText = response.display;
                                             
                                             $('#chatmembers').append(memberlisting);
+                                            
+                                            currentchatusers.push({username: response.username, displayname: response.display});
                                         }
                                     });
                                 });
+                                console.log(currentchatusers);
                                 
                                 // load all prev. messages to #messages using loop
                                 // d.pastmessages
@@ -128,7 +131,8 @@ block head
                                     timestampviz.setAttribute("class", "messageTags");
                                     
                                     message_temp.innerText = pmsg.text;
-                                    senderviz.innerText = pmsg.sender;
+                                    // senderviz.innerText = pmsg.sender;
+                                    senderviz.innerText = getDisplayName(pmsg.sender);
                                     timestampviz.innerText = pmsg.timestamp;
                                     
                                     if (myID === pmsg.sender) {
@@ -188,7 +192,6 @@ block head
                   $('#friendList').append(friendbutton);
                   
                   $("#" + usid).on("click", function() {
-                  
                     $.post('/addfriend', { friendusername: this.id, roomid: roomuuid }, function(data) {
                         if (data != null) {
                             alert("Chat invite sent to user " + JSON.stringify(this.id));
@@ -236,6 +239,8 @@ block head
           
           message_temp.innerText = msg.text;
           senderviz.innerText = msg.sender;
+          // senderviz.innerText = msg.sender;
+          senderviz.innerText = getDisplayName(msg.sender);
           timestampviz.innerText = msg.timestamp;
           
           // message_temp.appendChild(document.createTextNode(msg.text));
@@ -288,7 +293,6 @@ block head
                         if (data.success) {
                             room = roomid;
                             roomuuid = roomid;
-                            currentchatusers = data.userlist;
                             
                             socket.emit('join room', {
                                 user: myID,
@@ -304,9 +308,11 @@ block head
                                         memberlisting.innerText = response.display;
                                        
                                         $('#chatmembers').append(memberlisting);
+                                        currentchatusers.push({username: response.username, displayname: response.display});
                                     }
                                 });
                             });
+                            console.log(currentchatusers);
                             
                             // load all prev. messages to #messages using loop
                             // data.pastmessages
@@ -321,7 +327,8 @@ block head
                                 timestampviz.setAttribute("class", "messageTags");
                                 
                                 message_temp.innerText = pmsg.text;
-                                senderviz.innerText = pmsg.sender;
+                                // senderviz.innerText = pmsg.sender;
+                                senderviz.innerText = getDisplayName(pmsg.sender);
                                 timestampviz.innerText = pmsg.timestamp;
                                 
                                 if (myID === pmsg.sender) {
@@ -354,6 +361,21 @@ block head
             }
     	  }
     	});
+    }
+    
+    function getDisplayName(currentuser) { // callback (response)
+        console.log("at function");
+        
+        let dis = currentuser;
+        
+        for (let i = 0; i < currentchatusers.length; i++) {
+            console.log(usr);
+            if (usr.username == currentuser) {
+                dis = usr.display;
+            }
+            
+            if ();
+        });
     }
     
   title Chats 

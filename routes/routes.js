@@ -83,16 +83,20 @@ const getSettings = (req, res) => {
 const getMyWall = (req, res) => {
   let homeUser = req.params.username;
   if (req.session && req.session.user) {
-    db.querySingleUser(homeUser, (status, err, data) => {
-      if (isSuccessfulStatus(status)) {
-        console.log(data);
-        let homefriends = data.friends ? JSON.parse(data.friends) : [];
-        let canPost = homefriends.includes(req.session.user.username);
-        res.render('mywall', {userwall: homeUser, canPost: canPost});
-      } else {
-        res.redirect('/error');
-      }
-    });
+    if (homeUser != req.session.user.username) {
+      db.querySingleUser(homeUser, (status, err, data) => {
+        if (isSuccessfulStatus(status)) {
+          console.log(data);
+          let homefriends = data.friends ? JSON.parse(data.friends) : [];
+          let canPost = homefriends.includes(req.session.user.username);
+          res.render('mywall', {userwall: homeUser, canPost: canPost});
+        } else {
+          res.redirect('/error');
+        }
+      });
+    } else {
+      res.render('mywall', {userwall: homeUser, canPost: true});
+    }
   } else {
     res.redirect('/login');
   }
@@ -125,6 +129,28 @@ const viewRequests = (req, res) => {
     db.queryRequests(req.session.user.username, false, (status, err, data) => {
       if (isSuccessfulStatus(status)) {
         res.send(JSON.stringify(data));
+      } else {
+        res.status(status).send(new Error(err));
+      }
+    });
+  } else {
+    res.status(401).send(new Error("No user"));
+  }
+}
+
+const makeCommentOnPost = (req, res) => {
+  if (req.session && req.session.user) {
+    let userwall = req.body.userwall;
+    let postuuid = req.body.postuuid;
+    let commenter = req.session.user.username;
+    let text = req.body.commentText;
+    console.log(userwall);
+    console.log(postuuid);
+    console.log(commenter);
+    console.log(text);
+    db.addCommentToPost(userwall, postuuid, commenter, text, (status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+        res.status(201).send(data);
       } else {
         res.status(status).send(new Error(err));
       }
@@ -349,7 +375,7 @@ const sendChatList = (req, res) => {
   let username = req.session.user.username;
   db.findChats(username, (err, data) => {
 	if(data != null) {
-		if (data.length == 0 || data === "[]") {
+		if (data.length == 0 || data == "[]" || data == []) {
 			var obj = {'clist' : [], 'username': username};
 			res.send(obj);
 		} else {
@@ -375,7 +401,6 @@ const addChat = (req, res) => {
 		let user = req.session.user;
 		// generate uuid
 		let roomid = uuidv4();
-		console.log(roomid);
 		
 		let chatinfo = {
 			creator : user.username,
@@ -434,7 +459,6 @@ const viewFriends = (req, res) => {
 				}
 			} else {
 				console.log("query success");
-				console.log(data);
 				res.json(data);
 			}
 		});
@@ -579,7 +603,14 @@ const removeUser = (req, res) => {
 	// if chat has no more users, delete chat
 	let chatid = req.body.roomid;
 	let username = req.session.user.username;
-	
+	console.log("here");
+	db.removeUser(username, chatid, (status, err, data) => {
+		if (status != 200) {
+			res.sendStatus(status);
+		} else {
+			res.send(data);
+		}
+	});
 }
 
 /***
@@ -597,7 +628,6 @@ const extractUserInfo = (req, res) => {
 			console.log(err);
 			res.sendStatus(status);
 		} else {
-			console.log(data);
 			if (data[0].displayname == '') {
 				res.json({ status: 200, username: usr, display: data[0].fullname });
 			} else {
@@ -615,7 +645,6 @@ const acceptChatInvite = (req, res) => {
 	let acceptance = req.body.acceptance;
 	let username = req.session.user.username;
 	
-	console.log(req.body);
 	
 	if (acceptance == true || acceptance == 'true') {
 		console.log("We want to accept the invite");
@@ -851,6 +880,7 @@ const routes = {
 
   postmywall: postmywall,
   postMyWallRefresh: postMyWallRefresh,
+  makeCommentOnPost: makeCommentOnPost,
 
   // Kevin's visualizer routes
   getVisualizer: getVisualizer,

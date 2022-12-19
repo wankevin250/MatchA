@@ -66,15 +66,60 @@ const scanUsers = (searchQuery, callback) => {
   }
 }
 
+const addCommentToPost = (userwall, postuuid, commenter, text, callback) => {
+  db.getItem({
+    TableName: 'posts',
+    Key: {
+      'userwall': {S: userwall},
+      'postuuid': {S: postuuid},
+    }
+  }, (err, data) => {
+    if (err) {
+      console.log(err);
+      callback(500, err, null);
+    } else {
+      let post = data.Item;
+      let comments = post.comments.S && post.comments.S.length > 0
+        ? JSON.parse(post.comments.S) : [];
+      let newComment = {
+        'commenter': commenter,
+        'text': text,
+        'timestamp': (new Date()).toUTCString(),
+      };
+      comments.unshift(newComment);
+      comments.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+      db.updateItem({
+        TableName: 'posts',
+        Key: {
+          'userwall': {S: userwall},
+          'postuuid': {S: postuuid}
+        },
+        UpdateExpression: 'SET comments = :comments',
+        ExpressionAttributeValues: {
+          ':comments': {S: JSON.stringify(comments)}
+        }
+      }, (err, data) => {
+        if (err) {
+          console.log(err);
+          callback(500, err, null);
+        } else {
+          callback(201, err, data);
+        }
+      });
+    }
+  })
+}
+
 const postMyWall = (userwall, poster, text, callback) => {
   let item = {
     'userwall': {S: userwall},
     'postuuid': {S: uuidv4()},
     'poster': {S: poster},
     'text': {S: text},
+    'comments': {S: JSON.stringify([])},
     'timestamp': {S: (new Date()).toUTCString()}
   }
-  console.log(item);
   db.putItem({
     TableName: 'posts',
     Item: item
@@ -549,7 +594,7 @@ var findChats = function (username, callback) {
     db.query(params, function(err, data) {
 		if (err) {
 	        callback(err, null);
-	    } else if (data.Items.length == 0) {
+	    } else if (data.Items.length == 0 || data.Items[0].chatrooms == null || data.Items[0].chatrooms.S == '') {
 			callback(null, []);
 		} else {
 			// console.log(JSON.parse(data.Items[0].chatrooms.S));
@@ -571,8 +616,8 @@ const addChatToTable = (chatdata, callback) => {
 			'roomid': {S: chatdata.roomid}, 
 			'creator': {S: chatdata.creator},
 			'users': {S: JSON.stringify(userlist)}, 
-			'chatname': {S: chatdata.chatname}
-			};
+			'chatname': {S: chatdata.chatname},
+		};
 		
 		// db.query to check if already existing using this id, if so generate new id
 		var params = {
@@ -1099,13 +1144,39 @@ const removeUser = (username, chatid, callback) => {
 	// remove chat from list from user
 	// remove user from chatlist. if chat.users = [] (or length == 0) delete item
 	
-	db.getItem(paramsUser, (err, data) => {
-		if (err) {
-			console.log(err);
-			callback(500, err, null);
+	db.getItem(paramsUser, (e, d) => {
+		if (e) {
+			console.log(e);
+			callback(500, e, null);
 		} else {
-			let chatli = JSON.parse(data.Item.chatrooms.S);
+			let chatli = JSON.parse(d.Item.chatrooms.S);
+			chatli = chatli.filter(word => word.roomid != chatid);
+			
 			console.log(chatli);
+			
+			let updateUser = {
+				TableName: 'users',
+				Key: {
+					'username': {S: username}
+				},
+				
+				UpdateExpression: "SET #cr=:nl",
+				ExpressionAttributeValues: {
+					":nl": {S: JSON.stringify(chatli)}
+				},
+				ExpressionAttributeNames: {
+					"#cr": "chatrooms"
+				}
+			}
+			
+			db.updateItem(updateUser, (er, da) => {
+				if (er) {
+					console.log(e);
+					callback(500, e, null);
+				} else {
+					callback(200, null, da);
+				}
+			});
 		}
 	});
 }
@@ -1130,6 +1201,7 @@ const database = {
 
   queryPosts: queryPosts,
   postMyWall: postMyWall,
+  addCommentToPost: addCommentToPost,
   
   // ACE
   findChats: findChats,
@@ -1139,6 +1211,7 @@ const database = {
   viewChat: viewOneChat, 
   saveMessage: saveMessage,
   extractOneUserDisplayInfo: extractOneUserDisplayInfo,
+  removeUser: removeUser,
   
   acceptChatInvite: acceptChatInvite,
   declineChatInvite: declineChatInvite,

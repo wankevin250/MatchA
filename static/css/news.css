@@ -1,3 +1,4 @@
+@import url(https://fonts.googleapis.com/css?family=Jua);
 
 .news-head{
     display:inline-block;
@@ -10,6 +11,7 @@
     width: 100%;
     position:fixed;
     top:0;
+    font-family: 'Jua';
 }
 
 .divider{
@@ -25,6 +27,7 @@
     width: 100%;
     padding-top: 10%;
     font-size: 20px;
+    font-family: 'Jua';
 }
 
 .search-body {
@@ -33,6 +36,7 @@
     font-size: 20px;
     background: #523F38;
     color: white;
+    font-family: 'Jua';
 }
 
 .newsclass {
@@ -47,10 +51,11 @@
     text-decoration: none;
     display: block;
     font-size: 20px;
-    font-family: Helvetica, Sans-Serif;
+    font-family: 'Jua';
 }
 
 .news-box {
+    border: 15px solid #C7D9AB;
     border-radius: 25px;
     background: white;
     display: inline-block;
@@ -60,5 +65,5 @@
     width: 700px;
     height: 400px;
     overflow: scroll;
-    font-family: Helvetica, Sans-Serif;
+    font-family: 'Helvetica, Sans-Serif';
   }

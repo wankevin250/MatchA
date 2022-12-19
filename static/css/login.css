@@ -1,9 +1,23 @@
 @import url(https://fonts.googleapis.com/css?family=Jua);
 
+.parallax{
+    /* The image used */
+    background-image: url("https://www.teahub.io/photos/full/197-1972305_green-pattern-background-bmi-chart.png");
+
+    /* Set a specific height */
+    min-height: 500px;
+
+    /* Create the parallax scrolling effect */
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
 .login-head{
     display:inline-block;
-    background:#C7D9AB;
-    color:skyblue;
+    background: #523F38;
+    color: #77DD77;
     font-size:xx-large;
     font-weight: bold;
     text-align: center;
@@ -22,7 +36,8 @@
 .login-body{
     background:#C7D9AB;
     text-align: center;
-    width: 100%;
+    margin: auto;
+    width: 75%;
     padding-top: 10%;
     font-family: 'Jua';
 }
@@ -30,9 +45,11 @@
 .login-footer{
     background: #C7D9AB;
     height:100vw;
+    width: 75%;
+    margin: auto;
 }
 
 .login-h1{
-    color: #49592A;
+    color: #C7D9AB;
     font-size: 3vw;
 }

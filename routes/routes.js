@@ -753,6 +753,8 @@ const sendInitialVisualization = (req, res) => {
 
       } else {
         console.log('Else statement user: ' + user[0].username);
+        console.log('Else statement user affiliation: ' + user[0].affiliation);
+        affiliation = user[0].affiliation;
         db.getFriends(user[0].username, (statuscode, err, data) => {
           if (err) {
             console.log("Status code: " + statuscode);
@@ -763,8 +765,6 @@ const sendInitialVisualization = (req, res) => {
 
             console.log("User: " + user[0].displayname);
 
-            affiliation = user[0].affiliation;
-
             const datajson = {
               "id": user[0].username,
               "name": user[0].displayname,
@@ -774,10 +774,10 @@ const sendInitialVisualization = (req, res) => {
 
             for (const friend of data) {
               console.log("Friend: " + friend.status.S);
-              if (friend.status.S) {
+              if (friend.status.S == 'true') { // if status is boolean delete this
                 datajson.children.push({
-                  "id": friend.accepter.S, //should be username.S
-                  "name": friend.accepter.S, //should be displayname.S
+                  "id": friend.username.S, //should be username.S
+                  "name": friend.displayname.S, //should be displayname.S
                   "data": {},
                   "children": []
                 });
@@ -816,13 +816,13 @@ const sendFriends = (req, res) => {
         res.send({}); //status(500).send(new Error(err));
 
       } else {
-        console.log('Else statement user: ' + user[0].username);
+        console.log('Else statement of sendFriends user: ' + user[0].username);
         db.getFriends(user[0].username, (statuscode, err, data) => {
           if (err) {
             console.log("Status code: " + statuscode);
             console.log(err);
           } else {
-            console.log("Made it to else statement!");
+            console.log("Made it to else statement of sendFriends!");
             console.log(data);
 
             console.log("User: " + user[0].displayname);
@@ -836,10 +836,12 @@ const sendFriends = (req, res) => {
 
             for (const friend of data) {
               console.log("Friend: " + friend.status.S);
-              if (friend.status.S && (friend.affiliation.S == affiliation)) {
+              console.log("Friend Affiliation: " + friend.affiliation.S);
+              console.log("Session Affiliation: " + affiliation);
+              if (friend.status.S == 'true' && (friend.affiliation.S == affiliation)) { //if status is bool delete
                 datajson.children.push({
-                  "id": friend.accepter.S, //should be username.S
-                  "name": friend.accepter.S, //should be displayname.S
+                  "id": friend.username.S, //should be username.S
+                  "name": friend.displayname.S, //should be displayname.S
                   "data": {},
                   "children": []
                 });

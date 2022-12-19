@@ -28,7 +28,7 @@ $(document).ready(function() {
                 lineWidth: 5
             },
             //calculate nodes offset
-            offset: 0.2,
+            offset: 0.05,
             //Change the animation transition type
             transition: $jit.Trans.Back.easeOut,
             //animation duration (in milliseconds)

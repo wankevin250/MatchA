@@ -9,7 +9,7 @@ AWS.config.update({
 const db = new AWS.DynamoDB();
 
 const parseJSONwithS = (jsonstring) => {
-  return jsonstring && jsonstring.length > 0
+  return jsonstring.S && jsonstring.S.length > 0
    ? JSON.parse(jsonstring.S) : [];
 }
 
@@ -64,12 +64,11 @@ const scanUsers = (searchQuery, callback) => {
       }
     })
   }
-
 }
 
-const queryFriendInvites = (accepter, status, callback) => {
+const queryRequests = (accepter, status, callback) => {
   db.query({
-    TableName: 'friends',
+    TableName: 'requests',
     KeyConditionExpression: 'accepter = :accepter',
     ExpressionAttributeValues: {
       ':accepter': {S: accepter},
@@ -80,11 +79,30 @@ const queryFriendInvites = (accepter, status, callback) => {
       callback(500, err, null);
     } else {
       console.log(data.Items);
-      let requests = data.Items.filter(d => d.status.S == "false");
-      callback(201, err, requests);
+      let requests = data.Items.filter(d => d.status.BOOL == status);
+      callback(201, err, cleanDataItems(requests));
     }
   });
 }
+
+// const queryFriendInvites = (accepter, status, callback) => {
+//   db.query({
+//     TableName: 'friends',
+//     KeyConditionExpression: 'accepter = :accepter',
+//     ExpressionAttributeValues: {
+//       ':accepter': {S: accepter},
+//     },
+//   }, (err, data) => {
+//     if (err) {
+//       console.log(err);
+//       callback(500, err, null);
+//     } else {
+//       console.log(data.Items);
+//       let requests = data.Items.filter(d => d.status.S == "false");
+//       callback(201, err, requests);
+//     }
+//   });
+// }
 
 const rejectFriendInvite = (accepter, asker, callback) => {
   db.getItem({
@@ -120,7 +138,7 @@ const rejectFriendInvite = (accepter, asker, callback) => {
           callback(500, err, null);
         } else {
           db.deleteItem({
-            TableName: "friends",
+            TableName: "requests",
             Key: {
               "accepter": {S: accepter},
               "asker": {S: asker},
@@ -141,7 +159,7 @@ const rejectFriendInvite = (accepter, asker, callback) => {
 
 const acceptFriendInvite = (accepter, asker, callback) => {
   db.deleteItem({
-    TableName: "friends",
+    TableName: "requests",
     Key: {
       "accepter": {S: accepter},
       "asker": {S: asker},
@@ -158,7 +176,6 @@ const acceptFriendInvite = (accepter, asker, callback) => {
         },
       }, (err, data) => {
         if (err) {
-          console.log()
           console.log(err);
           callback(500, err, null);
         } else {
@@ -166,9 +183,7 @@ const acceptFriendInvite = (accepter, asker, callback) => {
           db.getItem({
             TableName: 'users',
             Key: {
-              username: {
-                S: asker
-              }
+              username: {S: asker}
             },
           }, (err, data) => {
             let askerData = data.Item;
@@ -194,6 +209,7 @@ const acceptFriendInvite = (accepter, asker, callback) => {
                   console.log(err);
                   callback(500, err, null);
                 } else {
+                  console.log(parseJSONwithS(askerData.friends));
                   let askerFriends = parseJSONwithS(askerData.friends);
                   askerFriends.push(accepter);
 
@@ -315,11 +331,12 @@ const sendFriendRequest = (asker, accepter, callback) => {
           callback(500, err, null);
         } else {
           db.putItem({
-            TableName: 'friends',
+            TableName: 'requests',
             Item: {
               accepter: {S: accepter},
               asker: {S: asker},
-              status: {S: 'false'},
+              type: {S: "friend"},
+              status: {BOOL: false},
               timestamp: {S: (new Date()).toUTCString()}
             }
           }, (err, data) => {
@@ -444,54 +461,6 @@ const createUser = (user, callback) => {
     });
   } else {
     callback(401, null, null);
-  }
-}
-
-const checkUsername = (username, skip, callback) => {
-  if (skip){
-    callback(201, null, null);
-  } else {
-    db.query({
-      ExpressionAttributeValues: {
-        ':username': {S: username},
-      },
-      KeyConditionExpression: 'username = :username',
-      TableName: 'users',
-    }, (err, data) => {
-      if (err) {
-        callback(500, err, null);
-      } else if (data.Items.length > 0) {
-        callback(401, "username", null);
-      } else {
-        callback(201, err, data);
-      }
-    });
-  }
-}
-
-const checkEmail = (email, skip, callback) => {
-  if (!skip) {
-    db.query({
-      ExpressionAttributeValues: {
-        ':email': {S: user.email},
-      },
-      KeyConditionExpression: 'email = :email',
-      TableName: 'users',
-      IndexName: 'email'
-    }, (err, data) => {
-      if (err) {
-        console.log(err);
-        callback(500, err, null);
-      } else {
-        if (data.Items.length > 0) {
-          callback(403, 'email', null);
-        } else {          
-          callback(201, err, null);
-        }
-      }
-    });
-  } else {
-    callback(201, null, null);
   }
 }
 
@@ -902,7 +871,6 @@ function compareLists (arrayA, arrayB) {
 			}
 		});
 	}
-	
 }
 
 /***
@@ -918,7 +886,6 @@ const addFriendToChat = (friend, chatid, callback) => {
 		"status" : {"BOOL": false},
 		"timestamp" : {"S": gmtTimeStamp},
 		"type" : {"S": "chat"}
-		
 	}
 	
 	db.putItem({"TableName": "requests", "Item" : chatinvite}, (err, data) => {
@@ -1104,7 +1071,8 @@ const database = {
   
   sendFriendRequest: sendFriendRequest,
   getFriends: getFriends,
-  queryFriendInvites: queryFriendInvites,
+  queryRequests: queryRequests,
+  // queryFriendInvites: queryFriendInvites,
   acceptFriendInvite: acceptFriendInvite,
   rejectFriendInvite: rejectFriendInvite,
 

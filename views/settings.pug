@@ -8,13 +8,14 @@ block content
     h1 Account Settings
     div(class="settings-content")
         div(class="settings-currentinfo")
-            p #{user.username}
-            p #{user.displayname ? user.displayname : user.username}
-            p #{user.email}
-            p #{user.firstname}
-            p #{user.lastname}
-            p #{user.phone ? user.phone : "No phone given."}
-            p #{user.dob}
+            p Username: #{user.username}
+            p Display Name: #{user.displayname ? user.displayname : user.username}
+            p Email: #{user.email}
+            p First Name: #{user.firstname}
+            p Last Name: #{user.lastname}
+            p Phone Number: #{user.phone ? user.phone : "No phone given."}
+            p Date of Birth: #{user.dob}
+            p Interests: #{user.interests}
         div(class="settings-form")
             h2 Edit your information
             div(class="settings-error")

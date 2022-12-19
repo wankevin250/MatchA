@@ -129,12 +129,14 @@ const addViewHistory = (user, articles, callback) => {
       } else if (data.Items.length > 0) {
         let prev = JSON.parse(data.Items[0].viewed.S);
         for (let i = 0; i < articles.length; i++) {
+          console.log(articles[i]);
           if (!prev.includes(articles[i])) {
             prev.unshift(articles[i]);
           }
           
         }
         let displayed = JSON.stringify(prev);
+        console.log(displayed);
         params = {
           TableName: 'newsViewed',
                   Key: {

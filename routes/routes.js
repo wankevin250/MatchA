@@ -3,7 +3,8 @@ const usr = require('../models/user');
 const db = require('../models/database');
 const user = require('../models/user');
 const e = require('express');
-const {v4 : uuidv4} = require('uuid')
+const {v4 : uuidv4} = require('uuid');
+const session = require('express-session');
 
 /**
  * Checks if HTTP Status code is successful (between 200-299)
@@ -98,17 +99,17 @@ const getNotifications = (req, res) => {
   }
 }
 
-const viewFriendInvites = (req, res) => {
+const viewRequests = (req, res) => {
   if (req.session && req.session.user) {
-    db.queryFriendInvites(req.session.user.username, "false", (status, err, data) => {
+    db.queryRequests(req.session.user.username, false, (status, err, data) => {
       if (isSuccessfulStatus(status)) {
         res.send(JSON.stringify(data));
       } else {
         res.status(status).send(new Error(err));
       }
-    })
+    });
   } else {
-    res.status(401).send(new Error("No user"))
+    res.status(401).send(new Error("No user"));
   }
 }
 
@@ -569,9 +570,9 @@ const extractUserInfo = (req, res) => {
  * @params expected input from body / ajax: { askerid, acceptance } (actually will be chat invite's chat code)
  */
 const acceptChatInvite = (req, res) => {
-	var chatid = req.body.askerid;
-	var acceptance = req.body.acceptance;
-	var username = req.session.user.username;
+	let chatid = req.body.askerid;
+	let acceptance = req.body.acceptance;
+	let username = req.session.user.username;
 	
 	if (acceptance === true) {
 		db.acceptChatInvite(chatid, username, (status, err, data) => {
@@ -601,28 +602,39 @@ const acceptChatInvite = (req, res) => {
  * if req.body.type === "chat", call acceptChatInvite. if === "friend" call acceptFriendInvite
  */
 const requestFilter = (req, res) => {
-	var type = req.body.type;
+	let type = req.body.type;
+  req.body.username = req.session.user.username;
+
+	if (req.session.user && req.session.user.username) {
+    if (type == null) {
+      res.status(400).send(new Error("type not here"));
+    } else {
+      if (type === "chat") {
+        acceptChatInvite(req, res);
+      } else if (type === "friend") {
+        processFriendInvite(req, res);
+      } else {
+        res.status(400).send(new Error("type error"));
+      }
+    }
+  } else {
+    res.status(401).send(new Error("no user"));
+  }
 	
-	if (type == null) {
-		res.sendStatus(400);
-	} else {
-		if (type === "chat") {
-			acceptChatInvite(req, res);
-		} else if (type === "friend") {
-			acceptFriendInvite(req, res);
-		} else {
-			res.sendStatus(400);
-		}
-	}
 }
 
 // end of Ace
 /***
  * @params expected input from body / ajax: { askerid } (asker user's username)
  */
-// const acceptFriendInvite = (req, res) => {
-	
-// }
+const processFriendInvite = (req, res) => {
+  req.body.asker = req.body.askerid;
+  if (req.body.acceptance) {
+    acceptFriendInvite(req, res);
+  } else {
+    rejectFriendInvite(req, res);
+  }
+}
 
 // Kevin visualizer routes
 const getVisualizer = (req, res) => {
@@ -747,8 +759,6 @@ const sendFriends = (req, res) => {
   }
 }
 
-
-
 const routes = {
   getSplash: getSplash,
 
@@ -789,7 +799,7 @@ const routes = {
 
   postSendFriendRequest: postSendFriendRequest,
   postGetFriend: postGetFriend,
-  viewFriendInvites: viewFriendInvites,
+  viewRequests: viewRequests,
   acceptFriendInvite: acceptFriendInvite,
   rejectFriendInvite: rejectFriendInvite,
 

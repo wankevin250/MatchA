@@ -7,7 +7,95 @@ block head
 	script(src='/socket.io/socket.io.js')
 	script.
 
-		$(function() {
+		var newsresults = [];
+
+		$(document).ready(function (){
+			$.getJSON('http://localhost:8080/news' , function(elements) {
+				console.log(elements);
+				newsresults= elements.results;
+				user = elements.user;
+				console.log(elements.results);
+				for (var i = 0; i < newsresults.length; i++) {
+					let row = document.createElement("div");
+					row.class = 'row';
+
+					let titlecol = document.createElement("div");
+					titlecol.class = 'col';
+					let title = document.createElement("p");
+					title.id = "title"+i;
+					title.setAttribute('style', 'font-weight: bold; font-size: 25px');
+					title.textContent = newsresults[i].headline.S;
+					console.log(title.textContent);
+					titlecol.appendChild(title);
+					row.appendChild(titlecol);
+
+					let authorcol = document.createElement("div");
+					authorcol.class = 'col';
+					let author = document.createElement("p");
+					author.setAttribute('style', 'font-size: 14px');
+					author.textContent = newsresults[i].authors.S;
+					authorcol.appendChild(author);
+					//row.appendChild(authorcol);
+
+					let catcol = document.createElement("div");
+					catcol.class = 'col';
+					let cat = document.createElement("p");
+					cat.textContent = newsresults[i].category.S;
+					catcol.appendChild(cat);
+					//row.appendChild(catcol);
+
+					let datecol = document.createElement("div");
+					datecol.class = 'col';
+					let date = document.createElement("p");
+					date.textContent = newsresults[i].date.S;
+					datecol.appendChild(date);
+					//row.appendChild(datecol);
+
+					let descol = document.createElement("div");
+					descol.class = 'col';
+					let des = document.createElement("p");
+					des.setAttribute('style', 'font-weight: italic; font-size: 15px');
+					title.textContent = newsresults[i].short_description.S;
+					descol.appendChild(des);
+					//row.appendChild(descol);
+
+					let like = document.createElement("button");
+					like.id = "like"+i;
+					like.className = "btn.btn-primary";
+					like.type = 'button';
+					like.innerHTML = "Like";
+					$("#like"+i).on("click", function(e) {
+						e.preventDefault();
+						console.log(newsresults[i].headline.S);
+						$.ajax({
+							type : "POST",
+							url: "/likeNews",
+							data : { 
+									headline : newsresults[i].headline.S ,
+							},
+							success : function(result) {
+								// add marker when success
+								alert('You just liked one of our articles :-D');
+							},
+							error : function(result) {
+								alert('error');
+							}
+						});
+					});
+					
+					var box = document.createElement("div");
+					box.class = 'news-box';
+					box.appendChild(row);
+					box.appendChild(like);
+					
+
+					$('#articles').append(box);
+				}
+			});
+			
+		});
+
+		/*$(function() {
 			console.log("hey");
 			$("#likeclick").on("click", function(e) {
 				e.preventDefault();
@@ -27,7 +115,7 @@ block head
 					}
 				})
 			})
-		});
+		});*/
 
 
 block content
@@ -40,8 +128,10 @@ block content
 			<input type="text" id="keyword" name="keyword" />
 				<input type="submit" value="Search">
 		</form>
+	div(class='divider')
 	div(class='news-body')
 		ul
+<<<<<<< HEAD
 			each result in results
 				div(class='news-Class')
 					div(class='news-box')
@@ -56,3 +146,6 @@ block content
 							a(href = result.link.S) <span style = 'font-size: 15px'> #{result.link.S} </span> 
 							p <span style = 'font-weight: italic; font-size: 15px'> Short description : #{result.short_description.S} </span>
 						button.btn.btn-primary(type='button', class='form-control', name='loginButton', id = 'likeclick') Like
+=======
+			#articles.newsclass
+>>>>>>> e0078924ea20942f31c3861b68b98aa9313a5e66

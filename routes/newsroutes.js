@@ -6,6 +6,17 @@ const e = require('express');
 
 
 // Sebin routes for news
+const newsfeed = function(req, res) {
+  if (req.session.user != null) {
+    let user = req.session.user;
+    res.render('news.pug', {user : req.session.name});
+  } else {
+    console.log("Not logged in, returned to homepage.");
+		res.redirect('/');
+  }
+};
+
+
 const calculateRank = (req, res) => {
 	result = []
   results = []
@@ -15,11 +26,11 @@ const calculateRank = (req, res) => {
   if (req.session.user != null) {
 		let user = req.session.user;
 
-    db.runSpark (user, (err, data) => {
+    /*db.runSpark (user, (err, data) => {
       if (err) {
         console.log(err);
       }
-    })
+    })*/
 
     db.computeRank(user, (err, headlines) => {
       if (err) {
@@ -31,6 +42,8 @@ const calculateRank = (req, res) => {
             console.log(err);
           } else {
               for (let i = 0; i < data.length; i++) {
+                let x = data[i].headline.S;
+                result.push(x);
                 if (data[i].authors.S.length == 0) {
                   data[i].authors.S = "Cannot find";
                 }
@@ -41,14 +54,16 @@ const calculateRank = (req, res) => {
                   data[i].short_description.S = data[i].short_description.S.replace(/([[\]\\])/g , "");
                 }
               }
-              res.render('news.pug', {results: data, which:"Articles that Match your Interests.."});
+              var dict = {results : data, which:"Articles that Match your Interests.."};
+				      res.json(dict);
+              //res.render('news.pug', {results: data, which:"Articles that Match your Interests.."});
               //res.send(data);
 
-              db.addViewHistory(user, results, (err,data) => {
+              db.addViewHistory(user, result, (err, status) => {
                 if (err) {
                   console.log(err);
                 } else {
-                  console.log("successfully" + data);
+                  console.log("successfully" + status);
                 }
               })
           }
@@ -129,7 +144,7 @@ const searchNews = (req, res) => {
                 if (element.short_description.S.length > 0) {
                   element.short_description.S = data[i].short_description.S.replace(/([[\]\\])/g , "");
                 }
-                
+
                 newsdata.push(element)});
                 res.render('news.pug', {results: newsdata, which:"Articles that match your search result..."});
                 //res.send(JSON.stringify(newsdata));
@@ -143,6 +158,7 @@ const searchNews = (req, res) => {
 
 const routes = {
     //Sebin's new
+  newsfeed: newsfeed,
   calculateRank: calculateRank,
   searchNews: searchNews,
   addLike: addLike,

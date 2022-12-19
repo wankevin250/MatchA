@@ -1,17 +1,17 @@
 $(document).ready(() => {
-    getFriendInvites();
+    getInvites();
 });
 
-function getFriendInvites() {
+function getInvites() {
     $.ajax({
-        url: '/ajaxviewfriendinvites',
+        url: '/ajaxviewinvites',
         type: 'POST',
         async: true,
         datatype: 'json',
         success: (response) => {
             console.log(response);
-            let invites = JSON.parse(response);
-            console.log(invites);
+            let invites = response && response.length > 0 
+                ? JSON.parse(response) : [];
             let target = $('#notificiations-friendinvites-target');
             invites.forEach(d => {
                 let inviteDiv = document.createElement('div');
@@ -19,22 +19,25 @@ function getFriendInvites() {
                 let actions = document.createElement('div');
 
                 let username = document.createElement('h1');
-                console.log(d.asker);
-                username.innerText = d.asker.S;
+                username.innerText = d.asker;
+
+                let typename = document.createElement('p');
+                typename.innerText = `Request ${d.type}`;
 
                 info.appendChild(username);
+                info.appendChild(typename);
 
                 let accept = document.createElement('button');
                 accept.innerText = 'Accept'
                 accept.onclick = () => {
-                    acceptFriendInvite(d.asker.S);
+                    processInvite(d.asker, d.type, true);
                     inviteDiv.style.display = "none";
                 };
 
                 let reject = document.createElement('button');
                 reject.innerText = 'Reject';
                 reject.onclick = () => {
-                    rejectFriendInvite(d.asker.S);
+                    rejectFriendInvite(d.asker, d.type, false);
                     inviteDiv.style.display = "none";
                 };
                 
@@ -53,42 +56,22 @@ function getFriendInvites() {
     });
 }
 
-function rejectFriendInvite(asker) {
+function processInvite(asker, type, acceptance) {
     $.ajax({
-        url: '/ajaxrejectfriendinvite',
+        url: '/handlerequest',
         type: 'POST',
         async: true,
         datatype: 'json',
         data: {
-            asker: asker
+            askerid: asker,
+            type: type,
+            acceptance: acceptance,
         },
         success: (response) => {
             console.log(response);
-        }, 
+        },
         error: (error) => {
             console.log(error);
         }
     });
-}
-
-function acceptFriendInvite(asker) {
-    $.ajax({
-        url: '/ajaxacceptfriendinvite',
-        type: 'POST',
-        async: true,
-        datatype: 'json',
-        data: {
-            asker: asker
-        },
-        success: (response) => {
-            console.log(response);
-        }, 
-        error: (error) => {
-            console.log(error);
-        }
-    });
-}
-
-function getChatInvites() {
-
 }

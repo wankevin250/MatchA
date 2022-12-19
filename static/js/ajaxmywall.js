@@ -16,8 +16,9 @@ function newPosts(inputPosts) {
         });
         return !isIn;
     });
-    posts.push(...addPosts);
-    return addPosts;
+    let sortedAddPosts = addPosts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    posts.unshift(...sortedAddPosts);
+    return sortedAddPosts;
 }
 
 function sendPost() {
@@ -77,13 +78,18 @@ function getPosts() {
 
                     let poster = document.createElement('h1');
                     poster.innerText = d.poster;
-                    postText.className = "mywall-postposter";
+                    poster.className = "mywall-postposter";
                     
                     let text = document.createElement('p');
                     text.innerText = d.text;
-                    postText.className = "mywall-posttext";
+                    text.className = "mywall-posttext";
+
+                    let time = document.createElement('p');
+                    time.innerText = d.timestamp;
+                    time.className = "mywall-posttime";
 
                     postContent.appendChild(poster);
+                    postContent.appendChild(text);
                     postContent.appendChild(text);
 
                     postTarget.prepend(postContent);

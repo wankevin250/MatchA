@@ -631,7 +631,8 @@ const removeUser = (req, res) => {
 		if (status != 200) {
 			res.sendStatus(status);
 		} else {
-			res.send(data);
+			console.log("Succeeded in Deletion!");
+			res.send({data: data, success: true});
 		}
 	});
 }

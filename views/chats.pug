@@ -108,7 +108,7 @@ block head
                                             var memberlisting = document.createElement("p");
                                             memberlisting.setAttribute("class", "memberlisting");
                                             memberlisting.setAttribute("id", response.username);
-                                            memberlisting.innerText = response.display;
+                                            memberlisting.innerText = response.display + " (" + response.username + ")";
                                             
                                             $('#chatmembers').append(memberlisting);
                                             
@@ -205,8 +205,27 @@ block head
       
       $('#leaveChatPermanently').on('click', function (event) {
           $.post('/removeuser', { roomid: roomuuid }, function (data) {
+              console.log(data);
               if (success) {
+                  socket.emit('leave room', {
+                      user: myID,
+                      room: roomuuid,
+                  });
+                  
                   alert("Permanently left chat.");
+                  
+                  roomuuid = null;
+                  room = null;
+                  currentchatusers = [];
+            
+                  const myNode = document.getElementById("messages");
+                  myNode.textContent = '';
+            
+                  $(".leftHalf").css('display', 'block');
+                  $(".rightHalf").css('display', 'none');
+                  document.getElementById("chatTitle").innerText = '';
+                  $('#chatmembers').empty();
+                  
               }
           });
       });
@@ -313,7 +332,7 @@ block head
                                         var memberlisting = document.createElement("p");
                                         memberlisting.setAttribute("class", "memberlisting");
                                         memberlisting.setAttribute("id", response.username);
-                                        memberlisting.innerText = response.display;
+                                        memberlisting.innerText = response.display + " (" + response.username + ")";
                                        
                                         $('#chatmembers').append(memberlisting);
                                         currentchatusers.push({username: response.username, displayname: response.display});
@@ -413,13 +432,13 @@ block content
     
     button#openMembers.btnAceBasic(onclick = "openMembers()") See Chat Members
     #membersPopup.memberspopup
-        p(style='font-size: 16px; font-family: Helvetica, Sans-Serif;') Current Chat Members
+        p(style='font-size: 16px; font-family: Jua; margin: 8px;') Current Chat Members
         ul#chatmembers.listTemplate
         button#closeMembers.btnAceBasic(onclick = "closeMembers()") Close
         
     button#addFriends.btnAceBasic Invite Friends
     #friendPopup.friendspopup
-        p(style='font-size: 16px; font-family: Helvetica, Sans-Serif;') Choose a friend's name to invite them to the chat
+        p(style='font-size: 16px; font-family: Jua; margin: 8px;') Choose a friend's name to invite them to the chat
         ul#friendList.listTemplate
         button.btnAceBasic(type='button', onclick='closeFriendList()') Close
     div()
@@ -428,5 +447,5 @@ block content
     div(id="form-message")
       input(id = 'message', class = 'form-control', autocomplete='off', placeholder='Type a message...')
       button#send-message.btnAceSend(type='button', onclick='return sendMessage();')  Send
-    button#leaveChatPermanently.btnAceBasic Leave Chat
+    button#leaveChatPermanently.btnAceBasic Leave Chat Permanently
   

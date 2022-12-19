@@ -11,14 +11,15 @@ $(document).ready(function() {
             //id of the visualization container
             injectInto: 'infovis',
             //canvas width and height
-            width: w,
-            height: h,
+            width: 250,
+            height: 250,
             //Change node and edge styles such as
             //color, width and dimensions.
             Node: {
                 //overridable: true,
                 'transform': false,
-                color: "#f00"
+                color: "#f00",
+                dim: 10
             },
         
             Edge: {
@@ -27,7 +28,7 @@ $(document).ready(function() {
                 lineWidth: 5
             },
             //calculate nodes offset
-            offset: 0.05,
+            offset: 3,
             //Change the animation transition type
             transition: $jit.Trans.Back.easeOut,
             //animation duration (in milliseconds)
@@ -63,7 +64,7 @@ $(document).ready(function() {
 
                     var height = domElement.offsetHeight;
                     var intY = parseInt(domElement.style.top);
-                    intY += height * 1.1;
+                    intY += height / 2;
                     domElement.style.left = intX + 'px';
                     domElement.style.top = intY + 'px';
             },

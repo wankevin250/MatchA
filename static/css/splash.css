@@ -1,4 +1,4 @@
-@import url(https://fonts.googleapis.com/css?family=Chewy);
+@import url(https://fonts.googleapis.com/css?family=Jua);
 
 body {
     background: #C7D9AB;
@@ -11,7 +11,7 @@ body {
     border-style:solid;
     border-color: black;
     font-size: 5vw;
-    font-family: 'Chewy';
+    font-family: 'Jua';
     color: #49592A;
 }
 
@@ -20,7 +20,7 @@ body {
     height:100vh;
     width:100%;
     margin: auto;
-    font-family: 'Chewy';
+    font-family: 'Jua';
 }
 
 .divider{

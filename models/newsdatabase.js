@@ -10,7 +10,6 @@ AWS.config.update({
 
 const db = new AWS.DynamoDB();
 
-
 const runSpark = (user, callback) => {
     // using username as an input for run, execute the whole rankJob.class
 	var exec = require('child_process').exec;

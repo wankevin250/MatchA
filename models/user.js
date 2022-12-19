@@ -41,7 +41,7 @@ const checkUser = (user) => {
     user.email && user.email.match(/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/) &&
     user.firstname && user.firstname.match(/^[A-Za-z-\s']{1,25}$/) &&
     user.lastname && user.lastname.match(/^[A-Za-z-\s']{1,25}$/) &&
-    user.affiliation && user.affiliation.match(/^\w{3,40}$/) &&
+    user.affiliation && user.affiliation.match(/^[a-zA-Z0-9_ ]{1,40}$/) &&
     user.timestamp && !isNaN(Date.parse(user.timestamp)) &&
     // conditionals for optional fields
 

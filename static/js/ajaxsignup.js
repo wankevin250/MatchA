@@ -27,7 +27,7 @@ function createUser() {
         email: $('#signup-email').val(),
         dob: $('#signup-dob').val(),
         timestamp: (new Date()).toString(),
-        interest: JSON.stringify($('#signup-interests').val())
+        interests: JSON.stringify($('#signup-interests').val())
     };
 
     console.log(user.dob);
@@ -48,11 +48,11 @@ function createUser() {
     if (!user.lastname.match(/^[A-Za-z-\s']{1,25}$/)) {
         userErr.innerHTML += "<li>Last Name error. Please enter in legal last name</li>"
     }
-    if (!user.affiliation.match(/^\w{3,40}$/)) {
+    if (!user.affiliation.match(/^[a-zA-Z0-9_ ]{1,40}$/)) {
         userErr.innerHTML += "<li>Affiliation error. Please input your affiliation. Max 40 characters."
     }
     if ($('#signup-interests').val().length < 2) {
-        userErr.innerHTML += "<l1>Interests error. Please select at least two.</li>"
+        userErr.innerHTML += "<li>Interests error. Please select at least two.</li>"
     }
 
     let dobDate = new Date(user.dob);

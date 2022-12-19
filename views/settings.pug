@@ -13,6 +13,7 @@ block content
             p Email: #{user.email}
             p First Name: #{user.firstname}
             p Last Name: #{user.lastname}
+            p Affiliation: #{user.affiliation}
             p Phone Number: #{user.phone ? user.phone : "No phone given."}
             p Date of Birth: #{user.dob}
             p Interests: #{user.interests}
@@ -36,6 +37,9 @@ block content
             div(class="form-group w-25")
                 label(for="settings-lastname") Last Name
                 input(type="text", class="form-control", id="settings-lastname" name="settings-lastname")
+            div(class="form-group w-25")
+                label(for="settings-affiliation") Affiliation
+                input(type="text", class="form-control", id="settings-affiliation" name="settings-affiliation")
             div(class="form-group w-25")
                 label(for="settings-email") Email
                 input(type="text", class="form-control", id="settings-email" name="settings-email")

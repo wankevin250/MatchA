@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
 const usr = require('./user.js');
-const {v4 : uuidv4} = require('uuid')
+const {v4 : uuidv4} = require('uuid');
+const bcrypt = require('bcrypt');
 
 AWS.config.update({
   region: 'us-east-1',
@@ -160,11 +161,9 @@ const addInterests = async (username, interests, callback) => {
     }).promise());
   });
 
-  await Promise.all(promises).then(() => {
-    callback(201, null, "added");
-  }).catch((err) => {
-    callback(500, err, null);
-  });
+  let promiseResult = await Promise.allSettled(promises);
+  console.log(promiseResult)
+  callback(201, null, promiseResult);
 }
 
 const addCommentToPost = (userwall, postuuid, commenter, text, callback) => {
@@ -552,14 +551,16 @@ const loginUser = (username, password, callback) => {
       callback(500, err, null);
     } else {
       let serverPassword = data.Items[0].password.S;
-      if (password == serverPassword) {
-        callback(201, err, data);
-      } else {
-        console.log(`Incorrect password: ${password}`);
-        callback(401, err, null);
-      }
+      bcrypt.compare(password, serverPassword, function(err, result) {
+        if (result) {
+          callback(201, err, data);
+        } else {
+          console.log(`Incorrect password: ${password}`);
+          callback(401, err, null);
+        }
+      });
     }
-  })
+  });
 }
 
 /**

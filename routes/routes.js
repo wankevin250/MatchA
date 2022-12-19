@@ -1,9 +1,11 @@
 const { sendStatus } = require('express/lib/response');
 const usr = require('../models/user');
 const db = require('../models/database');
+const newsdb = require('../models/newsdatabase');
 const user = require('../models/user');
 const e = require('express');
 const {v4 : uuidv4} = require('uuid');
+const bcrypt = require("bcrypt");
 
 /**
  * Checks if HTTP Status code is successful (between 200-299)
@@ -72,8 +74,13 @@ const getFriends = (req, res) => {
 const getSettings = (req, res) => {
   if (req.session && req.session.user) {
     let user = req.session.user;
-    console.log(user);
-    res.render('settings', {user: user});
+    db.scanNewsCategories((status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+        res.render('settings', {user: user, newsCategories: data});
+      } else {
+        res.redirect('/error');
+      }
+    });
   } else {
     res.redirect('/login');
   }
@@ -381,7 +388,25 @@ const postEditUser = (req, res) => {
       (status, err, data) => {
       if (isSuccessfulStatus(status)) {
         req.session.user = currUser;
-        res.sendStatus(201);
+        db.addInterests(currUser.username, JSON.parse(currUser.interests), (status, err, data) => {
+          if (isSuccessfulStatus(status)) {
+            newsdb.runSpark(currUser, (err, data) => {
+              if (err) {
+                res.status(500).send(new Error(err));
+              } else { 
+                newsdb.changeInterest(currUser, (err, data) => {
+                  if (err) {
+                    res.status(500).send(new Error(err));
+                  } else {
+                    res.status(201).send(data);
+                  }
+                });
+              }
+            });
+          } else {
+            res.status(status).send(new Error(err));
+          }
+        });
       } else {
         res.status(status).send(new Error(err));
       }
@@ -396,18 +421,33 @@ const postCreateUser = (req, res) => {
   let user = req.body.user;
 
   if (user && usr.checkUser(user)) {
-    db.createUser(user, (status, err, data) => {
-      if (isSuccessfulStatus(status)) {
-        req.session.user = user;
-        db.addInterests(user.username, user.interests, (status, err, data) => {
+    bcrypt.hash(user.password, 17, (err, encryptedpassword) => {
+      if (err) {
+        res.status(500).send(new Error("encryption error"));
+      } else {
+        user.password = encryptedpassword;
+        db.createUser(user, (status, err, data) => {
           if (isSuccessfulStatus(status)) {
-            res.status(201).send(data);
+            req.session.user = user;
+            console.log(user.interests);
+            db.addInterests(user.username, JSON.parse(user.interests), (status, err, data) => {
+              if (isSuccessfulStatus(status)) {
+                // newsdb.runSpark(user, (err, data) => {
+                //   if (err) {
+                //     res.status(500).send(new Error(err));
+                //   } else { 
+                //     res.status(201).send(data);
+                //   }
+                // });
+                res.status(201).send(data);
+              } else {
+                res.status(status).send(new Error(err));
+              }
+            });
           } else {
             res.status(status).send(new Error(err));
           }
-        })
-      } else {
-        res.status(status).send(new Error(err));
+        });
       }
     });
   } else {

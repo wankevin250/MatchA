@@ -25,6 +25,7 @@ function editUser() {
         password: $('#settings-password').val(),
         firstname: $('#settings-firstname').val(),
         lastname: $('#settings-lastname').val(),
+        affiliation: $('#settings-affiliation').val(),
         email: $('#settings-email').val(),
         phone: $('#settings-phone').val(),
         dob: $('#settings-dob').val(),
@@ -34,6 +35,7 @@ function editUser() {
     console.log(user);
 
     let userErr = document.createElement('ul');
+    userErr.innerHTML = '';
     if (user.username.length > 0 && !user.username.match(/^\w{3,25}$/)) {
         userErr.innerHTML += "<li>Username unsupported. Limit 1 to 25 characters.</li>";
     }
@@ -49,11 +51,14 @@ function editUser() {
     if (user.lastname.length > 0 && !user.lastname.match(/^[A-Za-z-\s']{1,25}$/)) {
         userErr.innerHTML += "<li>Last Name error. Please enter in legal last name</li>"
     }
+    if (user.affiliation.length > 0 && !user.affiliation.match(/^[a-zA-Z0-9_ ]{1,40}$/)) {
+        userErr.innerHTML += "<li>Affiliation error. Max 3-40 characters.</li>"
+    }
     if (user.phone.length > 0 && !user.phone.match(/^[A-Z][a-z0-9_-]{1,25}$/)) {
         userErr.innerHTML += "<li>Phone error. Please enter valid phone number</li>"
     }
-    if (user.interests.length > 0 && $('#signup-interests').val().length < 2) {
-        userErr.innerHTML += "<l1>Interests error. Please select more than 2 interests.</li>"
+    if (user.interests.length > 0 && $('#settings-interests').val().length < 2) {
+        userErr.innerHTML += "<li>Interests error. Please select more than 2 interests.</li>"
     }
     if (user.dob.length > 0) {
         let dobDate = new Date(user.dob);

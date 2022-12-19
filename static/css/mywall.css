@@ -1,5 +1,23 @@
 @import url(https://fonts.googleapis.com/css?family=Jua);
 
+.a{
+    all: unset;
+    font-size: 40px;
+    color:#49592A;
+    background-color: #C7D9AB;
+    width: 100%;
+    text-align: center;
+    margin: auto;
+    display: inline-block;
+    font-family: 'Jua';
+    position: fixed;
+    border: 1px solid white;
+}
+
+.a:hover{
+    color: white;
+}
+
 .content{
     background-color: #C7D9AB;
     height: 100%;
@@ -33,6 +51,7 @@
     text-align: center;
     background-color: #C7D9AB;
     font-family: 'Jua';
+    padding: 10px;
 }
 
 .mywall-header{

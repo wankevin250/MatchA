@@ -1,3 +1,21 @@
+@import url(https://fonts.googleapis.com/css?family=Jua);
+
+.a{
+    all: unset;
+    font-size: 40px;
+    color:#49592A;
+    background-color: #C7D9AB;
+    width: 100%;
+    text-align: center;
+    margin: auto;
+    display: inline-block;
+    font-family: 'Jua';
+}
+
+.a:hover{
+    color: white;
+}
+
 .content{
     background-color: #C7D9AB;
     width: 100%;
@@ -28,6 +46,7 @@
     margin:auto;
     overflow:hidden;
     text-align: center;
+    font-family: 'Jua';
 }
 
 .visualizer-footer{

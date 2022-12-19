@@ -181,7 +181,7 @@ app.post('/ajaxacceptfriendinvite', routes.acceptFriendInvite);
 app.post('/ajaxrejectfriendinvite', routes.rejectFriendInvite);
 
 // news
-
+app.get('/newsfeed', newsroutes.newsfeed);
 app.get('/news', newsroutes.calculateRank);
 app.post('/likeNews', newsroutes.addLike);
 app.get('/searchNews', newsroutes.searchNews);

@@ -866,8 +866,6 @@ function compareLists (arrayA, arrayB) {
  function extractUserNames (userlist, callback) {
 	var ans = [];
 	
-	console.log("At ExtractUserNames");
-	
 	if (userlist == null) {
 		userlist = [];
 	}
@@ -899,7 +897,6 @@ function compareLists (arrayA, arrayB) {
 				ans.push(userobj);
 				
 				if (ans.length == userlist.length) {
-					console.log(ans);
 					callback(200, null, ans);
 				}
 			}
@@ -1087,6 +1084,11 @@ const saveMessage = (messageobj, callback) => {
 	});
 }
 
+const extractOneUserDisplayInfo = (username, callback) => {
+	let uli = [username];
+	extractUserNames(uli, callback);
+}
+
 // end of ACE HOUR
 
 
@@ -1115,6 +1117,7 @@ const database = {
   addFriendToChat: addFriendToChat,
   viewChat: viewOneChat, 
   saveMessage: saveMessage,
+  extractOneUserDisplayInfo: extractOneUserDisplayInfo,
   
   acceptChatInvite: acceptChatInvite,
   declineChatInvite: declineChatInvite,

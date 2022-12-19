@@ -455,7 +455,6 @@ const openChat = (req, res) => {
 			console.log(err);
 			res.sendStatus(status);
 		} else {
-			console.log("Should succeed...");
 			const ansr = data.pastmessages.map( rawmessage => {
 					return { sender: rawmessage.sender.S, 
 								text: rawmessage.text.S,
@@ -541,8 +540,29 @@ const removeUser = (req, res) => {
 	
 }
 
-const viewUsers = (req, res) => {
+/***
+ * @params input: { username }, output: {userid: username, display: }
+ */
+const extractUserInfo = (req, res) => {
+	// if displayname 
+	// output from db: {userid: username, displayname: userdisplay, fullname: userfullname}
+	// iff displayname == '', display = fullname, otherwise = displayname
+	let usr = req.body.username;
+	console.log("extracting user info");
 	
+	db.extractOneUserDisplayInfo(usr, (status, err, data) => {
+		if (status != 200) {
+			console.log(err);
+			res.sendStatus(status);
+		} else {
+			console.log(data);
+			if (data[0].displayname == '') {
+				res.json({ status: 200, username: usr, display: data[0].fullname });
+			} else {
+				res.json({ status: 200, username: usr, display: data[0].displayname });
+			}
+		}
+	});
 }
 
 /***
@@ -752,7 +772,7 @@ const routes = {
   sendMessage: sendMsg,
   leaveChat: leaveChat,
   removeUser: removeUser,
-  viewUsers: viewUsers,
+  extractUserInfo: extractUserInfo,
   
   reloadRoom: reloadMsgs,
   reloadChats: reloadChats,

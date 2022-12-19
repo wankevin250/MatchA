@@ -86,7 +86,7 @@ function getPosts() {
 
                     let time = document.createElement('p');
                     time.innerText = d.timestamp;
-                    text.className = "mywall-posttime";
+                    time.className = "mywall-posttime";
 
                     postContent.appendChild(poster);
                     postContent.appendChild(text);

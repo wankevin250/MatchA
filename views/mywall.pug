@@ -11,10 +11,11 @@ block content
             h1(class='mywall-header-text')
                 span(id='mywall-userwall-target') #{userwall}
                 span 's wall
-        div(class='mywall-inputarea')
-            p(id='mywall-errortarget')
-            textarea(id='mywall-inputtarget')
-            button(id='mywall-inputbutton' onclick="sendPost()") Post to Wall
+        if canPost
+            div(class='mywall-inputarea')
+                p(id='mywall-errortarget')
+                textarea(id='mywall-inputtarget')
+                button(id='mywall-inputbutton' onclick="sendPost()") Post to Wall
         div(class='mywall-postarea')
             h1 Your posts:
             div(id='mywall-post-target')

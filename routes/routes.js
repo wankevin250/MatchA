@@ -83,7 +83,16 @@ const getSettings = (req, res) => {
 const getMyWall = (req, res) => {
   let homeUser = req.params.username;
   if (req.session && req.session.user) {
-    res.render('mywall', {userwall: homeUser});
+    db.querySingleUser(homeUser, (status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+        console.log(data);
+        let homefriends = data.friends ? JSON.parse(data.friends) : [];
+        let canPost = homefriends.includes(req.session.user.username);
+        res.render('mywall', {userwall: homeUser, canPost: canPost});
+      } else {
+        res.redirect('/error');
+      }
+    });
   } else {
     res.redirect('/login');
   }
@@ -95,6 +104,19 @@ const getNotifications = (req, res) => {
     res.render('notifications');
   } else {
     res.redirect('/login');
+  }
+}
+
+const viewUserInfo = (req, res) => {
+  let queryuser = req.body.queryuser;
+  if (req.session && req.session.user) {
+    db.querySingleUser(queryuser, (status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+        res.status(201).send(data);
+      } else {
+        res.status(status).send(new Error(err));
+      }
+    })
   }
 }
 
@@ -815,6 +837,7 @@ const routes = {
   postLoginUser: postLoginUser,
   postWallRefresh: postWallRefresh,
   postScanUsers: postScanUsers,
+  postViewUserInfo: viewUserInfo,
 
   postSendFriendRequest: postSendFriendRequest,
   postGetFriend: postGetFriend,

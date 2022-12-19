@@ -1,5 +1,6 @@
 let userwall;
 let posts = [];
+let letInput = false;
 
 $(document).ready(() => {
     userwall = $('#mywall-userwall-target').text();
@@ -16,7 +17,7 @@ function newPosts(inputPosts) {
         });
         return !isIn;
     });
-    let sortedAddPosts = addPosts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    let sortedAddPosts = addPosts.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
     posts.unshift(...sortedAddPosts);
     return sortedAddPosts;
 }
@@ -34,7 +35,6 @@ function sendPost() {
                 text: inputText
             },
             success: (response) => {
-                console.log(response);
                 $('#mywall-inputtarget').val('');
                 getPosts();
             },
@@ -90,7 +90,7 @@ function getPosts() {
 
                     postContent.appendChild(poster);
                     postContent.appendChild(text);
-                    postContent.appendChild(text);
+                    postContent.appendChild(time);
 
                     postTarget.prepend(postContent);
                 });

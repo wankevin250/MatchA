@@ -181,6 +181,7 @@ app.post('/ajaxacceptfriendinvite', routes.acceptFriendInvite);
 app.post('/ajaxrejectfriendinvite', routes.rejectFriendInvite);
 app.post('/ajaxpostmywall', routes.postmywall);
 app.post('/ajaxrefreshmywall', routes.postMyWallRefresh);
+app.post('/ajaxviewuserinfo', routes.postViewUserInfo);
 
 // news
 app.get('/newsfeed', newsroutes.newsfeed);

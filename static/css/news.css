@@ -1,11 +1,12 @@
 
 .news-head{
     display:inline-block;
-    background:#707C4F;
-    color:skyblue;
+    background:#D4CB8C;
+    color: black;
     font-size: 10px;
     font-weight: bold;
     text-align: center;
+    padding: 5px;
     width: 100%;
     position:fixed;
     top:0;
@@ -30,7 +31,7 @@
     text-align: center;
     width: 100%;
     font-size: 20px;
-    background: #707C4F;
+    background: #D4CB8C;
 }
 
 .news-Class {
@@ -50,12 +51,13 @@
 
 .news-box {
     border-radius: 25px;
-    background: rgb(255, 255, 255);
+    background: white;
     display: inline-block;
     text-align: center;
     padding: 10px; 
     margin: auto;
     width: 700px;
     height: 450px;
+    overflow: scroll;
     font-family: Helvetica, Sans-Serif;
   }

@@ -32,8 +32,8 @@ block head
 
 block content
 	div(class='news-head')
-		h1 #{message}
-	div(class='divider')
+		h1 Articles that Match your Interests.
+		div(class='divider')
 		div(class='search-body')
 			<form align="center" name="searchForm" action="/searchNews"  onsubmit="document.searchForm.keyword">
 			<label for="keyword">Search for Articles with the following words:</label><br/>
@@ -44,7 +44,7 @@ block content
 		ul
 			each result in results
 				div(class='news-Class')
-					div(class = 'news-box')
+					div(class='news-box')
 						div(class = 'row') 
 							<p id = 'title'> <span style = 'font-weight: bold; font-size: 25px'> #{result.headline.S}</span> </p>
 							div(class = 'col') 

@@ -132,7 +132,7 @@ block head
                                     
                                     message_temp.innerText = pmsg.text;
                                     // senderviz.innerText = pmsg.sender;
-                                    senderviz.innerText = getDisplayName(pmsg.sender);
+                                    senderviz.innerText = pmsg.sender;
                                     timestampviz.innerText = pmsg.timestamp;
                                     
                                     if (myID === pmsg.sender) {
@@ -240,7 +240,7 @@ block head
           message_temp.innerText = msg.text;
           senderviz.innerText = msg.sender;
           // senderviz.innerText = msg.sender;
-          senderviz.innerText = getDisplayName(msg.sender);
+          senderviz.innerText = msg.sender;
           timestampviz.innerText = msg.timestamp;
           
           // message_temp.appendChild(document.createTextNode(msg.text));
@@ -328,7 +328,7 @@ block head
                                 
                                 message_temp.innerText = pmsg.text;
                                 // senderviz.innerText = pmsg.sender;
-                                senderviz.innerText = getDisplayName(pmsg.sender);
+                                senderviz.innerText = pmsg.sender;
                                 timestampviz.innerText = pmsg.timestamp;
                                 
                                 if (myID === pmsg.sender) {
@@ -363,19 +363,18 @@ block head
     	});
     }
     
-    function getDisplayName(currentuser) { // callback (response)
+    function getDisplayName(currentuser, ulist) { // callback (response)
         console.log("at function");
-        
+        console.log(ulist);
+        let handler = [];
         let dis = currentuser;
         
-        for (let i = 0; i < currentchatusers.length; i++) {
-            console.log(usr);
-            if (usr.username == currentuser) {
-                dis = usr.display;
-            }
+        for (let i = 0; i < ulist.length; i++) {
+            let usr = ulist[i];
             
-            if ();
-        });
+        }
+        
+        return dis;
     }
     
   title Chats 

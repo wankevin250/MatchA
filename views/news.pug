@@ -65,33 +65,27 @@ block head
 					descol.appendChild(des);
 					row.appendChild(descol);
 
+
 					let like = document.createElement("button");
-					like.setAttribute('id', 'like');
-					var li = like.id;
-					console.log(li);
-					like.setAttribute('className', 'btn-primary');
-					//let hd = newsresults[i].headline.S;
+					like.setAttribute('class', 'likebtn');
+					like.setAttribute('id', 'like'+i);
 					like.setAttribute('myattribute', newsresults[i].headline.S);
 					console.log($("#"+li).attr('myattribute'));
 					like.type = 'button';
 					like.innerHTML = "Like";
-					//let yy = '#'+like.id;
-					//console.log(yy);
-					$('#like').on("click", function(e) {
-						//alert("!");
-						//alert(this.id);
+					$('.likebtn').on("click", function(e) {
 						e.preventDefault();
-						//console.log($('#like').attr('myattribute'));
-						//console.log(document.getElementById('title'+i).textContent);
+						let x = this.id;
+						let y = x.substring(x.length-1);
 						$.ajax({
 							type : "POST",
 							url: "/likeNews",
 							data : { 
-								headline : $('#like').attr('myattribute'),
+								headline : newsresults[y].headline.S,
 							},
 							success : function(result) {
 								// add marker when success
-								alert('You just liked one of our articles :-D');
+								console.log('like added');
 							},
 							error : function(result) {
 								alert('error');

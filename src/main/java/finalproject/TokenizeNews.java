@@ -218,7 +218,7 @@ public class TokenizeNews implements Serializable {
 				}
 				
 			} else {
-				System.out.println(title);
+				System.out.println(dt);
 			}
 			
 		});

@@ -236,7 +236,8 @@ const findNews = (user, keyword, callback) => {
 
         for (let i = 0; i < data.length; i++) {
               data[i].Items.forEach(function(item){
-                const newsDate = new Date(item.date.S);
+              const newsDate = new Date(item.date.S);
+              console.log
                 if (newsDate <= today) { 
                   count = count + 1;
                   let tle = item.headline.S;

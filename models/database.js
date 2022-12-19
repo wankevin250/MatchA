@@ -66,6 +66,30 @@ const scanUsers = (searchQuery, callback) => {
   }
 }
 
+const viewFeed = async (username, friends, callback) => {
+  let totalusers = [username, ...friends];
+  let promises = [];
+
+  totalusers.forEach(user => {
+    promises.push(db.query({
+      TableName: 'posts',
+      ExpressionAttributeValues: {
+        ':userwall': {S: user}
+      },
+      KeyConditionExpression: 'userwall = :userwall',
+    }).promise());
+  });
+
+  let promiseresult = await Promise.allSettled(promises);
+  let cleanresults = promiseresult.filter(d => d.status == 'fulfilled').map(d => d.value.Items).flat();
+  let collectivePosts = cleanDataItems(cleanresults);
+
+  collectivePosts.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  console.log(collectivePosts);
+  
+  callback(201, null, collectivePosts);
+}
+
 const addCommentToPost = (userwall, postuuid, commenter, text, callback) => {
   db.getItem({
     TableName: 'posts',
@@ -1252,6 +1276,7 @@ const database = {
   queryPosts: queryPosts,
   postMyWall: postMyWall,
   addCommentToPost: addCommentToPost,
+  viewFeed: viewFeed,
   
   // ACE
   findChats: findChats,

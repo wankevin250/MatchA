@@ -183,6 +183,7 @@ app.post('/ajaxpostmywall', routes.postmywall);
 app.post('/ajaxrefreshmywall', routes.postMyWallRefresh);
 app.post('/ajaxviewuserinfo', routes.postViewUserInfo);
 app.post('/ajaxmakecomment', routes.makeCommentOnPost);
+app.post('/ajaxviewfeed', routes.postViewFeed);
 
 // news
 app.get('/newsfeed', newsroutes.newsfeed);

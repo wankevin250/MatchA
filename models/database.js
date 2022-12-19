@@ -319,10 +319,11 @@ const acceptFriendInvite = (accepter, asker, callback) => {
 }
 
 const getFriends = (username, callback) => {
-  let friends = [];
+  let list = [];
+  let info = [];
 
   db.query({
-    TableName: "friends",
+    TableName: "users",
     KeyConditionExpression: "accepter = :username",
     ExpressionAttributeValues: {
         ":username": {S: username}
@@ -331,20 +332,37 @@ const getFriends = (username, callback) => {
     if (err) {
       callback(500, err, null);
     } else {
-      db.query({
-        TableName: 'friends',
-        IndexName: 'asker-index',
-        KeyConditionExpression: 'asker = :username',
-        ExpressionAttributeValues: {
-          ":username": {S: username}
+      let arr = JSON.parse(data1.Items[0].friends.S);
+      for (let i = 0; i < arr.length; i++) {
+        if (!info.includes(arr[i])) {
+          info.unshift(arr[i]);
         }
-      }, (err, data2) => {
-        if (err) {
-          callback(500, err, null);
-        } else {
-          callback(201, err, [...data1.Items, ...data2.Items]);
-        }
-      })
+      }
+
+      while (info.length > 0) {
+        let one = info.pop();
+        db.query({
+          TableName: 'users',
+          KeyConditionExpression: 'username = :username',
+          ExpressionAttributeValues: {
+            ":username": {S: one}
+          }
+        }, (err, data2) => {
+          if (err) {
+            callback(500, err, null);
+          } else {
+            let arrs = JSON.parse(data1.Items[0].friends.S);
+            list.push(data1.Items[0]);
+            for (let i = 0; i < arrs.length; i++) {
+              if (!info.includes(arrs[i])) {
+                info.unshift(arrs[i]);
+              }
+            }
+            //callback(201, err, [...data1.Items, ...data2.Items]);
+          }
+        })
+      }
+      callback(201, null, list);
     }
   });
 }

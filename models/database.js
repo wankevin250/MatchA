@@ -594,7 +594,7 @@ var findChats = function (username, callback) {
     db.query(params, function(err, data) {
 		if (err) {
 	        callback(err, null);
-	    } else if (data.Items.length == 0) {
+	    } else if (data.Items.length == 0 || data.Items[0].chatrooms == null || data.Items[0].chatrooms.S == '') {
 			callback(null, []);
 		} else {
 			// console.log(JSON.parse(data.Items[0].chatrooms.S));
@@ -1144,13 +1144,89 @@ const removeUser = (username, chatid, callback) => {
 	// remove chat from list from user
 	// remove user from chatlist. if chat.users = [] (or length == 0) delete item
 	
-	db.getItem(paramsUser, (err, data) => {
-		if (err) {
-			console.log(err);
-			callback(500, err, null);
+	db.getItem(paramsUser, (e, d) => {
+		if (e) {
+			console.log(e);
+			callback(500, e, null);
 		} else {
-			let chatli = JSON.parse(data.Item.chatrooms.S);
+			let chatli = JSON.parse(d.Item.chatrooms.S);
+			chatli = chatli.filter(word => word.roomid != chatid);
+			
 			console.log(chatli);
+			
+			let updateUser = {
+				TableName: 'users',
+				Key: {
+					'username': {S: username}
+				},
+				
+				UpdateExpression: "SET #cr=:nl",
+				ExpressionAttributeValues: {
+					":nl": {S: JSON.stringify(chatli)}
+				},
+				ExpressionAttributeNames: {
+					"#cr": "chatrooms"
+				}
+			}
+			
+			db.updateItem(updateUser, (er, da) => {
+				if (er) {
+					console.log(er);
+					callback(500, er, null);
+				} else {
+					db.getItem(paramsChatrooms, (err, dat) => {
+						if (err) {
+							console.log(err);
+							callback(500, err, null);
+						} else {
+							let userli = JSON.parse(dat.Item.users.S);
+							userli = userli.filter(word => word != username);
+							let updateChatrooms = {
+								TableName: 'chatrooms',
+								Key: {
+									'roomid' : {S: chatid}
+								},
+								UpdateExpression: "SET #usrs = :nul",
+								ExpressionAttributeValues: {
+									":nul" : {S: JSON.stringify(userli)}
+								},
+								ExpressionAttributeNames: {
+									"#usrs": "users"
+								}
+							}
+							
+							let delChat = {
+								TableName: 'chatrooms',
+								Key: {
+									'roomid' : {S: chatid}
+								}
+							}
+							
+							console.log(userli);
+							
+							if (userli.length > 0) {
+								db.updateItem(updateChatrooms, (errr, data) => {
+									if (errr) {
+										console.log(errr);
+										callback(500, errr, null);
+									} else {
+										callback (200, errr, data);
+									}
+								});
+							} else {
+								db.deleteItem(delChat, (errr, data) => {
+									if (errr) {
+										console.log(errr);
+										callback(500, errr, null);
+									} else {
+										callback (200, errr, data);
+									}
+								});
+							}
+						}
+					});
+				}
+			});
 		}
 	});
 }
@@ -1185,6 +1261,7 @@ const database = {
   viewChat: viewOneChat, 
   saveMessage: saveMessage,
   extractOneUserDisplayInfo: extractOneUserDisplayInfo,
+  removeUser: removeUser,
   
   acceptChatInvite: acceptChatInvite,
   declineChatInvite: declineChatInvite,

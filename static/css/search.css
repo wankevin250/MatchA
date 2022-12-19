@@ -1,0 +1,16 @@
+@import url(https://fonts.googleapis.com/css?family=Jua);
+
+.a{
+    all: unset;
+    font-size: 40px;
+    color:#49592A;
+    font-family: 'Jua';
+    display: block;
+    margin:auto;
+    text-align: center;
+    width: 50%;
+  }
+  
+  .a:hover{
+    color: white;
+  }

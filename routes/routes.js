@@ -375,7 +375,7 @@ const sendChatList = (req, res) => {
   let username = req.session.user.username;
   db.findChats(username, (err, data) => {
 	if(data != null) {
-		if (data.length == 0 || data === "[]") {
+		if (data.length == 0 || data == "[]" || data == []) {
 			var obj = {'clist' : [], 'username': username};
 			res.send(obj);
 		} else {
@@ -401,7 +401,6 @@ const addChat = (req, res) => {
 		let user = req.session.user;
 		// generate uuid
 		let roomid = uuidv4();
-		console.log(roomid);
 		
 		let chatinfo = {
 			creator : user.username,
@@ -460,7 +459,6 @@ const viewFriends = (req, res) => {
 				}
 			} else {
 				console.log("query success");
-				console.log(data);
 				res.json(data);
 			}
 		});
@@ -605,7 +603,14 @@ const removeUser = (req, res) => {
 	// if chat has no more users, delete chat
 	let chatid = req.body.roomid;
 	let username = req.session.user.username;
-	
+	console.log("here");
+	db.removeUser(username, chatid, (status, err, data) => {
+		if (status != 200) {
+			res.sendStatus(status);
+		} else {
+			res.send(data);
+		}
+	});
 }
 
 /***
@@ -623,7 +628,6 @@ const extractUserInfo = (req, res) => {
 			console.log(err);
 			res.sendStatus(status);
 		} else {
-			console.log(data);
 			if (data[0].displayname == '') {
 				res.json({ status: 200, username: usr, display: data[0].fullname });
 			} else {
@@ -641,7 +645,6 @@ const acceptChatInvite = (req, res) => {
 	let acceptance = req.body.acceptance;
 	let username = req.session.user.username;
 	
-	console.log(req.body);
 	
 	if (acceptance == true || acceptance == 'true') {
 		console.log("We want to accept the invite");

@@ -6,9 +6,19 @@ form {
     text-align: center;
 }
 
+.a{
+    all: unset;
+    font-size: 40px;
+    color:#49592A;
+}
+
+.a:hover{
+    color: white;
+}
+
 .parallax{
     /* The image used */
-    background-image: url("https://www.teahub.io/photos/full/197-1972305_green-pattern-background-bmi-chart.png");
+    background-image: url("/images/matcha-background.jpg");
 
     /* Set a specific height */
     min-height: 500px;

@@ -574,7 +574,10 @@ const acceptChatInvite = (req, res) => {
 	let acceptance = req.body.acceptance;
 	let username = req.session.user.username;
 	
-	if (acceptance === true) {
+	console.log(req.body);
+	
+	if (acceptance == true || acceptance == 'true') {
+		console.log("We want to accept the invite");
 		db.acceptChatInvite(chatid, username, (status, err, data) => {
 			if (status != 200) {
 				if (err) {
@@ -586,6 +589,7 @@ const acceptChatInvite = (req, res) => {
 			}
 		});
 	} else {
+		console.log("We want to reject the invite");
 		db.declineChatInvite(chatid, username, (status, err, data) => {
 			if (status != 200) {
 				if (err) {

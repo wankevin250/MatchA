@@ -954,10 +954,13 @@ const acceptChatInvite = (chatid, userid, callback) => {
 			"accepter" : {S: userid},
 			"asker" : {S: chatid}
 		},
-		UpdateExpression: "SET status=:e",
+		UpdateExpression: "SET #stat=:e",
 		ExpressionAttributeValues:{
-			":e": true
+			":e": {BOOL: true}
 		},
+		ExpressionAttributeNames: {
+    		"#stat": "status"
+  		}
 	}
 	
 	var paramsChat = {
@@ -993,10 +996,13 @@ const acceptChatInvite = (chatid, userid, callback) => {
 							Key: {
 								'roomid' : {S: chatid}
 							},
-							UpdateExpression: "SET users=:u",
+							UpdateExpression: "SET #users=:u",
 							ExpressionAttributeValues:{
-								":u": currentusers
+								":u": {S : JSON.stringify(currentusers)}
 							},
+							ExpressionAttributeNames:{
+								"#users" : 'users',
+							}
 						}
 						db.updateItem(paramsChatUpdate, (errCU, dCU) => {
 							if (errCU) {

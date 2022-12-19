@@ -180,7 +180,7 @@ public class LoadNews {
 						String dt = ldate.toString();
 						System.out.println(dt);
 						String title = (String) news.getAs(1);
-						if (title.length() != 0 && dt.compareTo(timeStamp) <= 0) {
+						if (title.length() != 0 && dt.compareTo(timeStamp) == 0) {
 							Item newsItem = new Item()
 											.withPrimaryKey("headline", (String) news.getAs(1), "date", dt)
 											.withString("category", (String) news.getAs(0))

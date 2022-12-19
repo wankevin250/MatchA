@@ -117,6 +117,15 @@ const getNotifications = (req, res) => {
   }
 }
 
+const getLogOut = (req, res) => {
+  if (req.session && req.session.user) {
+    req.session.destroy();
+    res.redirect('/');
+  } else {
+    res.redirect('/login');
+  }
+}
+
 const postViewFeed = (req, res) => {
   if (req.session && req.session.user) {
     db.querySingleUser(req.session.user.username, (status, err, data) => {
@@ -419,35 +428,27 @@ const postEditUser = (req, res) => {
 
 const postCreateUser = (req, res) => {
   let user = req.body.user;
-
   if (user && usr.checkUser(user)) {
-    bcrypt.hash(user.password, 17, (err, encryptedpassword) => {
-      if (err) {
-        res.status(500).send(new Error("encryption error"));
-      } else {
-        user.password = encryptedpassword;
-        db.createUser(user, (status, err, data) => {
+    db.createUser(user, (status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+        req.session.user = user;
+        console.log(user.interests);
+        db.addInterests(user.username, JSON.parse(user.interests), (status, err, data) => {
           if (isSuccessfulStatus(status)) {
-            req.session.user = user;
-            console.log(user.interests);
-            db.addInterests(user.username, JSON.parse(user.interests), (status, err, data) => {
-              if (isSuccessfulStatus(status)) {
-                // newsdb.runSpark(user, (err, data) => {
-                //   if (err) {
-                //     res.status(500).send(new Error(err));
-                //   } else { 
-                //     res.status(201).send(data);
-                //   }
-                // });
-                res.status(201).send(data);
-              } else {
-                res.status(status).send(new Error(err));
-              }
-            });
+            // newsdb.runSpark(user, (err, data) => {
+            //   if (err) {
+            //     res.status(500).send(new Error(err));
+            //   } else { 
+            //     res.status(201).send(data);
+            //   }
+            // });
+            res.status(201).send(data);
           } else {
             res.status(status).send(new Error(err));
           }
         });
+      } else {
+        res.status(status).send(new Error(err));
       }
     });
   } else {
@@ -994,6 +995,7 @@ const routes = {
   sendFriends: sendFriends,
   sendVisualizerUser: sendVisualizerUser,
 
+  getLogOut: getLogOut,
 }
 
 module.exports = routes;

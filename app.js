@@ -203,6 +203,8 @@ app.get('/news', newsroutes.calculateRank);
 app.post('/likeNews', newsroutes.addLike);
 app.get('/searchNews', newsroutes.searchNews);
 
+app.get('/logout', routes.getLogOut);
+
 app.get('*', (req, res) => {
   res.render('404');
 })

@@ -610,15 +610,23 @@ const createUser = (user, callback) => {
                 callback(403, 'email', null);
               } else {          
                 // put to database. respond with no data if server error.
-                db.putItem({
-                  Item: item,
-                  TableName: 'users',
-                }, (err, data) => {
+                bcrypt.hash(user.password, 17, (err, encryptedpassword) => {
                   if (err) {
-                    console.log("Error", err);
+                    console.log(err);
                     callback(500, err, null);
                   } else {
-                    callback(201, err, data);
+                    item.password = {S: encryptedpassword};
+                    db.putItem({
+                      Item: item,
+                      TableName: 'users',
+                    }, (err, data) => {
+                      if (err) {
+                        console.log("Error", err);
+                        callback(500, err, null);
+                      } else {
+                        callback(201, err, data);
+                      }
+                    });
                   }
                 });
               }

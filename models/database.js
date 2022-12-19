@@ -66,6 +66,28 @@ const scanUsers = (searchQuery, callback) => {
   }
 }
 
+const postMyWall = (userwall, poster, text, callback) => {
+  let item = {
+    'userwall': {S: userwall},
+    'postuuid': {S: uuidv4()},
+    'poster': {S: poster},
+    'text': {S: text},
+    'timestampe': {S: new Date()}
+  }
+  console.log(item);
+  db.putItem({
+    TableName: 'posts',
+    Item: item
+  }, (err, data) => {
+    if (err) {
+      console.log(err);
+      callback(500, err, null);
+    } else {
+      callback(201, err, data);
+    }
+  });
+}
+
 const queryRequests = (accepter, status, callback) => {
   db.query({
     TableName: 'requests',
@@ -84,25 +106,6 @@ const queryRequests = (accepter, status, callback) => {
     }
   });
 }
-
-// const queryFriendInvites = (accepter, status, callback) => {
-//   db.query({
-//     TableName: 'friends',
-//     KeyConditionExpression: 'accepter = :accepter',
-//     ExpressionAttributeValues: {
-//       ':accepter': {S: accepter},
-//     },
-//   }, (err, data) => {
-//     if (err) {
-//       console.log(err);
-//       callback(500, err, null);
-//     } else {
-//       console.log(data.Items);
-//       let requests = data.Items.filter(d => d.status.S == "false");
-//       callback(201, err, requests);
-//     }
-//   });
-// }
 
 const rejectFriendInvite = (accepter, asker, callback) => {
   db.getItem({
@@ -288,7 +291,7 @@ const queryPosts = (userwall, callback) => {
     if (err) {
       callback(500, err, null);
     } else {
-      callback(201, err, data);
+      callback(201, err, cleanDataItems(data.Items));
     }
   });
 }
@@ -1083,6 +1086,7 @@ const database = {
   rejectFriendInvite: rejectFriendInvite,
 
   queryPosts: queryPosts,
+  postMyWall: postMyWall,
   
   // ACE
   findChats: findChats,

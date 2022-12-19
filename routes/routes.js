@@ -82,9 +82,8 @@ const getSettings = (req, res) => {
 
 const getMyWall = (req, res) => {
   let homeUser = req.params.username;
-
   if (req.session && req.session.user) {
-    res.render('mywall', {homeuser: homeUser});
+    res.render('mywall', {userwall: homeUser});
   } else {
     res.redirect('/login');
   }
@@ -151,6 +150,22 @@ const acceptFriendInvite = (req, res) => {
   }
 }
 
+const postmywall = (req, res) => {
+  if (req.session && req.session.user) {
+    let text = req.body.text;
+    let currentwall = req.body.userwall;
+    db.postMyWall(currentwall, req.session.user.username, text, (status, error, data) => {
+      if (isSuccessfulStatus(status)) {
+        res.status(201).send(JSON.stringify(data));
+      } else {
+        res.status(status).send(new Error(err));
+      }
+    });
+  } else {
+    res.status(400).send(new Error("No User"));
+  }
+}
+
 const postScanUsers = (req, res) => {
   let query = req.body.query;
 
@@ -207,7 +222,7 @@ const postMyWallRefresh = (req, res) => {
   if (req.session && req.session.user) {
     db.queryPosts(userwall, (status, err, data) => {
       if (isSuccessfulStatus(status)) {
-
+        res.send(JSON.stringify(data));
       } else {
         res.status(status).send(new Error(err));
       }
@@ -806,6 +821,9 @@ const routes = {
   viewRequests: viewRequests,
   acceptFriendInvite: acceptFriendInvite,
   rejectFriendInvite: rejectFriendInvite,
+
+  postmywall: postmywall,
+  postMyWallRefresh: postMyWallRefresh,
 
   // Kevin's visualizer routes
   getVisualizer: getVisualizer,

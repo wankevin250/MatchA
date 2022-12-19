@@ -1,6 +1,29 @@
+.body{
+    background-color: #C7D9AB;
+}
+
 .container{
     background: #C7D9AB;
-    height: 100vh;
+    height: 100%;
     width: 100%;
+    margin:auto;
+    position: relative;
+}
+
+.center-container{
+    margin:auto;
+    height:50vh;
+    width:50vw;
+    top:0;
+    position:absolute;
+}
+
+.infovis{
+    display:inline-block;
+    position:relative;
+    width:2000px;
+    height:1000px;
+    margin:auto;
+    overflow:hidden;
     text-align: center;
 }

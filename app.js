@@ -179,6 +179,8 @@ app.post('/ajaxedituser', routes.postEditUser);
 app.post('/ajaxviewinvites', routes.viewRequests);
 app.post('/ajaxacceptfriendinvite', routes.acceptFriendInvite);
 app.post('/ajaxrejectfriendinvite', routes.rejectFriendInvite);
+app.post('/ajaxpostmywall', routes.postmywall);
+app.post('/ajaxrefreshmywall', routes.postMyWallRefresh);
 
 // news
 app.get('/newsfeed', newsroutes.newsfeed);

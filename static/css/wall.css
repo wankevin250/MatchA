@@ -1,4 +1,4 @@
-@import url(https://fonts.googleapis.com/css?family=Chewy);
+@import url(https://fonts.googleapis.com/css?family=Jua);
 
 form {
     display:inline-block;
@@ -31,7 +31,7 @@ form {
     position:fixed;
     top:0;
     margin-bottom: 0;
-    font-family: 'Chewy';
+    font-family: 'Jua';
 }
 
 .wall-buttons{
@@ -39,7 +39,7 @@ form {
     background:#C7D9AB;
     width:100%;
     margin-top:0;
-    font-family: 'Chewy';
+    font-family: 'Jua';
 }
 
 .wall-divider{
@@ -57,7 +57,7 @@ form {
     margin-left:auto;
     margin-right:auto;
     height: 100vh;
-    font-family: 'Chewy';
+    font-family: 'Jua';
     padding-top: 20px;
 }
 

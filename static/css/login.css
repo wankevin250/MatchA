@@ -1,4 +1,4 @@
-@import url(https://fonts.googleapis.com/css?family=Chewy);
+@import url(https://fonts.googleapis.com/css?family=Jua);
 
 .login-head{
     display:inline-block;
@@ -10,7 +10,7 @@
     width: 100%;
     position:fixed;
     top:0;
-    font-family: 'Chewy';
+    font-family: 'Jua';
 }
 
 .divider{
@@ -24,7 +24,7 @@
     text-align: center;
     width: 100%;
     padding-top: 10%;
-    font-family: 'Chewy';
+    font-family: 'Jua';
 }
 
 .login-footer{

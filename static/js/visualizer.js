@@ -18,7 +18,8 @@ $(document).ready(function() {
             Node: {
                 //overridable: true,
                 'transform': false,
-                color: "#f00"
+                color: "#f00",
+                dim: 10
             },
         
             Edge: {
@@ -27,7 +28,7 @@ $(document).ready(function() {
                 lineWidth: 5
             },
             //calculate nodes offset
-            offset: 0.05,
+            offset: 0.2,
             //Change the animation transition type
             transition: $jit.Trans.Back.easeOut,
             //animation duration (in milliseconds)
@@ -59,13 +60,9 @@ $(document).ready(function() {
             onPlaceLabel: function(domElement, node){
                     var width = domElement.offsetWidth;
                     var intX = parseInt(domElement.style.left);
-                    intX -= width * 1.1; // / 2
+                    intX -= width / 2;
 
-                    var height = domElement.offsetHeight;
-                    var intY = parseInt(domElement.style.top);
-                    intY += height * 1.1;
                     domElement.style.left = intX + 'px';
-                    domElement.style.top = intY + 'px';
             },
             
             onComplete: function(){

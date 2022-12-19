@@ -34,10 +34,11 @@ block content
         label(for="signup-dob") Date of Birth
         input.form-control(type="date", class="", id="signup-dob" name="signup-dob")
     div()
-        label(for="signup-interests") Choose your interests
-        select(name="signup-interests" id="signup-interests" multiple)
+        label(class='form-label select-label', for="signup-interests") Choose your interests
+        select(class='select' name="signup-interests" id="signup-interests" multiple)
             each item in newsCategories
                 option(value=item.category) #{item.category}
+
     button(id='signup-submit', class="btn btn-primary", onclick="createUser()")
         span Create your account
     

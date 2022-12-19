@@ -431,8 +431,8 @@ const viewFriends = (req, res) => {
  */
 const addFriend = (req, res) => {
 	// if user exists
-	var friend = req.body.friendusername;
-	var chatid = req.body.roomid;
+	let friend = req.body.friendusername;
+	let chatid = req.body.roomid;
 	
 	console.log("Sending invite to: " + friend + " for chat " + chatid);
 	// on click, send request to add friend to db using addFriendToChat
@@ -519,7 +519,7 @@ var sendMsg = function (obj, callback) {
 	const gmtTimeStamp = new Date().toUTCString();
 	const msgid = uuidv4();
 	
-	var messageobj = {
+	let messageobj = {
 		room: obj.room,
 		messageid: msgid,
 		text: obj.text,
@@ -553,6 +553,10 @@ const reloadChats = (req, res) => {
   if error: send error message to session, console error
  */
 const removeUser = (req, res) => {
+	// remove user from chat data, remove chat from user's list of chatrooms,
+	// if chat has no more users, delete chat
+	let chatid = req.body.roomid;
+	let username = req.session.user.username;
 	
 }
 

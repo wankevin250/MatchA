@@ -203,6 +203,14 @@ block head
           });
       });
       
+      $('#leaveChatPermanently').on('click', function (event) {
+          $.post('/removeuser', { roomid: roomuuid }, function (data) {
+              if (success) {
+                  alert("Permanently left chat.");
+              }
+          });
+      });
+      
     });
     
     

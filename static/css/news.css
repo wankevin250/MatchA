@@ -35,7 +35,7 @@
     width: 100%;
     font-size: 20px;
     background: #523F38;
-    color: white;
+    color: #C7D9AB;
     font-family: 'Jua';
 }
 
@@ -70,4 +70,14 @@
     height: 400px;
     overflow: scroll;
     font-family: 'Helvetica, Sans-Serif';
+  }
+
+  .a{
+    all:unset;
+    font-size: 40px;
+    color:#C7D9AB;
+  }
+
+  .a:hover{
+    color: red;
   }

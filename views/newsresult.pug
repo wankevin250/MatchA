@@ -7,10 +7,11 @@ block head
 
 block content
 	div(class='news-head')
+		a(class='a', href='/wall') MatchA
 		h1(style='color:white') Articles That Match Your Search Result.
 		div(class='divider')
 		div(class='search-body')
-			a.basicButton(href="/newsfeed") Back to News Feed
+			a.basicButton(sthref="/newsfeed") Back to News Feed
 	div(class='news-body')
 		ul
 			each result in results

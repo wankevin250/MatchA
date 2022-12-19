@@ -4,7 +4,6 @@ const db = require('../models/database');
 const user = require('../models/user');
 const e = require('express');
 const {v4 : uuidv4} = require('uuid');
-const session = require('express-session');
 
 /**
  * Checks if HTTP Status code is successful (between 200-299)
@@ -183,6 +182,23 @@ const makeCommentOnPost = (req, res) => {
   }
 }
 
+const postRemoveFriend = (req, res) => {
+  let remover = req.session.user.username;
+  let victim = req.body.victim;
+
+  if (req.session && req.session.user) {
+    db.deleteFriend(remover, victim, (status, err, data) => {
+      if (isSuccessfulStatus(status)) {
+        res.status(201).send(data);
+      } else {
+        res.status(status).send(new Error(err));
+      }
+    })
+  } else {
+    res.status(401).send(new Error("No user"));
+  }
+}
+
 const rejectFriendInvite = (req, res) => {
   let asker = req.body.asker;
   if (req.session && req.session.user) {
@@ -208,7 +224,23 @@ const acceptFriendInvite = (req, res) => {
     if (typeof asker == 'string') {
       db.acceptFriendInvite(req.session.user.username, asker, (status, err, data) => {
         if (isSuccessfulStatus(status)) {
-          res.send(data);
+          db.postMyWall(req.session.user.username, req.session.user.username,
+            `${req.session.user.username} just accepted a friend request from ${asker}`, 
+            (status, err, data) => {
+              if (isSuccessfulStatus(status)) {
+                db.postMyWall(asker, asker,
+                  `${asker} is now friends with ${req.session.user.username}`, 
+                  (status, err, data) => {
+                    if (isSuccessfulStatus(status)) {
+                      res.status(201).send(data);
+                    } else {
+                      res.status(status).send(new Error(err));
+                    }
+                  });
+              } else {
+                res.status(status).send(new Error(err));
+              }
+            });
         } else {
           res.status(status).send(new Error(err));
         }
@@ -367,7 +399,13 @@ const postCreateUser = (req, res) => {
     db.createUser(user, (status, err, data) => {
       if (isSuccessfulStatus(status)) {
         req.session.user = user;
-        res.sendStatus(201);
+        db.addInterests(user.username, user.interests, (status, err, data) => {
+          if (isSuccessfulStatus(status)) {
+            res.status(201).send(data);
+          } else {
+            res.status(status).send(new Error(err));
+          }
+        })
       } else {
         res.status(status).send(new Error(err));
       }
@@ -753,6 +791,8 @@ const sendInitialVisualization = (req, res) => {
 
       } else {
         console.log('Else statement user: ' + user[0].username);
+        console.log('Else statement user affiliation: ' + user[0].affiliation);
+        affiliation = user[0].affiliation;
         db.getFriends(user[0].username, (statuscode, err, data) => {
           if (err) {
             console.log("Status code: " + statuscode);
@@ -763,8 +803,6 @@ const sendInitialVisualization = (req, res) => {
 
             console.log("User: " + user[0].displayname);
 
-            affiliation = user[0].affiliation;
-
             const datajson = {
               "id": user[0].username,
               "name": user[0].displayname,
@@ -774,10 +812,10 @@ const sendInitialVisualization = (req, res) => {
 
             for (const friend of data) {
               console.log("Friend: " + friend.status.S);
-              if (friend.status.S) {
+              if (friend.status.S == 'true') { // if status is boolean delete this
                 datajson.children.push({
-                  "id": friend.accepter.S, //should be username.S
-                  "name": friend.accepter.S, //should be displayname.S
+                  "id": friend.username.S, //should be username.S
+                  "name": friend.displayname.S, //should be displayname.S
                   "data": {},
                   "children": []
                 });
@@ -816,13 +854,13 @@ const sendFriends = (req, res) => {
         res.send({}); //status(500).send(new Error(err));
 
       } else {
-        console.log('Else statement user: ' + user[0].username);
+        console.log('Else statement of sendFriends user: ' + user[0].username);
         db.getFriends(user[0].username, (statuscode, err, data) => {
           if (err) {
             console.log("Status code: " + statuscode);
             console.log(err);
           } else {
-            console.log("Made it to else statement!");
+            console.log("Made it to else statement of sendFriends!");
             console.log(data);
 
             console.log("User: " + user[0].displayname);
@@ -836,10 +874,12 @@ const sendFriends = (req, res) => {
 
             for (const friend of data) {
               console.log("Friend: " + friend.status.S);
-              if (friend.status.S && (friend.affiliation.S == affiliation)) {
+              console.log("Friend Affiliation: " + friend.affiliation.S);
+              console.log("Session Affiliation: " + affiliation);
+              if (friend.status.S == 'true' && (friend.affiliation.S == affiliation)) { //if status is bool delete
                 datajson.children.push({
-                  "id": friend.accepter.S, //should be username.S
-                  "name": friend.accepter.S, //should be displayname.S
+                  "id": friend.username.S, //should be username.S
+                  "name": friend.displayname.S, //should be displayname.S
                   "data": {},
                   "children": []
                 });
@@ -901,6 +941,7 @@ const routes = {
   viewRequests: viewRequests,
   acceptFriendInvite: acceptFriendInvite,
   rejectFriendInvite: rejectFriendInvite,
+  postRemoveFriend: postRemoveFriend,
 
   postmywall: postmywall,
   postMyWallRefresh: postMyWallRefresh,

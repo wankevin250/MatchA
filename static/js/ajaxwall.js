@@ -31,9 +31,12 @@ function refreshFeed() {
                     let postContent = document.createElement('div');
                     postContent.className = "wall-postcontent";
 
-                    let poster = document.createElement('h1');
-                    poster.innerText = d.poster;
-                    poster.className = "wall-postposter";
+                    let poster = document.createElement('a');
+                    poster.href = `/mywall/${d.userwall}`
+                    let posterInside = document.createElement('h1');
+                    posterInside.innerText = `${d.poster} > ${d.userwall}'s wall`;
+                    posterInside.className = "wall-postposter";
+                    poster.appendChild(posterInside);
                     
                     let text = document.createElement('p');
                     text.innerText = d.text;

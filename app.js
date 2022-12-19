@@ -176,7 +176,7 @@ app.post('/ajaxsearchuser', routes.postScanUsers);
 app.post('/ajaxsendfriendrequest', routes.postSendFriendRequest);
 app.post('/ajaxgetfriends', routes.postGetFriend);
 app.post('/ajaxedituser', routes.postEditUser);
-app.post('/ajaxviewfriendinvites', routes.viewFriendInvites);
+app.post('/ajaxviewinvites', routes.viewRequests);
 app.post('/ajaxacceptfriendinvite', routes.acceptFriendInvite);
 app.post('/ajaxrejectfriendinvite', routes.rejectFriendInvite);
 

@@ -3,7 +3,7 @@
 
 1) G11: Kevin Wang (wankevin), Sebin Lee (seblee), DaHyeon Choi (dhachoi), Henry Ge (hhenerge)
 
-2) Accounts, Walls, and Home Pages: 
+2) Accounts, Walls, and Home Pages: Full implementation of functionality expected in assignment document including AJAX calls and password hashing.
    Chat: Full implementation of functionality expected in assignment document.
    News Feeds: 
    Frontend: Designed the complete functionality of the frontend, including the css, html, bootstrap, pug, etc.
@@ -120,4 +120,4 @@
 
 5) All code was written by team G11 (including method documentation references)
 
-6) 
+6) Ensure node is on version greater than 12. Ensure mvn, javasdk, and spark are all installed. Run npm install. Edit the port in app.js at the top using the PORT variable. Run node app.js on the base directory.
